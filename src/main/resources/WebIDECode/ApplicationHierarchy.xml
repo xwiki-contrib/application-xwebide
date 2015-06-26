@@ -1,0 +1,1394 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc>
+  <web>WebIDECode</web>
+  <name>ApplicationHierarchy</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <parent>WebIDE.WebHome</parent>
+  <creator>xwiki:XWiki.Admin</creator>
+  <author>xwiki:XWiki.Admin</author>
+  <customClass/>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <creationDate>1434700712000</creationDate>
+  <date>1435326413000</date>
+  <contentUpdateDate>1435326413000</contentUpdateDate>
+  <version>1.1</version>
+  <title>ApplicationHierarchy</title>
+  <defaultTemplate/>
+  <validationScript/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <object>
+    <class>
+      <name>XWiki.JavaScriptExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage|onDemand|always</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <name>WebIDECode.ApplicationHierarchy</name>
+    <number>0</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>95d6ad85-599f-40f3-b936-d2312fb7a8df</guid>
+    <property>
+      <cache>forbid</cache>
+    </property>
+    <property>
+      <code>require(['jquery'], function ($) {
+
+$(function(){
+
+  //-------------------------
+  //------- Functions -------
+  //-------------------------
+
+  // Register all click events with a function. They have to be register each time a new page or folder is created and the hierarchy is updated.
+  function initialization() {
+    // Buttons to hide or show the hierarchy and resize the textarea 
+    $('#hierarchyClose').click(function(e){
+      $('#hierarchyContent').hide();
+      $('#hierarchyOpenBlock').show();
+      $("#hierarchyBlock").css({
+        "min-width": "0px", 
+        "width": "42px"
+      });
+      if(XWiki.contextaction == "edit") {
+        $('#'+mainBlock).css({
+          "maxWidth": "100%", 
+          "width": ($('#'+mainBlockContainer).width()-42)+"px"
+        });
+      }
+    });
+    $('#hierarchyOpenBlock').click(function(e){
+      $('#hierarchyOpenBlock').hide();
+      $('#hierarchyContent').show();
+      $("#hierarchyBlock").css({
+        "minWidth": "17%", 
+        "width": "17%"
+      });
+      if(XWiki.contextaction == "edit") {
+        $('#'+mainBlock).css({
+          "maxWidth": "83%", 
+          "width": "83%"
+        });
+      }
+    });
+
+    // Display or hide the content of a folder by clicking on its name
+    $('.hierarchy-toggleFolder').click(function(){
+      var spaceToggle = $(this).attr('space');
+      $('#hierarchySpace_'+spaceToggle).toggle();
+      var indexSpace = $.inArray(spaceToggle, visibleSpaces);
+      if($('#hierarchySpace_'+spaceToggle).is(':visible')) {
+        visibleSpaces.push(spaceToggle);
+        $('#hierarchyFolderIcon_'+spaceToggle).attr('src', '/xwiki/resources/icons/silk/bullet_toggle_minus.png');
+      }
+      else {
+        if(indexSpace &gt;= 0) {
+          visibleSpaces.splice(indexSpace, 1);
+        }
+        $('#hierarchyFolderIcon_'+spaceToggle).attr('src', '/xwiki/resources/icons/silk/bullet_toggle_plus.png');
+      }
+    });
+    // Display or hide the details of a page by clicking on its name
+    $('.hierarchy-displayPage').click(function(){
+      var pageToggle = $(this).attr('pageid');
+      $('#hierarchyPageDetails_'+pageToggle).toggle();
+      if($('#hierarchyPageDetails_'+pageToggle).is(':visible')) {
+        $(this).find('.hierarchyDisplayPageIcon').attr('src', '/xwiki/resources/icons/silk/bullet_toggle_minus.png');
+      }
+      else {
+        $(this).find('.hierarchyDisplayPageIcon').attr('src', '/xwiki/resources/icons/silk/bullet_toggle_plus.png');
+      }
+    });
+
+    // Change the folder to use when adding a new page
+    $('.newPage').click(function(e){
+      e.preventDefault();
+      $('#hierarchyPageFolder').html($(this).attr("space"));
+    });
+
+    // Remove a folder by clicking on the cross
+    $('.hierarchy-remove').click(function(){
+      removeFolder($(this).attr('space'));
+    });
+
+    $('.editPage').click(function(e){
+      if(!saving &amp;&amp; !loading) {
+        e.preventDefault();
+        $('#hierarchyNextDocName').val($(this).attr('page'));
+        $('#hierarchyNextDocSpace').val($(this).attr('space'));
+
+        if(XWiki.editor == "wiki"){
+          if(savedContent != $('#content').val()) {
+            $('#hierarchyChangePageModal').modal('show');
+          }
+          else {
+            loadPage(false);
+          }
+        }
+        else if(XWiki.editor == "object"){
+          window.location.href = '/xwiki/bin/edit/'+$(this).attr('space')+'/'+$(this).attr('page')+'?editor=object#!XWebIDE';
+        }
+      }
+    });
+
+    // Load the new content and new title when the user click on a link in the hierarchy panel
+    $('#hierarchySaveAndContinueModal, #hierarchyDiscardAndContinueModal').click(function(e){
+      e.preventDefault();
+      if(!saving &amp;&amp; !loading) {
+        $('body').removeClass('modal-open');
+        if($(this).attr('id') == 'hierarchySaveAndContinueModal') {
+          loadPage(true);
+        }
+        else {
+          loadPage(false);
+        }
+      }
+    });
+
+    // Reset page name and folder name in modals
+    $('#hierarchyNewPageName').val('');
+    $('#hierarchyNewFolderName').val('');
+  }
+  
+  function loadPage(saveContent) {
+    if(!loading) {
+      loading = true;
+      $('#hierarchyLoadingState').html('&lt;strong class="red"&gt;Loading...&lt;/strong&gt;');
+      if(saveContent) {
+        saveAndContinueIDE(currentSpace, currentPage, $('#content').val(), $('#xwikidoctitleinput').val(), false);
+      }
+      currentSpace = $('#hierarchyNextDocSpace').val();
+      currentPage = $('#hierarchyNextDocName').val();
+      $('#hierarchyCurrentDocName').val(currentPage); // Used in the JSInjector file to know which is the current page to save
+      $('#hierarchyCurrentDocSpace').val(currentSpace);
+      $.ajax({
+        url: "/xwiki/bin/view/"+currentSpace+"/"+currentPage+"?xpage=plain&amp;raw=1",
+        type: "GET",
+        contentType: "plain/text",
+      }).success(function(data){
+        var formattedData = data.replace(/^&lt;pre&gt;/, '').replace(/&lt;\/pre&gt;$/, '');
+        $('#content').val($('&lt;div /&gt;').html(formattedData).text());
+        savedContent = $('#content').val();
+        $.ajax({
+          url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+currentSpace+"/pages/"+currentPage,
+          type: "GET",
+          contentType: "application/xml",
+        }).success(function(data){
+          $('#xwikidoctitleinput').val($(data).find('title').text());
+          $.ajax({
+            url: "/xwiki/bin/get/WebIDECode/ApplicationHierarchy?xpage=plain",
+            type: "GET",
+            datatype : "html",
+            data : "action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+masterSpace+"."+masterName+"&amp;remotePage="+currentSpace+"."+currentPage+"&amp;visibleSpaces="+visibleSpaces,
+            contentType: "text/html",
+          }).success(function(res3){
+            var result = $('&lt;div /&gt;').append(res3).find('#hierarchyContent').html();
+            $('#hierarchyNewFolderName').val('');
+            $('#hierarchyChangePageModal').modal('hide');
+            $('#hierarchyContent').html(result);
+            initialization();
+            loading = false;
+            $('#hierarchyLoadingState').html('&lt;strong class="green"&gt;Loaded&lt;/strong&gt;').show().delay(2500).queue(function(n) {
+              $(this).hide().html('');
+              n();
+            });
+          });
+        });
+      });
+    }
+  }
+
+  function saveAndViewIDE(space, page, newContent, newTitle, changeSavedContent) {
+    if(!saving) {
+      saving = true;
+      $('#hierarchySavingState').html('&lt;strong class="red"&gt;Saving...&lt;/strong&gt;');
+      $.ajax({
+        url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+space+"/pages/"+page,
+        type: "PUT",
+        contentType: "application/x-www-form-urlencoded",
+        accept: "application/xml",
+        data: "title="+encodeURIComponent(newTitle)+"&amp;content="+encodeURIComponent(newContent),
+      }).error(function(){
+        saving = false;
+        return false;
+      }).success(function(data){
+        if(changeSavedContent) {
+          savedContent = $('#content').val();
+        }
+        $('#hierarchySavingState').html('&lt;strong class="green"&gt;Saved&lt;/strong&gt;').show().delay(2500).queue(function(n) {
+          $(this).hide().html('');
+          n();
+        });
+        saving = false;
+        window.location.href = '/xwiki/bin/view/'+currentSpace+'/'+currentPage;
+      });
+    }
+  }
+
+  function saveAndContinueIDE(space, page, newContent, newTitle, changeSavedContent) {
+    if(!saving) {
+      saving = true;
+      $('#hierarchySavingState').html('&lt;strong class="red"&gt;Saving...&lt;/strong&gt;');
+      $.ajax({
+        url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+space+"/pages/"+page,
+        type: "PUT",
+        contentType: "application/x-www-form-urlencoded",
+        accept: "application/xml",
+        data: "title="+encodeURIComponent(newTitle)+"&amp;content="+encodeURIComponent(newContent),
+      }).error(function(){
+        saving = false;
+        return false;
+      }).success(function(data){
+        if(changeSavedContent) {
+          savedContent = $('#content').val();
+        }
+        $('#hierarchySavingState').html('&lt;strong class="green"&gt;Saved&lt;/strong&gt;').show().delay(2500).queue(function(n) {
+          $(this).hide().html('');
+          n();
+        });
+        saving = false;
+        return true;
+      });
+    }
+  }
+
+  function cancelAndViewIDE() {
+    if(savedContent != $('#content').val()) {
+      if(confirm("Are you sure?")) {
+        window.location.href = '/xwiki/bin/view/'+currentSpace+'/'+currentPage;
+      }
+    }
+    else {
+      window.location.href = '/xwiki/bin/view/'+currentSpace+'/'+currentPage;
+    }
+  }
+
+  function removeFolder(folder) {
+    $.ajax({
+      url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+masterSpace+"/pages/"+masterName+"/objects/WebIDECode.ApplicationClass/0/properties/spaces",
+      type: "GET",
+      contentType: "application/xml",
+    }).success(function(res){
+      var oldSpaces = $(res).find('value').text();
+      var spaceArray = oldSpaces.split('|');
+      var indexSpace = $.inArray(folder, spaceArray)
+      if(indexSpace &gt;= 0) {
+        spaceArray.splice(indexSpace, 1);
+        var indexSpace2 = $.inArray(folder, visibleSpaces);
+        if(indexSpace2 &gt;= 0) {
+          visibleSpaces.splice(indexSpace2, 1);
+        }
+        $.ajax({
+          url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+masterSpace+"/pages/"+masterName+"/objects/WebIDECode.ApplicationClass/0/properties/spaces",
+          type: "PUT",
+          contentType: "application/x-www-form-urlencoded",
+          accept: "application/xml",
+          data: "property#spaces="+spaceArray,
+        }).success(function(res2){
+          $.ajax({
+            url: "/xwiki/bin/get/WebIDECode/ApplicationHierarchy?xpage=plain",
+            type: "GET",
+            datatype : "html",
+            data : "action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+masterSpace+"."+masterName+"&amp;remotePage="+currentSpace+"."+currentPage+"&amp;visibleSpaces="+visibleSpaces,
+            contentType: "text/html",
+          }).success(function(res3){
+            var result = $('&lt;div /&gt;').append(res3).find('#hierarchyContent').html();
+            $('#hierarchyContent').html(result);
+            initialization();
+          });
+        });
+      }
+    });
+  }
+
+  //-------------------------
+  //----- End functions -----
+  //-------------------------
+
+  // Variables
+  var masterSpace = $('#hierarchyMasterDocSpace').val();
+  var masterName = $('#hierarchyMasterDocName').val();
+  var currentPage = XWiki.currentPage;
+  var currentSpace = XWiki.currentSpace;
+  var saving = false;
+  var loading = false;
+  var visibleSpaces = [currentSpace];
+  var mainBlock = '';
+  var mainBlockContainer = '';
+  if(XWiki.contextaction =="view") {
+    $('#hierarchyBlock').css({"resize" : "none"});
+  }
+  if(XWiki.editor == "wiki") {
+    mainBlock = 'content';
+    mainBlockContainer = 'xwikieditcontentinner';
+    var savedContent = $('#content').val();
+  }
+  else if(XWiki.editor == "object"){
+    mainBlock = 'update';
+    mainBlockContainer = 'mainEditArea';
+  }
+  else if(XWiki.editor == "class"){
+    mainBlock = 'propupdate';
+    mainBlockContainer = 'mainEditArea';
+  }
+  // Autofocus on text inputs when a modal appears
+  $('#hierarchyFolderModal').on('shown.bs.modal', function () {
+    $('#hierarchyNewFolderName').focus();
+  })
+  $('#hierarchyPageModal').on('shown.bs.modal', function () {
+    $('#hierarchyNewPageName').focus();
+  })
+  if(XWiki.editor == "wiki") {
+    // Remove previous shortcuts to prevent saving modifications only in the page loaded at first
+    shortcut.remove("Alt+Shift+S");
+    shortcut.remove("Alt+S");
+    shortcut.remove("Alt+C");
+    shortcut.remove("Alt+P");
+
+    // Add events on buttons and shortcuts
+    $('#hierarchySaveButtonIDE').click(function(e){
+      e.preventDefault();
+      saveAndContinueIDE(currentSpace, currentPage, $('#content').val(), $('#xwikidoctitleinput').val(), true);
+    });
+    $('#hierarchySaveViewButtonIDE').click(function(e){
+      e.preventDefault();
+      saveAndViewIDE(currentSpace, currentPage, $('#content').val(), $('#xwikidoctitleinput').val(), true);
+    });
+    $('#hierarchyDiscardViewButtonIDE').click(function(e){
+      e.preventDefault();
+      cancelAndViewIDE();
+    });
+    shortcut.add("Alt+Shift+S", function() {saveAndContinueIDE(currentSpace, currentPage, $('#content').val(), $('#xwikidoctitleinput').val(), true);});
+    shortcut.add("Alt+S", function() {saveAndViewIDE(currentSpace, currentPage, $('#content').val(), $('#xwikidoctitleinput').val(), true);});
+    shortcut.add("Alt+C", function() {cancelAndViewIDE();});
+  }
+
+  initialization();
+
+  /* 
+  ** Add a folder in the hierarchy list :
+  ** 1/ Check that the folfer doesn't already exists
+  ** 2/ Add the folder in the list alphabetically sorted
+  ** 3/ Update the hierarchy
+  */
+  $('#hierarchyAddFolder').click(function(e){
+    $('body').removeClass('modal-open');
+    e.preventDefault();
+    var newFolder = $('#hierarchyNewFolderName').val().replace('%', '%25');
+    $.ajax({
+      url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+masterSpace+"/pages/"+masterName+"/objects/WebIDECode.ApplicationClass/0/properties/spaces",
+      type: "GET",
+      contentType: "application/xml",
+    }).success(function(res){
+      var oldSpaces = $(res).find('value').text();
+      var spaceArray = oldSpaces.split('|');
+      if($.inArray(newFolder, spaceArray) == -1) {
+        spaceArray.push(newFolder);
+        spaceArray = spaceArray.sort();
+        $.ajax({
+          url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+masterSpace+"/pages/"+masterName+"/objects/WebIDECode.ApplicationClass/0/properties/spaces",
+          type: "PUT",
+          contentType: "application/x-www-form-urlencoded",
+          accept: "application/xml",
+          data: "property#spaces="+spaceArray,
+        }).success(function(res2){
+          $.ajax({
+            url: "/xwiki/bin/get/WebIDECode/ApplicationHierarchy?xpage=plain",
+            type: "GET",
+            datatype : "html",
+            data : "action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+masterSpace+"."+masterName+"&amp;remotePage="+currentSpace+"."+currentPage+"&amp;visibleSpaces="+visibleSpaces,
+            contentType: "text/html",
+          }).success(function(res3){
+            var result = $('&lt;div /&gt;').append(res3).find('#hierarchyContent').html();
+            $('#hierarchyNewFolderName').val('');
+            $('#hierarchyFolderModal').modal('hide');
+            $('#hierarchyContent').html(result);
+            initialization();
+          });
+        });
+      }
+    });
+  });
+
+  /* 
+  ** Add a page in a folder :
+  ** 1/ Check that the page doesn't already exists
+  ** 2/ Create the page in the wiki
+  ** 3/ Update the hierarchy
+  */
+  $('#hierarchyAddPage').click(function(e){
+    $('body').removeClass('modal-open');
+    e.preventDefault();
+    var folder = $('#hierarchyPageFolder').html().replace('%', '%25');
+    var newPage = $('#hierarchyNewPageName').val().replace('%', '%25');
+    $.ajax({
+      url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+folder+"/pages/"+newPage,
+      type: "GET",
+      contentType: "application/xml",
+    }).error(function(res){
+      $.ajax({
+        url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+folder+"/pages/"+newPage,
+        type: "PUT",
+        contentType: "application/x-www-form-urlencoded",
+        accept: "application/xml",
+        data: "title="+newPage+"&amp;parent="+XWiki.currentSpace+"."+XWiki.currentPage,
+      }).success(function(res2){
+        $.ajax({
+          url: "/xwiki/bin/get/WebIDECode/ApplicationHierarchy?xpage=plain",
+          type: "GET",
+          datatype : "html",
+          data : "action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+masterSpace+"."+masterName+"&amp;remotePage="+currentSpace+"."+currentPage+"&amp;visibleSpaces="+visibleSpaces,
+          contentType: "text/html",
+        }).success(function(res3){
+            var result = $('&lt;div /&gt;').append(res3).find('#hierarchyContent').html();
+            $('#hierarchyPageModal').modal('hide');
+            $('#hierarchyContent').html(result);
+            initialization();
+        });
+      });
+    });
+  });
+
+});
+});</code>
+    </property>
+    <property>
+      <name>Hierarchy panel</name>
+    </property>
+    <property>
+      <parse/>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
+  <object>
+    <class>
+      <name>XWiki.StyleSheetExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <contentType>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>contentType</name>
+        <number>6</number>
+        <prettyName>Content Type</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>CSS|LESS</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </contentType>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage|onDemand|always</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <name>WebIDECode.ApplicationHierarchy</name>
+    <number>0</number>
+    <className>XWiki.StyleSheetExtension</className>
+    <guid>0c7773fa-9a7a-49a4-b0db-44800f0bf911</guid>
+    <property>
+      <cache>forbid</cache>
+    </property>
+    <property>
+      <code>#template('colorThemeInit.vm')
+
+/* Hierarchy Block */
+#hierarchyBlock {
+  background-color : $theme.menuContentBackgroundColor;
+  border: 1px solid $theme.borderColor;
+  min-width: 17%;
+  width: 17%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  float: left;
+  display: inline-block;
+  resize: vertical;
+  padding-right: 0px;
+  border-radius: 4px;
+}
+
+/* Project Block */
+#hierarchyContent {
+  padding:5px;
+  height : 100%;
+}
+#hierarchyMainList {
+  -webkit-user-select: none;  /* Chrome all / Safari all */
+  -moz-user-select: none;     /* Firefox all */
+  -ms-user-select: none;      /* IE 10+ */
+  user-select: none;
+}
+.hierarchy-right {
+  cursor: pointer;
+  float: right;
+}
+#hierarchyOpenBlock {
+  cursor: pointer;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  text-align: center;
+}
+#hierarchyOpenBlock p {
+  margin-bottom: 0px;
+}
+
+/* Project Content */
+.hierarchy-list {
+  list-style-type: none;
+  padding-left: 25px;
+}
+.hierarchy-no-padding {
+  padding-left: 0px;
+}
+.hierarchy-hidden {
+  display: none;
+}
+.hierarchy-toggleFolder {
+  cursor: pointer;
+  display: inline-block;
+}
+.hierarchy-toggleFolder:hover span{
+  text-decoration: underline;
+}
+.hierarchy-toggleFolder p{
+  margin-bottom:0;
+}
+.hierarchy-displayPage {
+  cursor: pointer;
+  display: inline-block;
+}
+.hierarchy-displayPage span {
+  font-weight: bold;
+}
+.hierarchy-displayPage:hover span{
+  text-decoration: underline;
+}
+.hierarchy-displayPage p{
+  margin-bottom:0;
+}
+.hierarchyContextActionIcon {
+  margin-right: 5px;
+}
+/* Page state info */
+#hierarchySavingState, #hierarchyLoadingState {
+  float: right;
+  background-color: green;
+  color: white;
+  border: 2px solid grey;
+  padding: 2px;
+  display: none;
+}
+#hierarchySavingState.red, #hierarchyLoadingState.red {
+  background-color: red;
+}
+#hierarchyBottomActionsBar {
+  padding-left: 18%;
+  padding-right: 2%;
+}</code>
+    </property>
+    <property>
+      <contentType>CSS</contentType>
+    </property>
+    <property>
+      <name>Hierarchy CSS</name>
+    </property>
+    <property>
+      <parse>1</parse>
+    </property>
+    <property>
+      <use>always</use>
+    </property>
+  </object>
+  <object>
+    <class>
+      <name>XWiki.WikiMacroClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>9</number>
+        <prettyName>Macro code</prettyName>
+        <rows>20</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <contentDescription>
+        <disabled>0</disabled>
+        <name>contentDescription</name>
+        <number>8</number>
+        <prettyName>Content description (Not applicable for "No content" type)</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </contentDescription>
+      <contentType>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>contentType</name>
+        <number>7</number>
+        <prettyName>Macro content type</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator>|</separator>
+        <separators>|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>Optional|Mandatory|No content</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </contentType>
+      <defaultCategory>
+        <disabled>0</disabled>
+        <name>defaultCategory</name>
+        <number>4</number>
+        <prettyName>Default category</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultCategory>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>3</number>
+        <prettyName>Macro description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <id>
+        <disabled>0</disabled>
+        <name>id</name>
+        <number>1</number>
+        <prettyName>Macro id</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </id>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>2</number>
+        <prettyName>Macro name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <supportsInlineMode>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>supportsInlineMode</name>
+        <number>5</number>
+        <prettyName>Supports inline mode</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </supportsInlineMode>
+      <visibility>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>visibility</name>
+        <number>6</number>
+        <prettyName>Macro visibility</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator>|</separator>
+        <separators>|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>Current User|Current Wiki|Global</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </visibility>
+    </class>
+    <name>WebIDECode.ApplicationHierarchy</name>
+    <number>0</number>
+    <className>XWiki.WikiMacroClass</className>
+    <guid>9d820c7a-33c4-436d-82c4-2a86e8095709</guid>
+    <property>
+      <code>{{velocity}}
+#set($discard = $xwiki.jsx.use("WebIDECode.ApplicationHierarchy"))
+#set($discard = $xwiki.ssx.use("WebIDECode.ApplicationHierarchy"))
+#set($masterDoc = 'Main.WebHome')
+#if($xwiki.exists($xcontext.macro.params.masterPage))
+  #set($masterDoc = $xwiki.getDocument($xcontext.macro.params.masterPage))
+#end
+#if($xwiki.exists($xcontext.macro.params.remotePage))
+  #set($currentDoc = $xwiki.getDocument($xcontext.macro.params.remotePage))
+#else
+  #set($currentDoc = $doc)
+#end
+#set($currentEditor = $!{xcontext.macro.params.editor})
+#set($visibleSpacesString = $!{xcontext.macro.params.visibleSpaces})
+#set($visibleSpaces = $visibleSpacesString.split("[,]"))
+(% class="hierarchy-hidden" id="hierarchyOpenBlock" %)(((
+[[image:icon:control_end_blue||title="Open hierarchy"]]
+)))
+#set($masterObj = $masterDoc.getObject('WebIDECode.ApplicationClass'))
+#set($spacesList = $masterObj.getProperty('spaces').value)
+#set($spacesListAdd = [])
+#set($pagesList = $masterObj.getProperty('pages').value)
+#set($pagesNameList = {})
+#foreach($page in $pagesList)
+  #set($document = $xwiki.getDocument($page))
+  #if(!$spacesListAdd.contains($document.space))
+    #set($discard = $spacesListAdd.add($document.space))
+  #end
+#end
+#set($discard = $spacesList.addAll($spacesListAdd))
+#set($spacesList = $sorttool.sort($spacesList))
+(% id="hierarchyContent" %) (((
+(% class="hierarchy-right" id="hierarchyCloseBlock" %)(((
+[[image:icon:control_start_blue||title="Hide hierarchy" id="hierarchyClose" class="hierarchy-right"]]
+)))
+//**Project** :// **[[$masterObj.getProperty('projectName').value&gt;&gt;$masterDoc.fullName||target="_blank"]]** 
+(% class="hierarchy-list hierarchy-no-padding" id="hierarchyMainList" %)
+#foreach($space in $spacesList)
+  #if($visibleSpaces.contains($space) || $space == $currentDoc.space)
+    #set($contentDisplay = '')
+    #set($folderIcon = 'bullet_toggle_minus')
+  #else
+    #set($contentDisplay = ' hierarchy-hidden')
+    #set($folderIcon = 'bullet_toggle_plus')
+  #end 
+  * (% class="hierarchy-toggleFolder" space="$space" %)((([[image:icon:$folderIcon||id="hierarchyFolderIcon_$space"]][[image:icon:folder]] {{html clean=false}}&lt;span &gt;$space&lt;/span&gt; {{/html}}))) [[image:icon:cross||title="Remove folder '$space'" space="$space" class="hierarchy-right hierarchy-remove"]]
+  (% id="hierarchySpace_$space" class="hierarchy-list${contentDisplay}" %)
+  #set($spacePageList = $xwiki.getSpaceDocsName($space))
+  #if($spacesListAdd.contains($space))
+    #set($spacePageNameList = [])
+    #foreach($page in $pagesList)
+      #set($document = $xwiki.getDocument($page))
+      #if($space == $document.space)
+        #set($discard = $spacePageNameList.add($document.name))
+      #end
+    #end
+    #set($discard = $spacePageList.retainAll($spacePageNameList))
+    #set($spacePageList = $sorttool.sort($spacePageList))
+  #end
+  #foreach($page in $spacePageList)
+    #set($pageFullName = "$space.$page")
+    #set($pageClassHidden = " hierarchy-hidden")
+    #set($iconBulletToggle = "bullet_toggle_plus")
+    #if($xcontext.action != "edit" &amp;&amp; "$!{xcontext.macro.params.action}" != "edit")
+      #set($displayedIcon = 'page')
+      #set($pageName = ")))[[$pageFullName]]")
+    #elseif($currentEditor == "object")
+      #set($displayedIcon = 'application_edit')
+      #set($pageName = ")))[[$page&gt;&gt;path:$xwiki.getURL($pageFullName, 'edit', 'editor=object')#!XWebIDE]]")
+    #elseif($currentEditor == "class")
+      #set($displayedIcon = 'monitor_edit')
+      #set($pageName = ")))[[$page&gt;&gt;path:$xwiki.getURL($pageFullName, 'edit', 'editor=class')#!XWebIDE]]")
+    #else
+      #set($displayedIcon = 'page_edit')
+      #set($pageName = "))){{html}}&lt;a href='#!XWebIDE' space='$space' page='$page' class='editPage'&gt;$page&lt;/a&gt;{{/html}}")
+    #end
+    #if($pageFullName == $currentDoc.fullName)
+      #set($pageName = "{{html}}&lt;span&gt;$page&lt;/span&gt;{{/html}})))")
+      #set($pageClassHidden = "")
+      #set($iconBulletToggle = "bullet_toggle_minus")
+    #end
+    ** (% pageid="$space$page" class="hierarchy-displayPage" %)((([[image:icon:$iconBulletToggle||class="hierarchyDisplayPageIcon"]][[image:icon:$displayedIcon||class="hierarchyContextActionIcon"]]$pageName
+    (% id="hierarchyPageDetails_$space$page" class="hierarchy-list${pageClassHidden}" %)
+    #if($xcontext.action == "edit" || "$!{xcontext.macro.params.action}" == "edit")
+    *** [[image:icon:page View&gt;&gt;path:$xwiki.getURL("${space}.${page}", 'view')||target="_blank"]]
+    #end
+    #if($currentEditor != "wiki")
+      *** [[image:icon:page_edit Edit (wiki)&gt;&gt;path:$xwiki.getURL("${space}.${page}", 'edit', 'editor=wiki')#!XWebIDE]]
+    #end
+    #if($currentEditor != "object")
+      *** [[image:icon:application_edit Objects&gt;&gt;path:$xwiki.getURL("${space}.${page}", 'edit', 'editor=object')#!XWebIDE]]
+    #end
+    #if($currentEditor != "class")
+      *** [[image:icon:monitor_edit Class&gt;&gt;path:$xwiki.getURL("${space}.${page}", 'edit', 'editor=object')#!XWebIDE]]
+    #end
+    *** [[image:icon:attach Attachments&gt;&gt;path:$xwiki.getURL("${space}.${page}", 'view')#Attachments]]
+  #end
+  ** image:icon:add {{html}}&lt;a href="#!XWebIDE" space="$space" class="newPage" data-toggle="modal" data-target="#hierarchyPageModal"&gt;Add new page&lt;/a&gt;{{/html}}
+#end
+* image:icon:add {{html}}&lt;a href="#!XWebIDE" class="newFolder" data-toggle="modal" data-target="#hierarchyFolderModal"&gt;Add new folder&lt;/a&gt;{{/html}}
+
+{{html}}
+## Modal should not add #!XWebIDE when the macro is used in view mode (e.g. in the master page)
+#if($xcontext.action == "edit")
+  #set($anchorHash = "!XWebIDE")
+#end
+  &lt;div class="modal fade text-left hierarchy-hidden" id="hierarchyFolderModal" tabindex="-1" role="dialog" aria-labelledby="hierarchyFolderModalLabel" aria-hidden="true"&gt;
+    &lt;div class="modal-dialog"&gt;
+      &lt;div class="modal-content"&gt;
+        &lt;div class="modal-header"&gt;
+          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
+          &lt;h4 class="modal-title"&gt;Add New Folder&lt;/h4&gt;
+        &lt;/div&gt;
+        &lt;div class="modal-body"&gt;
+          &lt;input type="text" id="hierarchyNewFolderName" /&gt;
+          &lt;a href="#$!{anchorHash}" id="hierarchyAddFolder" class="btn btn-success"&gt;Add the folder&lt;/a&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="modal fade text-left hierarchy-hidden" id="hierarchyPageModal" tabindex="-1" role="dialog" aria-labelledby="hierarchyPageModalLabel" aria-hidden="true"&gt;
+    &lt;div class="modal-dialog"&gt;
+      &lt;div class="modal-content"&gt;
+        &lt;div class="modal-header"&gt;
+          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
+          &lt;h4 class="modal-title"&gt;Add New Page&lt;/h4&gt;
+        &lt;/div&gt;
+        &lt;div class="modal-body"&gt;
+          Folder : &lt;span id="hierarchyPageFolder"&gt;&lt;/span&gt;&lt;br /&gt;
+          &lt;input type="text" id="hierarchyNewPageName" /&gt;
+          &lt;a href="#$!{anchorHash}" id="hierarchyAddPage" class="btn btn-success"&gt;Add the page&lt;/a&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="modal fade text-left hierarchy-hidden" id="hierarchyChangePageModal" tabindex="-1" role="dialog" aria-labelledby="hierarchyChangePageModalLabel" aria-hidden="true"&gt;
+    &lt;div class="modal-dialog"&gt;
+      &lt;div class="modal-content"&gt;
+        &lt;div class="modal-header"&gt;
+          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
+          &lt;h4 class="modal-title"&gt;Unsaved content&lt;/h4&gt;
+        &lt;/div&gt;
+        &lt;div class="modal-body"&gt;
+          &lt;p&gt;
+            You have unsaved content, do you want to continue? All unsaved modifications will be lost permanently&lt;br /&gt;
+            #if($xcontext.action == "edit")
+              #set
+            #end
+            &lt;a href="#$!{anchorHash}" id="hierarchySaveAndContinueModal" class="btn btn-success"&gt;Save &amp; Continue&lt;/a&gt; &lt;a href="#$!{anchorHash}" id="hierarchyDiscardAndContinueModal" class="btn btn-primary"&gt;Continue without saving&lt;/a&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;Cancel&lt;/button&gt;
+          &lt;/p&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;input type="hidden" id="hierarchyMasterDocName" value="$masterDoc.name" /&gt;&lt;input type="hidden" id="hierarchyMasterDocSpace" value="$masterDoc.space" /&gt;&lt;input type="hidden" id="hierarchyCurrentDocName" value="$doc.name" /&gt;&lt;input type="hidden" id="hierarchyCurrentDocSpace" value="$doc.space" /&gt;&lt;input type="hidden" id="hierarchyNextDocName" value="" /&gt;&lt;input type="hidden" id="hierarchyNextDocSpace" value="" /&gt;
+{{/html}}
+
+{{/velocity}}</code>
+    </property>
+    <property>
+      <contentDescription/>
+    </property>
+    <property>
+      <contentType>No content</contentType>
+    </property>
+    <property>
+      <defaultCategory/>
+    </property>
+    <property>
+      <description>A macro which displays the hierarchy of the current project in the IDE application.</description>
+    </property>
+    <property>
+      <id>displayHierarchy</id>
+    </property>
+    <property>
+      <name>Display Project Hierarchy</name>
+    </property>
+    <property>
+      <supportsInlineMode/>
+    </property>
+    <property>
+      <visibility>Current Wiki</visibility>
+    </property>
+  </object>
+  <object>
+    <class>
+      <name>XWiki.WikiMacroParameterClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <defaultValue>
+        <disabled>0</disabled>
+        <name>defaultValue</name>
+        <number>4</number>
+        <prettyName>Parameter default value</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultValue>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>2</number>
+        <prettyName>Parameter description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <mandatory>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>mandatory</name>
+        <number>3</number>
+        <prettyName>Parameter mandatory</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </mandatory>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Parameter name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+    </class>
+    <name>WebIDECode.ApplicationHierarchy</name>
+    <number>0</number>
+    <className>XWiki.WikiMacroParameterClass</className>
+    <guid>bc1ca3e7-c410-4a30-abda-2f8201f61fa1</guid>
+    <property>
+      <defaultValue/>
+    </property>
+    <property>
+      <description>The master page of the project you are working on.</description>
+    </property>
+    <property>
+      <mandatory>1</mandatory>
+    </property>
+    <property>
+      <name>masterPage</name>
+    </property>
+  </object>
+  <object>
+    <class>
+      <name>XWiki.WikiMacroParameterClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <defaultValue>
+        <disabled>0</disabled>
+        <name>defaultValue</name>
+        <number>4</number>
+        <prettyName>Parameter default value</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultValue>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>2</number>
+        <prettyName>Parameter description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <mandatory>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>mandatory</name>
+        <number>3</number>
+        <prettyName>Parameter mandatory</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </mandatory>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Parameter name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+    </class>
+    <name>WebIDECode.ApplicationHierarchy</name>
+    <number>1</number>
+    <className>XWiki.WikiMacroParameterClass</className>
+    <guid>595fefaf-7e55-48ac-9a5e-0c5a9fad22f6</guid>
+    <property>
+      <defaultValue/>
+    </property>
+    <property>
+      <description>The action needed for the hierarchy "panel" : "edit", "view", etc...</description>
+    </property>
+    <property>
+      <mandatory>0</mandatory>
+    </property>
+    <property>
+      <name>action</name>
+    </property>
+  </object>
+  <object>
+    <class>
+      <name>XWiki.WikiMacroParameterClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <defaultValue>
+        <disabled>0</disabled>
+        <name>defaultValue</name>
+        <number>4</number>
+        <prettyName>Parameter default value</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultValue>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>2</number>
+        <prettyName>Parameter description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <mandatory>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>mandatory</name>
+        <number>3</number>
+        <prettyName>Parameter mandatory</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </mandatory>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Parameter name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+    </class>
+    <name>WebIDECode.ApplicationHierarchy</name>
+    <number>2</number>
+    <className>XWiki.WikiMacroParameterClass</className>
+    <guid>288afa70-9c0c-45b3-b740-97692198c48f</guid>
+    <property>
+      <defaultValue/>
+    </property>
+    <property>
+      <description>The full-name of the page where the hierarchy must be displayed</description>
+    </property>
+    <property>
+      <mandatory>0</mandatory>
+    </property>
+    <property>
+      <name>remotePage</name>
+    </property>
+  </object>
+  <object>
+    <class>
+      <name>XWiki.WikiMacroParameterClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <defaultValue>
+        <disabled>0</disabled>
+        <name>defaultValue</name>
+        <number>4</number>
+        <prettyName>Parameter default value</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultValue>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>2</number>
+        <prettyName>Parameter description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <mandatory>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>mandatory</name>
+        <number>3</number>
+        <prettyName>Parameter mandatory</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </mandatory>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Parameter name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+    </class>
+    <name>WebIDECode.ApplicationHierarchy</name>
+    <number>3</number>
+    <className>XWiki.WikiMacroParameterClass</className>
+    <guid>f214d5b0-880a-4f3d-97bc-90daa3fc4d5a</guid>
+    <property>
+      <defaultValue/>
+    </property>
+    <property>
+      <description>List of spaces which have been made visible by the user in the hierarchy</description>
+    </property>
+    <property>
+      <mandatory>0</mandatory>
+    </property>
+    <property>
+      <name>visibleSpaces</name>
+    </property>
+  </object>
+  <object>
+    <class>
+      <name>XWiki.WikiMacroParameterClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <defaultValue>
+        <disabled>0</disabled>
+        <name>defaultValue</name>
+        <number>4</number>
+        <prettyName>Parameter default value</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultValue>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>2</number>
+        <prettyName>Parameter description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <mandatory>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>mandatory</name>
+        <number>3</number>
+        <prettyName>Parameter mandatory</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </mandatory>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Parameter name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+    </class>
+    <name>WebIDECode.ApplicationHierarchy</name>
+    <number>4</number>
+    <className>XWiki.WikiMacroParameterClass</className>
+    <guid>df7cb2f4-bb44-40ee-96f8-3fb59a0d9ede</guid>
+    <property>
+      <defaultValue/>
+    </property>
+    <property>
+      <description>Select the editor to use in the links of the hierarchy panel.</description>
+    </property>
+    <property>
+      <mandatory>0</mandatory>
+    </property>
+    <property>
+      <name>editor</name>
+    </property>
+  </object>
+  <content>{{velocity}}
+#if($request.masterPage)
+  {{displayHierarchy masterPage="$request.masterPage" action="$!request.action" remotePage="$request.remotePage" visibleSpaces="$!request.visibleSpaces"  editor="$!request.editor" /}}
+#end
+{{/velocity}}</content>
+</xwikidoc>
