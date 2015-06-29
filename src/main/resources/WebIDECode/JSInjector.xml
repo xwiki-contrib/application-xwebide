@@ -26,13 +26,13 @@
   <language/>
   <defaultLanguage/>
   <translation>0</translation>
-  <parent>WebIDE.WebHome</parent>
+  <parent>WebIDECode.ApplicationClass</parent>
   <creator>xwiki:XWiki.Admin</creator>
   <author>xwiki:XWiki.Admin</author>
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434954547000</creationDate>
-  <date>1435326449000</date>
+  <date>1435585557000</date>
   <contentUpdateDate>1434977986000</contentUpdateDate>
   <version>1.1</version>
   <title/>
@@ -125,12 +125,14 @@
       <code>require(['jquery'], function ($) {
 $(function(){
 
-  var currentPage = XWiki.currentPage;
-  var currentSpace = XWiki.currentSpace;
+  var currentPage = encodeURI(XWiki.currentPage);
+  var currentSpace = encodeURI(XWiki.currentSpace);
+  var currentPageEscaped = encodeURI(XWiki.currentPage.replace(/\\/g, '\\\\').replace(/\./g, '\\\.'));
+  var currentSpaceEscaped = encodeURI(XWiki.currentSpace.replace(/\\/g, '\\\\').replace(/\./g, '\\\.'));
 
   // Determine if that page is part of a project. Add the XWebIDE link in the Actions menu if that's the case and the "W" shortcut to use the XWebIDE editor.
   $.ajax({
-    url: "/xwiki/bin/view/WebIDECode/ApplicationCheck?xpage=plain&amp;outputSyntax=plain&amp;doc="+currentSpace+"."+currentPage,
+    url: "/xwiki/bin/view/WebIDECode/ApplicationCheck?xpage=plain&amp;outputSyntax=plain&amp;doc="+currentSpaceEscaped+"."+currentPageEscaped,
     type: "GET",
     contentType: "application/json",
   }).success(function(data){
@@ -162,7 +164,7 @@ $(function(){
     if(!hierarchyStatus) {
       hierarchyStatus = true;
       $.ajax({
-        url: "/xwiki/bin/get/WebIDECode/ApplicationHierarchy?xpage=plain&amp;action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+masterSpace+"."+masterName+"&amp;remotePage="+XWiki.currentSpace+"."+XWiki.currentPage,
+        url: "/xwiki/bin/get/WebIDECode/ApplicationHierarchy?xpage=plain&amp;action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+encodeURI(masterSpace)+"."+encodeURI(masterName)+"&amp;remotePage="+currentSpaceEscaped+"."+currentPageEscaped,
         type: "GET",
         contentType: "text/plain",
       }).success(function(data){

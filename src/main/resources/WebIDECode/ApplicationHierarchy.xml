@@ -26,14 +26,14 @@
   <language/>
   <defaultLanguage/>
   <translation>0</translation>
-  <parent>WebIDE.WebHome</parent>
+  <parent>WebIDECode.ApplicationClass</parent>
   <creator>xwiki:XWiki.Admin</creator>
   <author>xwiki:XWiki.Admin</author>
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434700712000</creationDate>
-  <date>1435326413000</date>
-  <contentUpdateDate>1435326413000</contentUpdateDate>
+  <date>1435585523000</date>
+  <contentUpdateDate>1435583176000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -165,24 +165,24 @@ $(function(){
     // Display or hide the content of a folder by clicking on its name
     $('.hierarchy-toggleFolder').click(function(){
       var spaceToggle = $(this).attr('space');
-      $('#hierarchySpace_'+spaceToggle).toggle();
+      $(document.getElementById('hierarchySpace_'+spaceToggle)).toggle();
       var indexSpace = $.inArray(spaceToggle, visibleSpaces);
-      if($('#hierarchySpace_'+spaceToggle).is(':visible')) {
+      if($(document.getElementById('hierarchySpace_'+spaceToggle)).is(':visible')) {
         visibleSpaces.push(spaceToggle);
-        $('#hierarchyFolderIcon_'+spaceToggle).attr('src', '/xwiki/resources/icons/silk/bullet_toggle_minus.png');
+        $(document.getElementById('hierarchyFolderIcon_'+spaceToggle)).attr('src', '/xwiki/resources/icons/silk/bullet_toggle_minus.png');
       }
       else {
         if(indexSpace &gt;= 0) {
           visibleSpaces.splice(indexSpace, 1);
         }
-        $('#hierarchyFolderIcon_'+spaceToggle).attr('src', '/xwiki/resources/icons/silk/bullet_toggle_plus.png');
+       $(document.getElementById('hierarchyFolderIcon_'+spaceToggle)).attr('src', '/xwiki/resources/icons/silk/bullet_toggle_plus.png');
       }
     });
     // Display or hide the details of a page by clicking on its name
     $('.hierarchy-displayPage').click(function(){
       var pageToggle = $(this).attr('pageid');
-      $('#hierarchyPageDetails_'+pageToggle).toggle();
-      if($('#hierarchyPageDetails_'+pageToggle).is(':visible')) {
+      $(document.getElementById('hierarchyPageDetails_'+pageToggle)).toggle();
+      if($(document.getElementById('hierarchyPageDetails_'+pageToggle)).is(':visible')) {
         $(this).find('.hierarchyDisplayPageIcon').attr('src', '/xwiki/resources/icons/silk/bullet_toggle_minus.png');
       }
       else {
@@ -198,7 +198,7 @@ $(function(){
 
     // Remove a folder by clicking on the cross
     $('.hierarchy-remove').click(function(){
-      removeFolder($(this).attr('space'));
+      removeFolder(decodeURI($(this).attr('space')));
     });
 
     $('.editPage').click(function(e){
@@ -249,6 +249,8 @@ $(function(){
       }
       currentSpace = $('#hierarchyNextDocSpace').val();
       currentPage = $('#hierarchyNextDocName').val();
+      currentPageEscaped = currentPage.replace(/\\/g, '%5C%5C').replace(/\./g, '%5C.');
+      currentSpaceEscaped = currentSpace.replace(/\\/g, '%5C%5C').replace(/\./g, '%5C.');
       $('#hierarchyCurrentDocName').val(currentPage); // Used in the JSInjector file to know which is the current page to save
       $('#hierarchyCurrentDocSpace').val(currentSpace);
       $.ajax({
@@ -269,7 +271,7 @@ $(function(){
             url: "/xwiki/bin/get/WebIDECode/ApplicationHierarchy?xpage=plain",
             type: "GET",
             datatype : "html",
-            data : "action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+masterSpace+"."+masterName+"&amp;remotePage="+currentSpace+"."+currentPage+"&amp;visibleSpaces="+visibleSpaces,
+            data : "action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+masterSpace+"."+masterName+"&amp;remotePage="+currentSpaceEscaped+"."+currentPageEscaped+"&amp;visibleSpaces="+encodeURI(visibleSpaces),
             contentType: "text/html",
           }).success(function(res3){
             var result = $('&lt;div /&gt;').append(res3).find('#hierarchyContent').html();
@@ -373,13 +375,13 @@ $(function(){
           type: "PUT",
           contentType: "application/x-www-form-urlencoded",
           accept: "application/xml",
-          data: "property#spaces="+spaceArray,
+          data: "property#spaces="+encodeURI(spaceArray),
         }).success(function(res2){
           $.ajax({
             url: "/xwiki/bin/get/WebIDECode/ApplicationHierarchy?xpage=plain",
             type: "GET",
             datatype : "html",
-            data : "action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+masterSpace+"."+masterName+"&amp;remotePage="+currentSpace+"."+currentPage+"&amp;visibleSpaces="+visibleSpaces,
+            data : "action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+masterSpace+"."+masterName+"&amp;remotePage="+currentSpaceEscaped+"."+currentPageEscaped+"&amp;visibleSpaces="+encodeURI(visibleSpaces),
             contentType: "text/html",
           }).success(function(res3){
             var result = $('&lt;div /&gt;').append(res3).find('#hierarchyContent').html();
@@ -400,6 +402,8 @@ $(function(){
   var masterName = $('#hierarchyMasterDocName').val();
   var currentPage = XWiki.currentPage;
   var currentSpace = XWiki.currentSpace;
+  var currentPageEscaped = encodeURI(currentPage.replace(/\\/g, '\\').replace(/\./g, '\.'));
+  var currentSpaceEscaped = encodeURI(currentSpace.replace(/\\/g, '\\').replace(/\./g, '\.'));
   var saving = false;
   var loading = false;
   var visibleSpaces = [currentSpace];
@@ -464,7 +468,7 @@ $(function(){
   $('#hierarchyAddFolder').click(function(e){
     $('body').removeClass('modal-open');
     e.preventDefault();
-    var newFolder = $('#hierarchyNewFolderName').val().replace('%', '%25');
+    var newFolder = $('#hierarchyNewFolderName').val();
     $.ajax({
       url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+masterSpace+"/pages/"+masterName+"/objects/WebIDECode.ApplicationClass/0/properties/spaces",
       type: "GET",
@@ -480,13 +484,13 @@ $(function(){
           type: "PUT",
           contentType: "application/x-www-form-urlencoded",
           accept: "application/xml",
-          data: "property#spaces="+spaceArray,
+          data: "property#spaces="+encodeURI(spaceArray),
         }).success(function(res2){
           $.ajax({
             url: "/xwiki/bin/get/WebIDECode/ApplicationHierarchy?xpage=plain",
             type: "GET",
             datatype : "html",
-            data : "action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+masterSpace+"."+masterName+"&amp;remotePage="+currentSpace+"."+currentPage+"&amp;visibleSpaces="+visibleSpaces,
+            data : "action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+masterSpace+"."+masterName+"&amp;remotePage="+currentSpaceEscaped+"."+currentPageEscaped+"&amp;visibleSpaces="+encodeURI(visibleSpaces),
             contentType: "text/html",
           }).success(function(res3){
             var result = $('&lt;div /&gt;').append(res3).find('#hierarchyContent').html();
@@ -509,7 +513,7 @@ $(function(){
   $('#hierarchyAddPage').click(function(e){
     $('body').removeClass('modal-open');
     e.preventDefault();
-    var folder = $('#hierarchyPageFolder').html().replace('%', '%25');
+    var folder = $('#hierarchyPageFolder').html();
     var newPage = $('#hierarchyNewPageName').val().replace('%', '%25');
     $.ajax({
       url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+folder+"/pages/"+newPage,
@@ -527,7 +531,7 @@ $(function(){
           url: "/xwiki/bin/get/WebIDECode/ApplicationHierarchy?xpage=plain",
           type: "GET",
           datatype : "html",
-          data : "action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+masterSpace+"."+masterName+"&amp;remotePage="+currentSpace+"."+currentPage+"&amp;visibleSpaces="+visibleSpaces,
+          data : "action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+masterSpace+"."+masterName+"&amp;remotePage="+currentSpaceEscaped+"."+currentPageEscaped+"&amp;visibleSpaces="+encodeURI(visibleSpaces),
           contentType: "text/html",
         }).success(function(res3){
             var result = $('&lt;div /&gt;').append(res3).find('#hierarchyContent').html();
@@ -667,6 +671,7 @@ $(function(){
 
 /* Project Block */
 #hierarchyContent {
+  overflow-x: hidden;
   padding:5px;
   height : 100%;
 }
@@ -676,9 +681,23 @@ $(function(){
   -ms-user-select: none;      /* IE 10+ */
   user-select: none;
 }
+#hierarchyMainList li {
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  -webkit-user-select: none;  /* Chrome all / Safari all */
+  -moz-user-select: none;     /* Firefox all */
+  -ms-user-select: none;      /* IE 10+ */
+  user-select: none;
+}
 .hierarchy-right {
   cursor: pointer;
   float: right;
+}
+.hierarchy-remove {
+  position: absolute;
+  right: 0px;
+  top: 1px;
 }
 #hierarchyOpenBlock {
   cursor: pointer;
@@ -878,9 +897,13 @@ $(function(){
 #set($masterDoc = 'Main.WebHome')
 #if($xwiki.exists($xcontext.macro.params.masterPage))
   #set($masterDoc = $xwiki.getDocument($xcontext.macro.params.masterPage))
+#elseif($xwiki.exists($xcontext.macro.params.masterPage.replace('%22', '"')))
+  #set($masterDoc = $xwiki.getDocument($xcontext.macro.params.masterPage.replace('%22', '"')))
 #end
 #if($xwiki.exists($xcontext.macro.params.remotePage))
   #set($currentDoc = $xwiki.getDocument($xcontext.macro.params.remotePage))
+#elseif($xwiki.exists($xcontext.macro.params.remotePage.replace('%22', '"').replace('%5C', '\')))
+  #set($currentDoc = $xwiki.getDocument($xcontext.macro.params.remotePage.replace('%22', '"').replace('%5C', '\')))
 #else
   #set($currentDoc = $doc)
 #end
@@ -894,7 +917,6 @@ $(function(){
 #set($spacesList = $masterObj.getProperty('spaces').value)
 #set($spacesListAdd = [])
 #set($pagesList = $masterObj.getProperty('pages').value)
-#set($pagesNameList = {})
 #foreach($page in $pagesList)
   #set($document = $xwiki.getDocument($page))
   #if(!$spacesListAdd.contains($document.space))
@@ -917,8 +939,9 @@ $(function(){
     #set($contentDisplay = ' hierarchy-hidden')
     #set($folderIcon = 'bullet_toggle_plus')
   #end 
-  * (% class="hierarchy-toggleFolder" space="$space" %)((([[image:icon:$folderIcon||id="hierarchyFolderIcon_$space"]][[image:icon:folder]] {{html clean=false}}&lt;span &gt;$space&lt;/span&gt; {{/html}}))) [[image:icon:cross||title="Remove folder '$space'" space="$space" class="hierarchy-right hierarchy-remove"]]
-  (% id="hierarchySpace_$space" class="hierarchy-list${contentDisplay}" %)
+  #set($spaceEscaped = $space.replace('%', '%25').replace('"', '%22').replace(' ', '%20').replace("'", "%27"))
+  * (% class="hierarchy-toggleFolder" space="$spaceEscaped" %)((([[image:icon:$folderIcon||id="hierarchyFolderIcon_$spaceEscaped"]][[image:icon:folder]] {{html clean=false}}&lt;span&gt;$space&lt;/span&gt; {{/html}}))) [[image:icon:cross||title="Remove folder '$spaceEscaped'" space="$spaceEscaped" class="btn-danger hierarchy-right hierarchy-remove"]]
+  (% id="hierarchySpace_$spaceEscaped" class="hierarchy-list${contentDisplay}" %)
   #set($spacePageList = $xwiki.getSpaceDocsName($space))
   #if($spacesListAdd.contains($space))
     #set($spacePageNameList = [])
@@ -932,9 +955,10 @@ $(function(){
     #set($spacePageList = $sorttool.sort($spacePageList))
   #end
   #foreach($page in $spacePageList)
-    #set($pageFullName = "$space.$page")
+    #set($pageFullName = "${space.replace('\', '\\').replace('.', '\.')}.${page.replace('\', '\\').replace('.', '\.')}")
     #set($pageClassHidden = " hierarchy-hidden")
     #set($iconBulletToggle = "bullet_toggle_plus")
+    #set($pageEscaped = $page.replace('%', '%25').replace('"', '%22').replace(' ', '%20').replace("'", "%27"))
     #if($xcontext.action != "edit" &amp;&amp; "$!{xcontext.macro.params.action}" != "edit")
       #set($displayedIcon = 'page')
       #set($pageName = ")))[[$pageFullName]]")
@@ -946,32 +970,33 @@ $(function(){
       #set($pageName = ")))[[$page&gt;&gt;path:$xwiki.getURL($pageFullName, 'edit', 'editor=class')#!XWebIDE]]")
     #else
       #set($displayedIcon = 'page_edit')
-      #set($pageName = "))){{html}}&lt;a href='#!XWebIDE' space='$space' page='$page' class='editPage'&gt;$page&lt;/a&gt;{{/html}}")
+      #set($pageName = "))){{html clean=false}}&lt;a href='#!XWebIDE' space='$spaceEscaped' page='$pageEscaped' class='editPage'&gt;$page&lt;/a&gt;{{/html}}")
     #end
     #if($pageFullName == $currentDoc.fullName)
       #set($pageName = "{{html}}&lt;span&gt;$page&lt;/span&gt;{{/html}})))")
       #set($pageClassHidden = "")
       #set($iconBulletToggle = "bullet_toggle_minus")
     #end
-    ** (% pageid="$space$page" class="hierarchy-displayPage" %)((([[image:icon:$iconBulletToggle||class="hierarchyDisplayPageIcon"]][[image:icon:$displayedIcon||class="hierarchyContextActionIcon"]]$pageName
-    (% id="hierarchyPageDetails_$space$page" class="hierarchy-list${pageClassHidden}" %)
+    ** (% pageid="$spaceEscaped$pageEscaped" class="hierarchy-displayPage" %)((([[image:icon:$iconBulletToggle||class="hierarchyDisplayPageIcon"]][[image:icon:$displayedIcon||class="hierarchyContextActionIcon"]]$pageName
+    (% id='hierarchyPageDetails_$spaceEscaped$pageEscaped' class='hierarchy-list${pageClassHidden}' %)
     #if($xcontext.action == "edit" || "$!{xcontext.macro.params.action}" == "edit")
-    *** [[image:icon:page View&gt;&gt;path:$xwiki.getURL("${space}.${page}", 'view')||target="_blank"]]
+    *** [[image:icon:page View&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')||target="_blank"]]
     #end
     #if($currentEditor != "wiki")
-      *** [[image:icon:page_edit Edit (wiki)&gt;&gt;path:$xwiki.getURL("${space}.${page}", 'edit', 'editor=wiki')#!XWebIDE]]
+      *** [[image:icon:page_edit Edit (wiki)&gt;&gt;path:$xwiki.getURL("$pageFullName", 'edit', 'editor=wiki')#!XWebIDE]]
     #end
     #if($currentEditor != "object")
-      *** [[image:icon:application_edit Objects&gt;&gt;path:$xwiki.getURL("${space}.${page}", 'edit', 'editor=object')#!XWebIDE]]
+      *** [[image:icon:application_edit Objects&gt;&gt;path:$xwiki.getURL("$pageFullName", 'edit', 'editor=object')#!XWebIDE]]
     #end
     #if($currentEditor != "class")
-      *** [[image:icon:monitor_edit Class&gt;&gt;path:$xwiki.getURL("${space}.${page}", 'edit', 'editor=object')#!XWebIDE]]
+      *** [[image:icon:monitor_edit Class&gt;&gt;path:$xwiki.getURL("$pageFullName", 'edit', 'editor=class')#!XWebIDE]]
     #end
-    *** [[image:icon:attach Attachments&gt;&gt;path:$xwiki.getURL("${space}.${page}", 'view')#Attachments]]
+    *** [[image:icon:attach Attachments&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')#Attachments]]
   #end
-  ** image:icon:add {{html}}&lt;a href="#!XWebIDE" space="$space" class="newPage" data-toggle="modal" data-target="#hierarchyPageModal"&gt;Add new page&lt;/a&gt;{{/html}}
+  ** image:icon:add {{html}}&lt;a href="#!XWebIDE" space="$spaceEscaped" class="newPage" data-toggle="modal" data-target="#hierarchyPageModal"&gt;Add new page&lt;/a&gt;{{/html}}
 #end
 * image:icon:add {{html}}&lt;a href="#!XWebIDE" class="newFolder" data-toggle="modal" data-target="#hierarchyFolderModal"&gt;Add new folder&lt;/a&gt;{{/html}}
+)))
 
 {{html}}
 ## Modal should not add #!XWebIDE when the macro is used in view mode (e.g. in the master page)
@@ -1026,7 +1051,7 @@ $(function(){
       &lt;/div&gt;
     &lt;/div&gt;
   &lt;/div&gt;
-  &lt;input type="hidden" id="hierarchyMasterDocName" value="$masterDoc.name" /&gt;&lt;input type="hidden" id="hierarchyMasterDocSpace" value="$masterDoc.space" /&gt;&lt;input type="hidden" id="hierarchyCurrentDocName" value="$doc.name" /&gt;&lt;input type="hidden" id="hierarchyCurrentDocSpace" value="$doc.space" /&gt;&lt;input type="hidden" id="hierarchyNextDocName" value="" /&gt;&lt;input type="hidden" id="hierarchyNextDocSpace" value="" /&gt;
+  &lt;div class="hierarchy-hidden"&gt;&lt;input type="hidden" id="hierarchyMasterDocName" value="$escapetool.url($masterDoc.name)" /&gt;&lt;input type="hidden" id="hierarchyMasterDocSpace" value="$escapetool.url($masterDoc.space)" /&gt;&lt;input type="hidden" id="hierarchyCurrentDocName" value="$escapetool.url($doc.name)" /&gt;&lt;input type="hidden" id="hierarchyCurrentDocSpace" value="$escapetool.url($doc.space)" /&gt;&lt;input type="hidden" id="hierarchyNextDocName" value="" /&gt;&lt;input type="hidden" id="hierarchyNextDocSpace" value="" /&gt;&lt;/div&gt;
 {{/html}}
 
 {{/velocity}}</code>
@@ -1388,7 +1413,7 @@ $(function(){
   </object>
   <content>{{velocity}}
 #if($request.masterPage)
-  {{displayHierarchy masterPage="$request.masterPage" action="$!request.action" remotePage="$request.remotePage" visibleSpaces="$!request.visibleSpaces"  editor="$!request.editor" /}}
+  {{displayHierarchy masterPage="${request.masterPage.replace('"', '%22')}" action="$!request.action" remotePage="${request.remotePage.replace('"', '%22')}" visibleSpaces="$!{request.visibleSpaces.replace('"', '%22')}"  editor="$!request.editor" /}}
 #end
 {{/velocity}}</content>
 </xwikidoc>
