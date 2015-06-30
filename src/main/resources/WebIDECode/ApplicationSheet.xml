@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434695260000</creationDate>
-  <date>1435572074000</date>
-  <contentUpdateDate>1435572074000</contentUpdateDate>
+  <date>1435670735000</date>
+  <contentUpdateDate>1435670735000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -154,8 +154,13 @@
     </property>
   </object>
   <content>{{velocity}}
+#if($doc.isNew())
+  $doc.getObject('WebIDECode.ApplicationClass').set('projectName', $doc.name)
+  $doc.save()
+  $response.sendRedirect($doc.getURL('view'))
+#else
 $xwiki.jsx.use("WebIDECode.ApplicationSheet")
-; $doc.displayPrettyName('projectName') : $doc.display('projectName', 'edit') #if($xcontext.action == "view") {{html}}&lt;input type="button" id="saveName" class="btn btn-success" value="Save" title="Change the application name" /&gt; &lt;span id="result"&gt;&lt;/span&gt;{{/html}}
+; $doc.displayPrettyName('projectName') : $doc.display('projectName', 'edit') {{html}}&lt;input type="button" id="saveName" class="btn btn-success" value="Save" title="Change the application name" /&gt; &lt;span id="result"&gt;&lt;/span&gt;{{/html}}
 
   **Content :**
   (% id="hierarchyBlock" %)
