@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434954547000</creationDate>
-  <date>1435822971000</date>
+  <date>1435837819000</date>
   <contentUpdateDate>1434977986000</contentUpdateDate>
   <version>1.1</version>
   <title/>
@@ -197,7 +197,7 @@ $(function(){
         $("#hierarchyBlock").css({
           "width" : "17%",
           "maxWidth" : "17%",
-          "resize" : "none"
+          "resize" : "none",
         });
         if(XWiki.editor == "wiki") {
           $('#editPanels').remove();
@@ -206,14 +206,18 @@ $(function(){
             "height":"95%"
           });
           $("#hierarchyBlock").css({
-            "height":"95%"
+            "height":"95%",
+            "backgroundColor" : $('div.leftmenu2').css('backgroundColor')
+          });
+          $(".hierarchy-remove").css({
+            "backgroundColor" : $('div.leftmenu2').css('backgroundColor')
           });
           $('#content').attr('autocomplete','off');
           $('#content').attr('spellcheck','false');
           $("#xwikieditcontentinner").css({
             "height" : ($("#content").outerHeight()+100)+"px",
             "overflow" : "hidden",
-            "padding" : "10px",
+            "padding" : "0",
             "resize" : "vertical",
             "minHeight" : ($("#content").outerHeight()+100)+"px"
           });
