@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434955733000</creationDate>
-  <date>1435652802000</date>
-  <contentUpdateDate>1435652802000</contentUpdateDate>
+  <date>1435757297000</date>
+  <contentUpdateDate>1435757297000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationCheck</title>
   <defaultTemplate/>
@@ -56,29 +56,30 @@ $response.setContentType('application/json')
     "documentSpace" : "$document.space.replace('"', '%22')",
     "masterName" : "$masterDoc.name.replace('"', '%22')",
     "masterSpace" : "$masterDoc.space.replace('"', '%22')",
-    "project" : "$masterDoc.projectName.replace('"', '%22')"
+    "project" : "$masterDoc.projectName.replace('"', '%22')",
   #else
-    #foreach($documentFullName in $services.sheet.getSheets($document, 'view'))
-      #set($document = $xwiki.getDocument($documentFullName))
-      #set($xwqlstatement = "where doc.object(WebIDECode.ApplicationClass).spaces like :spaces or doc.object(WebIDECode.ApplicationClass).pages like :pages")
-      #set($queryResults = $services.query.xwql($xwqlstatement).bindValue('pages', "%$document.fullName%").bindValue('spaces', "%$document.space%").execute())
-      #if($queryResults.size() == 1)
-        #set($masterDoc = $xwiki.getDocument($queryResults.get(0)))
-        "error" : -1,
-        "documentName" : "$document.name.replace('"', '%22')",
-        "documentSpace" : "$document.space.replace('"', '%22')",
-        "masterName" : "$masterDoc.name.replace('"', '%22')",
-        "masterSpace" : "$masterDoc.space.replace('"', '%22')",
-        "project" : "$masterDoc.projectName.replace('"', '%22')"
-        #break
-      #end
-    #end
-    #if(!$masterDoc)
-      "error" : 1
+    "error" : 1,
+  #end
+  #set($sheetError = "1")
+  #foreach($documentFullName in $services.sheet.getSheets($document, 'view'))
+    #set($document = $xwiki.getDocument($documentFullName))
+    #set($xwqlstatement = "where doc.object(WebIDECode.ApplicationClass).spaces like :spaces or doc.object(WebIDECode.ApplicationClass).pages like :pages")
+    #set($queryResults = $services.query.xwql($xwqlstatement).bindValue('pages', "%$document.fullName%").bindValue('spaces', "%$document.space%").execute())
+    #if($queryResults.size() == 1)
+      #set($sheetError = "-1")
+      #set($masterDoc = $xwiki.getDocument($queryResults.get(0)))
+      "sheetDocumentName" : "$document.name.replace('"', '%22')",
+      "sheetDocumentSpace" : "$document.space.replace('"', '%22')",
+      "sheetMasterName" : "$masterDoc.name.replace('"', '%22')",
+      "sheetMasterSpace" : "$masterDoc.space.replace('"', '%22')",
+      "sheetProject" : "$masterDoc.projectName.replace('"', '%22')",
+      #break
     #end
   #end
+  "sheetError" : $sheetError
 #else
-  "error" : 0
+  "error" : 0,
+  "sheetError" : 0
 #end
 }
 {{/velocity}}</content>
