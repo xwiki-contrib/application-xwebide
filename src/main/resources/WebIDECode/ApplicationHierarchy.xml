@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434700712000</creationDate>
-  <date>1435837728000</date>
-  <contentUpdateDate>1435753149000</contentUpdateDate>
+  <date>1435908589000</date>
+  <contentUpdateDate>1435908347000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -204,7 +204,7 @@ $(function(){
     // Change the folder to use when adding a new page
     $('.newPage').click(function(e){
       e.preventDefault();
-      $('#hierarchyPageFolder').html(decodeURI($(this).attr("space")));
+      $('#hierarchyPageFolder').html(unescape($(this).attr("space")));
     });
 
     // Remove a folder by clicking on the cross
@@ -453,8 +453,8 @@ $(function(){
   // Variables
   var masterSpace = $('#hierarchyMasterDocSpace').val();
   var masterName = $('#hierarchyMasterDocName').val();
-  var currentPage = XWiki.currentPage;
-  var currentSpace = XWiki.currentSpace;
+  var currentPage = encodeURIComponent(XWiki.currentPage);
+  var currentSpace = encodeURIComponent(XWiki.currentSpace);
   var currentPageEscaped = encodeURIComponent(currentPage.replace(/\\/g, '\\').replace(/\./g, '\.'));
   var currentSpaceEscaped = encodeURIComponent(currentSpace.replace(/\\/g, '\\').replace(/\./g, '\.'));
   var saving = false;
@@ -581,7 +581,7 @@ $(function(){
   $('#hierarchyAddPage').click(function(e){
     $('body').removeClass('modal-open');
     e.preventDefault();
-    var folder = encodeURIComponent($('#hierarchyPageFolder').text());
+    var folder = encodeURIComponent(unescape($('#hierarchyPageFolder').text()));
     var newPage = encodeURIComponent($('#hierarchyNewPageName').val());
     $.ajax({
       url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+folder+"/pages/"+newPage,
@@ -1008,13 +1008,13 @@ $(function(){
 #set($masterDoc = 'Main.WebHome')
 #if($xwiki.exists($xcontext.macro.params.masterPage))
   #set($masterDoc = $xwiki.getDocument($xcontext.macro.params.masterPage))
-#elseif($xwiki.exists($xcontext.macro.params.masterPage.replace('%22', '"')))
-  #set($masterDoc = $xwiki.getDocument($xcontext.macro.params.masterPage.replace('%22', '"')))
+#elseif($xwiki.exists($util.decodeURI($xcontext.macro.params.masterPage)))
+  #set($masterDoc = $xwiki.getDocument($util.decodeURI($xcontext.macro.params.masterPage)))
 #end
 #if($xwiki.exists($xcontext.macro.params.remotePage))
   #set($currentDoc = $xwiki.getDocument($xcontext.macro.params.remotePage))
-#elseif($xwiki.exists($xcontext.macro.params.remotePage.replace('%22', '"').replace('%5C', '\')))
-  #set($currentDoc = $xwiki.getDocument($xcontext.macro.params.remotePage.replace('%22', '"').replace('%5C', '\')))
+#elseif($xwiki.exists($util.decodeURI($xcontext.macro.params.remotePage)))
+  #set($currentDoc = $xwiki.getDocument($util.decodeURI($xcontext.macro.params.remotePage)))
 #else
   #set($currentDoc = $doc)
 #end
@@ -1049,8 +1049,9 @@ $(function(){
 //**Project** :// **[[$masterObj.getProperty('projectName').value&gt;&gt;$masterDoc.fullName||target="_blank"]]** 
 (% class="hierarchy-list hierarchy-no-padding" id="hierarchyMainList" %)
 #foreach($space in $spacesList)
-  #set($spaceEscaped = $space.replace('%', '%25').replace('"', '%22').replace("'", "%27"))
-  #if($hiddenSpaces.contains($spaceEscaped) &amp;&amp; $space != $currentDoc.space)
+  #set($spaceEscaped = $util.encodeURI($space).replace("+", "%20"))
+  #set($spaceEscapedBackslash = $util.encodeURI($space.replace('\', '\\').replace('.', '\.')).replace("+", "%20"))
+  #if($hiddenSpaces.contains($spaceEscapedBackslash) &amp;&amp; $space != $currentDoc.space)
     #set($contentDisplay = " hierarchy-hidden")
     #set($folderIcon = "bullet_toggle_plus")
   #else
@@ -1065,8 +1066,7 @@ $(function(){
   #if($spacesListInit.contains($space))
     #set($addRemoveButton = "[[image:icon:cross||title='Remove folder $spaceEscaped' space='$spaceEscaped' class='hierarchy-right hierarchy-remove hierarchy-remove-folder']]")
   #end 
-  #set($spaceEscaped = $space.replace('%', '%25').replace('"', '%22').replace("'", "%27"))
-  * (% class="hierarchy-toggleFolder" space="$spaceEscaped" %)((([[image:icon:$folderIcon||id="hierarchyFolderIcon_$spaceEscaped"]][[image:icon:folder]] {{html clean=false}}&lt;span$!{displayCurrentSpace}&gt;$space&lt;/span&gt; {{/html}}))) $!addRemoveButton
+  * (% class="hierarchy-toggleFolder" space="$spaceEscapedBackslash" %)((([[image:icon:$folderIcon||id="hierarchyFolderIcon_$spaceEscapedBackslash"]][[image:icon:folder]] {{html clean=false}}&lt;span$!{displayCurrentSpace}&gt;$space&lt;/span&gt; {{/html}}))) $!addRemoveButton
   #if($spacesListInit.contains($space))
     #set($spacePageList = $xwiki.getSpaceDocsName($space))
   #else
@@ -1079,17 +1079,18 @@ $(function(){
     #end
     #set($spacePageList = $sorttool.sort($spacePageList))
   #end
-  (% id="hierarchySpace_$spaceEscaped" class="hierarchy-list${contentDisplay}" %)
+  (% id="hierarchySpace_$spaceEscapedBackslash" class="hierarchy-list${contentDisplay}" %)
   #foreach($page in $spacePageList)
     #set($pageFullName = "${space.replace('\', '\\').replace('.', '\.')}.${page.replace('\', '\\').replace('.', '\.')}")
-    #set($pageFullNameEscaped = $pageFullName.replace('%', '%25').replace('"', '%22').replace("'", "%27"))
+    #set($pageFullNameEscaped = $util.encodeURI($pageFullName).replace("+", "%20"))
     #set($pageClassHidden = "")
     #set($iconBulletToggle = "bullet_toggle_minus")
     #if($hiddenPages.contains($pageFullNameEscaped) &amp;&amp; $pageFullName != $currentDoc.fullName)
       #set($pageClassHidden = " hierarchy-hidden")
       #set($iconBulletToggle = "bullet_toggle_plus")
     #end
-    #set($pageEscaped = $page.replace('%', '%25').replace('"', '%22').replace("'", "%27"))
+    #set($pageEscaped = $util.encodeURI($page).replace("+", "%20"))
+    #set($pageEscapedBackslash = $util.encodeURI($page.replace('\', '\\').replace('.', '\.')).replace("+", "%20"))
     #if($xcontext.action != "edit" &amp;&amp; "$!{xcontext.macro.params.action}" != "edit")
       #set($displayedIcon = 'page')
     #elseif($currentEditor == "object")
@@ -1111,8 +1112,8 @@ $(function(){
     #set($objectCount = $services.query.xwql("select count(obj.className) from BaseObject as obj, Document as doc where obj.name  = doc.fullName and doc.fullName = :pageFullName and doc.translation=0").bindValue('pageFullName', $pageFullName).execute()[0])
     #set($attachmentCount = $xwiki.getDocument($pageFullName).getAttachmentList().size())
     #set($classCount = $xwiki.getClass($pageFullName).properties.size())
-    ** (% pageid="$spaceEscaped.$pageEscaped" class="hierarchy-displayPage" %)((([[image:icon:$iconBulletToggle||class="hierarchyDisplayPageIcon"]][[image:icon:$displayedIcon||class="hierarchyContextActionIcon"]]$pageName $!addRemoveButton
-    (% id='hierarchyPageDetails_$spaceEscaped.$pageEscaped' class='hierarchy-list${pageClassHidden}' %)
+    ** (% pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((([[image:icon:$iconBulletToggle||class="hierarchyDisplayPageIcon"]][[image:icon:$displayedIcon||class="hierarchyContextActionIcon"]]$pageName $!addRemoveButton
+    (% id='hierarchyPageDetails_$spaceEscapedBackslash.$pageEscapedBackslash' class='hierarchy-list${pageClassHidden}' %)
     #if($xcontext.action != "edit" &amp;&amp; "$!{xcontext.macro.params.action}" != "edit" &amp;&amp; $pageFullName == $currentDoc.fullName)
       *** image:icon:page {{html}}&lt;span class='hierarchyCurrentSpacePageAction'&gt;View&lt;/span&gt;{{/html}}
     #else
@@ -1639,7 +1640,7 @@ $(function(){
   </object>
   <content>{{velocity}}
 #if($request.masterPage)
-  {{displayHierarchy masterPage="${request.masterPage.replace('"', '%22')}" action="$!request.action" remotePage="${request.remotePage.replace('"', '%22')}" hiddenSpaces="$!{request.hiddenSpaces.replace('"', '%22')}" hiddenPages="$!{request.hiddenPages.replace('"', '%22')}"  editor="$!request.editor" /}}
+  {{displayHierarchy masterPage="$util.encodeURI(${request.masterPage}).replace("+", "%20")" action="$!request.action" remotePage="$util.encodeURI(${request.remotePage}).replace("+", "%20")" hiddenSpaces="$!{request.hiddenSpaces}" hiddenPages="$!{request.hiddenPages}"  editor="$!request.editor" /}}
 #end
 {{/velocity}}</content>
 </xwikidoc>
