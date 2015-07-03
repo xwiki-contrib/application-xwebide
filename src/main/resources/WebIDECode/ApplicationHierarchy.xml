@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434700712000</creationDate>
-  <date>1435908589000</date>
-  <contentUpdateDate>1435908347000</contentUpdateDate>
+  <date>1435928149000</date>
+  <contentUpdateDate>1435927523000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -201,10 +201,39 @@ $(function(){
       setCookieHierarchy('hiddenPages', hiddenPages, 365);
     });
 
-    // Change the folder to use when adding a new page
+    // Add a page (if no bootstrap) / Change the folder to use when adding a new page
     $('.newPage').click(function(e){
       e.preventDefault();
       $('#hierarchyPageFolder').html(unescape($(this).attr("space")));
+      if(!bootstrap) {
+        var newPageNoBootstrap = prompt("Name of the new page:", "");
+        if(newPageNoBootstrap != null) {
+          $('#hierarchyNewPageName').val(newPageNoBootstrap);
+          addPage();
+        }
+      }
+    });
+    // Add a folder (if no bootstrap)
+    $('.newFolder').click(function(e){
+      e.preventDefault();
+      if(!bootstrap) {
+        var newFodlerNoBootstrap = prompt("Name of the folder:", "");
+        if(newFodlerNoBootstrap != null) {
+          $('#hierarchyNewFolderName').val(newFodlerNoBootstrap);
+          addFolder();
+        }
+      }
+    });
+    // Add an existing page (if no bootstrap)
+    $('.newExistingPage').click(function(e){
+      e.preventDefault();
+      if(!bootstrap) {
+        var newExistingPageNoBootstrap = prompt("Name of the existing page:", "");
+        if(newExistingPageNoBootstrap != null) {
+          $('#hierarchyExistingPageName').val(newExistingPageNoBootstrap);
+          addExistingPage();
+        }
+      }
     });
 
     // Remove a folder by clicking on the cross
@@ -229,14 +258,16 @@ $(function(){
 
         if(XWiki.editor == "wiki"){
           if(savedContent != $('#content').val()) {
-            $('#hierarchyChangePageModal').modal('show');
+            if(bootstrap) {
+              $('#hierarchyChangePageModal').modal('show');
+            }
+            else if(confirm("You have unsaved modifications. If you continue, all modifications will be lost.\nDo you want to continue?")) {
+              loadPage(false);
+            }
           }
           else {
             loadPage(false);
           }
-        }
-        else if(XWiki.editor == "object"){
-          window.location.href = '/xwiki/bin/edit/'+$(this).attr('space')+'/'+$(this).attr('page')+'?editor=object#!XWebIDE';
         }
       }
     });
@@ -274,7 +305,7 @@ $(function(){
       $('#hierarchyCurrentDocName').val(currentPage); // Used in the JSInjector file to know which is the current page to save
       $('#hierarchyCurrentDocSpace').val(currentSpace);
       $.ajax({
-        url: "/xwiki/bin/view/"+currentSpace+"/"+currentPage+"?xpage=plain&amp;raw=1",
+        url: wikiViewURL+currentSpace+"/"+currentPage+"?xpage=plain&amp;raw=1",
         type: "GET",
         contentType: "plain/text",
       }).success(function(dataContent){
@@ -288,7 +319,9 @@ $(function(){
         }).success(function(dataTitle){
           $('#xwikidoctitleinput').val($(dataTitle).find('title').text());
           $('#hierarchyNewFolderName').val('');
-          $('#hierarchyChangePageModal').modal('hide');
+          if(bootstrap) {
+            $('#hierarchyChangePageModal').modal('hide');
+          }
           reloadHierarchy();
           loading = false;
           $('#hierarchyLoadingState').html('&lt;strong class="green"&gt;Loaded&lt;/strong&gt;').show().delay(2500).queue(function(n) {
@@ -323,7 +356,7 @@ $(function(){
           n();
         });
         saving = false;
-        window.location.href = '/xwiki/bin/view/'+currentSpace+'/'+currentPage;
+        window.location.href = wikiViewURL+currentSpace+'/'+currentPage;
       });
     }
   }
@@ -359,17 +392,17 @@ $(function(){
   function cancelAndViewIDE() {
     if(savedContent != $('#content').val()) {
       if(confirm("Are you sure?")) {
-        window.location.href = '/xwiki/bin/view/'+currentSpace+'/'+currentPage;
+        window.location.href = wikiViewURL+currentSpace+'/'+currentPage;
       }
     }
     else {
-      window.location.href = '/xwiki/bin/view/'+currentSpace+'/'+currentPage;
+      window.location.href = wikiViewURL+currentSpace+'/'+currentPage;
     }
   }
 
   function reloadHierarchy() {
     $.ajax({
-      url: "/xwiki/bin/get/WebIDECode/ApplicationHierarchy?xpage=plain",
+      url: wikiGetURL+"WebIDECode/ApplicationHierarchy?xpage=plain",
       type: "GET",
       datatype : "html",
       data : "action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+masterSpace+"."+masterName+"&amp;remotePage="+currentSpaceEscaped+"."+currentPageEscaped+"&amp;hiddenSpaces="+encodeURIComponent(hiddenSpaces)+"&amp;hiddenPages="+encodeURIComponent(hiddenPages),
@@ -463,6 +496,20 @@ $(function(){
   var hiddenPages = getCookieHierarchy('hiddenPages').split(',');
   var mainBlock = '';
   var mainBlockContainer = '';
+  var wikiGetURL = '/xwiki/bin/get/';
+  if(window.docgeturl.indexOf('/get/') != 0) {
+    wikiGetURL = window.docgeturl.substring(0,window.docgeturl.indexOf('/get/')+5);
+  }
+  var wikiViewURL = '/xwiki/bin/view/';
+  if(window.docviewurl.indexOf('/'+XWiki.currentSpace+'/') != 0) {
+    wikiViewURL = window.docviewurl.substring(0,window.docviewurl.indexOf('/'+XWiki.currentSpace+'/')+1);
+  }
+  if(typeof($.fn.modal) === 'undefined') {
+    var bootstrap = false;
+  }
+  else {
+    var bootstrap = true;
+  }
   if(XWiki.contextaction =="view") {
     $('#hierarchyBlock').css({"resize" : "none"});
   }
@@ -479,16 +526,18 @@ $(function(){
     mainBlock = 'propupdate';
     mainBlockContainer = 'mainEditArea';
   }
-  // Autofocus on text inputs when a modal appears
-  $('#hierarchyFolderModal').on('shown.bs.modal', function () {
-    $('#hierarchyNewFolderName').focus();
-  })
-  $('#hierarchyPageModal').on('shown.bs.modal', function () {
-    $('#hierarchyNewPageName').focus();
-  })
-  $('#hierarchyExistingPageModal').on('shown.bs.modal', function () {
-    $('#hierarchyExistingPageName').focus();
-  })
+  // Autofocus on text inputs when a modal appears:
+  if(bootstrap) {
+    $('#hierarchyFolderModal').on('shown.bs.modal', function () {
+      $('#hierarchyNewFolderName').focus();
+    })
+    $('#hierarchyPageModal').on('shown.bs.modal', function () {
+      $('#hierarchyNewPageName').focus();
+    })
+    $('#hierarchyExistingPageModal').on('shown.bs.modal', function () {
+      $('#hierarchyExistingPageName').focus();
+    })
+  }
   if(XWiki.editor == "wiki") {
     // Remove previous shortcuts to prevent saving modifications only in the page loaded at first
     shortcut.remove("Alt+Shift+S");
@@ -546,6 +595,9 @@ $(function(){
   $('#hierarchyAddFolder').click(function(e){
     $('body').removeClass('modal-open');
     e.preventDefault();
+    addFolder();
+  });
+  function addFolder() {
     var newFolder = $('#hierarchyNewFolderName').val();
     $.ajax({
       url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+masterSpace+"/pages/"+masterName+"/objects/WebIDECode.ApplicationClass/0/properties/spaces",
@@ -565,12 +617,14 @@ $(function(){
           data: "property#spaces="+encodeURIComponent(spaceArray),
         }).success(function(){
           $('#hierarchyNewFolderName').val('');
-          $('#hierarchyFolderModal').modal('hide');
+          if(bootstrap) {
+            $('#hierarchyFolderModal').modal('hide');
+          }
           reloadHierarchy();
         });
       }
     });
-  });
+  }
 
   /* 
   ** Add a page in a folder :
@@ -581,6 +635,9 @@ $(function(){
   $('#hierarchyAddPage').click(function(e){
     $('body').removeClass('modal-open');
     e.preventDefault();
+    addPage();
+  });
+  function addPage() {
     var folder = encodeURIComponent(unescape($('#hierarchyPageFolder').text()));
     var newPage = encodeURIComponent($('#hierarchyNewPageName').val());
     $.ajax({
@@ -596,11 +653,13 @@ $(function(){
         data: "title="+newPage+"&amp;parent="+currentSpaceEscaped+"."+currentPageEscaped,
       }).success(function(){
         $('#hierarchyNewPageName').val('');
-        $('#hierarchyPageModal').modal('hide');
+        if(bootstrap) {
+          $('#hierarchyPageModal').modal('hide');
+        }
         reloadHierarchy();
       });
     });
-  });
+  }
 
   /* 
   ** Add an existing page in the hierarchy list :
@@ -611,6 +670,9 @@ $(function(){
   $('#hierarchyAddExistingPage').click(function(e){
     $('body').removeClass('modal-open');
     e.preventDefault();
+    addExistingPage();
+  });
+  function addExistingPage() {
     var existingPage = $('#hierarchyExistingPageName').val();
     var existingPageSpace = existingPage.substr(0,existingPage.indexOf('.'));
     var existingPageName = existingPage.substr(existingPage.indexOf('.')+1);
@@ -619,10 +681,15 @@ $(function(){
       type: "GET",
       contentType: "application/xml",
     }).error(function(){
-      $('#hierarchyExistingPageModalError').html('ERROR : Unexisting page').show().delay(2500).queue(function(n) {
-        $(this).hide().html('');
-        n();
-      });;
+      if(bootstrap) {
+        $('#hierarchyExistingPageModalError').html('ERROR : Unexisting page').show().delay(2500).queue(function(n) {
+          $(this).hide().html('');
+          n();
+        });;
+      }
+      else {
+        alert('That page doesn\'t exist!');
+      }
     }).success(function(){
       $.ajax({
         url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+masterSpace+"/pages/"+masterName+"/objects/WebIDECode.ApplicationClass/0/properties/pages",
@@ -642,13 +709,15 @@ $(function(){
             data: "property#pages="+encodeURIComponent(pageArray),
           }).success(function(){
             $('#hierarchyExistingPageName').val('');
-            $('#hierarchyExistingPageModal').modal('hide');
+            if(bootstrap) {
+              $('#hierarchyExistingPageModal').modal('hide');
+            }
             reloadHierarchy();
           });
         }
       });
     });
-  });
+  }
 
 });
 });</code>
@@ -773,7 +842,6 @@ $(function(){
   resize: vertical;
   padding-right: 0px;
 }
-
 /* Project Block */
 #hierarchyContent {
   overflow-x: hidden;
@@ -812,14 +880,26 @@ $(function(){
   padding-bottom: 5px;
   text-align: center;
 }
-#hierarchyOpenBlock p {
-  margin-bottom: 0px;
+
+/* Project Block - Colibri skin */
+#hierarchyContent ul {
+  margin: 0px;
+}
+.hierarchy-list p {
+  margin: 0px !important;
+}
+.hierarchy-list img {
+  padding: 0px !important;
 }
 
 /* Project Content */
 .hierarchy-list {
   list-style-type: none;
   padding-left: 25px;
+  margin: 0px;
+}
+.hierarchy-list p {
+  margin: 0px;
 }
 .hierarchy-no-padding {
   padding-left: 0px;
