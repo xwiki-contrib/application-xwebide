@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434955733000</creationDate>
-  <date>1435832217000</date>
-  <contentUpdateDate>1435832217000</contentUpdateDate>
+  <date>1436348911000</date>
+  <contentUpdateDate>1436348911000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationCheck</title>
   <defaultTemplate/>
@@ -47,8 +47,8 @@ $response.setContentType('application/json')
 {
 #if($xwiki.exists($request.get('doc')))
   #set($document = $xwiki.getDocument($request.get('doc')))
-  #set($xwqlstatement = "where doc.object(WebIDECode.ApplicationClass).spaces like :spacesA or doc.object(WebIDECode.ApplicationClass).spaces like :spacesB or doc.object(WebIDECode.ApplicationClass).spaces like :spacesC or doc.object(WebIDECode.ApplicationClass).pages like :pagesA or doc.object(WebIDECode.ApplicationClass).pages like :pagesB or doc.object(WebIDECode.ApplicationClass).pages like :pagesC")
-  #set($queryResults = $services.query.xwql($xwqlstatement).bindValue('pagesA', "%|$document.fullName|%").bindValue('pagesB', "$document.fullName|%").bindValue('pagesC', "%|$document.fullName").bindValue('spacesA', "%|${document.space}|%").bindValue('spacesB', "${document.space}|%").bindValue('spacesC', "%|${document.space}").execute()) 
+  #set($xwqlstatement = "where doc.object(WebIDECode.ApplicationClass).spaces like :spacesA or doc.object(WebIDECode.ApplicationClass).spaces like :spacesB or doc.object(WebIDECode.ApplicationClass).spaces like :spacesC or doc.object(WebIDECode.ApplicationClass).spaces like :spacesD or doc.object(WebIDECode.ApplicationClass).pages like :pagesA or doc.object(WebIDECode.ApplicationClass).pages like :pagesB or doc.object(WebIDECode.ApplicationClass).pages like :pagesC or doc.object(WebIDECode.ApplicationClass).pages like :pagesD")
+  #set($queryResults = $services.query.xwql($xwqlstatement).bindValue('pagesA', "%|$document.fullName|%").bindValue('pagesB', "$document.fullName|%").bindValue('pagesC', "%|$document.fullName").bindValue('pagesD', "$document.fullName").bindValue('spacesA', "%|${document.space}|%").bindValue('spacesB', "${document.space}|%").bindValue('spacesC', "%|${document.space}").bindValue('spacesD', "${document.space}").execute())
   #if($queryResults.size() == 1)
     #set($masterDoc = $xwiki.getDocument($queryResults.get(0)))
     "error" : -1,
@@ -63,8 +63,8 @@ $response.setContentType('application/json')
   #set($sheetError = "1")
   #foreach($documentFullName in $services.sheet.getSheets($document, 'view'))
     #set($document = $xwiki.getDocument($documentFullName))
-    #set($xwqlstatement = "where doc.object(WebIDECode.ApplicationClass).spaces like :spacesA or doc.object(WebIDECode.ApplicationClass).spaces like :spacesB or doc.object(WebIDECode.ApplicationClass).spaces like :spacesC or doc.object(WebIDECode.ApplicationClass).pages like :pagesA or doc.object(WebIDECode.ApplicationClass).pages like :pagesB or doc.object(WebIDECode.ApplicationClass).pages like :pagesC")
-    #set($queryResults = $services.query.xwql($xwqlstatement).bindValue('pagesA', "%|$document.fullName|%").bindValue('pagesB', "$document.fullName|%").bindValue('pagesC', "%|$document.fullName").bindValue('spacesA', "%|${document.space}|%").bindValue('spacesB', "${document.space}|%").bindValue('spacesC', "%|${document.space}").execute()) 
+    #set($xwqlstatement = "where doc.object(WebIDECode.ApplicationClass).spaces like :spacesA or doc.object(WebIDECode.ApplicationClass).spaces like :spacesB or doc.object(WebIDECode.ApplicationClass).spaces like :spacesC or doc.object(WebIDECode.ApplicationClass).spaces like :spacesD or doc.object(WebIDECode.ApplicationClass).pages like :pagesA or doc.object(WebIDECode.ApplicationClass).pages like :pagesB or doc.object(WebIDECode.ApplicationClass).pages like :pagesC or doc.object(WebIDECode.ApplicationClass).pages like :pagesD")
+    #set($queryResults = $services.query.xwql($xwqlstatement).bindValue('pagesA', "%|$document.fullName|%").bindValue('pagesB', "$document.fullName|%").bindValue('pagesC', "%|$document.fullName").bindValue('pagesD', "$document.fullName").bindValue('spacesA', "%|${document.space}|%").bindValue('spacesB', "${document.space}|%").bindValue('spacesC', "%|${document.space}").bindValue('spacesD', "${document.space}").execute())
     #if($queryResults.size() == 1)
       #set($sheetError = "-1")
       #set($masterDoc = $xwiki.getDocument($queryResults.get(0)))
