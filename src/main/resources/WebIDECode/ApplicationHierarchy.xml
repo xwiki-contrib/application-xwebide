@@ -306,7 +306,7 @@ $(function(){
       $('#hierarchyCurrentDocName').val(currentPage); // Used in the JSInjector file to know which is the current page to save
       $('#hierarchyCurrentDocSpace').val(currentSpace);
       $.ajax({
-        url: wikiViewURL+currentSpace+"/"+currentPage+"?xpage=plain&amp;raw=1",
+        url: wikiViewURL+currentSpace+"/"+currentPage+"?xpage=plain&amp;raw=1&amp;language=default",
         type: "GET",
         contentType: "plain/text",
       }).success(function(dataContent){
@@ -1201,7 +1201,7 @@ $(function(){
     #elseif($currentEditor == "wiki")
       *** image:icon:page_edit {{html clean=false}}&lt;a href='#!XWebIDE' space='$spaceEscaped' page='$pageEscaped' rawtitle="$pageRawTitleEscaped" class='editPage'&gt;Edit (wiki)&lt;/a&gt;{{/html}}
     #else
-      *** [[image:icon:page_edit Edit (wiki)&gt;&gt;path:$xwiki.getURL("$pageFullName", 'edit', 'editor=wiki')#!XWebIDE]]
+      *** [[image:icon:page_edit Edit (wiki)&gt;&gt;path:$xwiki.getURL("$pageFullName", 'edit', 'language=default&amp;editor=wiki')#!XWebIDE]]
     #end
     #if($currentEditor == "object" &amp;&amp; $pageFullName == $currentDoc.fullName)
       *** image:icon:application_edit {{html}}&lt;span class='hierarchyCurrentSpacePageAction'&gt;Objects ($objectCount)&lt;/span&gt;{{/html}}

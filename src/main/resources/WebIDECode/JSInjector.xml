@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434954547000</creationDate>
-  <date>1435928263000</date>
+  <date>1436869408000</date>
   <contentUpdateDate>1435908346000</contentUpdateDate>
   <version>1.1</version>
   <title/>
@@ -129,7 +129,7 @@ $(function(){
   var currentPageEscaped = encodeURIComponent(XWiki.currentPage.replace(/\\/g, '\\\\').replace(/\./g, '\\\.'));
   var currentSpaceEscaped = encodeURIComponent(XWiki.currentSpace.replace(/\\/g, '\\\\').replace(/\./g, '\\\.'));
   var wikiViewURL = '/xwiki/bin/view/';
-  if(window.docviewurl.indexOf('/'+XWiki.currentSpace+'/') != 0) {
+  if(window.docviewurl.indexOf('/'+XWiki.currentSpace+'/') &gt;= 0) {
     wikiViewURL = window.docviewurl.substring(0,window.docviewurl.indexOf('/'+XWiki.currentSpace+'/')+1);
   }
 
@@ -142,13 +142,13 @@ $(function(){
     if(data.error == "-1") {
       if(XWiki.contextaction == 'edit' || XWiki.contextaction == 'view') {
         if($('#tmEdit .submenu .submenuseparator').length) { //Colibri Skin
-          $('#tmEdit .submenu .submenuseparator').before('&lt;span class="submenuitem "&gt;&lt;a href="/xwiki/bin/edit/'+data.documentSpace+'/'+data.documentName+'?editor=wiki#!XWebIDE" id="tmEditWebIDE" class="tmEditXWebIDE" title="Edit '+data.documentName+' in XWebIDE as part of '+data.project+'"&gt;XWebIDE&lt;/a&gt;&lt;/span&gt;');
+          $('#tmEdit .submenu .submenuseparator').before('&lt;span class="submenuitem "&gt;&lt;a href="/xwiki/bin/edit/'+data.documentSpace+'/'+data.documentName+'?language=default&amp;editor=wiki#!XWebIDE" id="tmEditWebIDE" class="tmEditXWebIDE" title="Edit '+data.documentName+' in XWebIDE as part of '+data.project+'"&gt;XWebIDE&lt;/a&gt;&lt;/span&gt;');
           $('.tmEditXWebIDE').css({
             "backgroundImage": "url('/xwiki/resources/icons/silk/folder_page.png')"
           });
         }
         else { //Flamingo
-          $('#tmEdit .dropdown-menu .divider').before('&lt;li class=""&gt;&lt;a href="/xwiki/bin/edit/'+data.documentSpace+'/'+data.documentName+'?editor=wiki#!XWebIDE" id="tmEditWebIDE" title="Edit '+data.documentName+' in XWebIDE as part of '+data.project+'"&gt;&lt;span class="glyphicon  glyphicon-folder-open"&gt;&lt;/span&gt; XWebIDE&lt;/a&gt;&lt;/li&gt;');
+          $('#tmEdit .dropdown-menu .divider').before('&lt;li class=""&gt;&lt;a href="/xwiki/bin/edit/'+data.documentSpace+'/'+data.documentName+'?language=default&amp;editor=wiki#!XWebIDE" id="tmEditWebIDE" title="Edit '+data.documentName+' in XWebIDE as part of '+data.project+'"&gt;&lt;span class="glyphicon  glyphicon-folder-open"&gt;&lt;/span&gt; XWebIDE&lt;/a&gt;&lt;/li&gt;');
         }
       }
       if(XWiki.contextaction == 'edit' &amp;&amp; window.location.hash &amp;&amp; !hierarchyStatus) {
@@ -163,22 +163,22 @@ $(function(){
           }
         });
       }
-      shortcut.add("W", function() { window.location.href = '/xwiki/bin/edit/'+encodeURIComponent(unescape(data.documentSpace))+'/'+encodeURIComponent(unescape(data.documentName))+'?editor=wiki#!XWebIDE'; },{'disable_in_input':'true'});
+      shortcut.add("W", function() { window.location.href = '/xwiki/bin/edit/'+encodeURIComponent(unescape(data.documentSpace))+'/'+encodeURIComponent(unescape(data.documentName))+'?language=default&amp;editor=wiki#!XWebIDE'; },{'disable_in_input':'true'});
     }
 
     if(data.sheetError == "-1") {
       if(XWiki.contextaction == 'edit' || XWiki.contextaction == 'view') {
         if($('#tmEdit .submenu .submenuseparator').length) { //Colibri Skin
-          $('#tmEdit .submenu .submenuseparator').before('&lt;span class="submenuitem "&gt;&lt;a href="/xwiki/bin/edit/'+data.sheetDocumentSpace+'/'+data.sheetDocumentName+'?editor=wiki#!XWebIDE" id="tmEditWebIDE" class="tmEditXWebIDESheet" title="Edit sheet '+data.sheetDocumentSpace+'.'+data.sheetDocumentName+' in XWebIDE as part of '+data.sheetProject+'"&gt;XWebIDE (Sheet)&lt;/a&gt;&lt;/span&gt;');
+          $('#tmEdit .submenu .submenuseparator').before('&lt;span class="submenuitem "&gt;&lt;a href="/xwiki/bin/edit/'+data.sheetDocumentSpace+'/'+data.sheetDocumentName+'?language=default&amp;editor=wiki#!XWebIDE" id="tmEditWebIDE" class="tmEditXWebIDESheet" title="Edit sheet '+data.sheetDocumentSpace+'.'+data.sheetDocumentName+' in XWebIDE as part of '+data.sheetProject+'"&gt;XWebIDE (Sheet)&lt;/a&gt;&lt;/span&gt;');
           $('.tmEditXWebIDESheet').css({
             "backgroundImage": "url('/xwiki/resources/icons/silk/folder_page.png')"
           });
         }
         else { //Flamingo
-          $('#tmEdit .dropdown-menu .divider').before('&lt;li class=""&gt;&lt;a href="/xwiki/bin/edit/'+data.sheetDocumentSpace+'/'+data.sheetDocumentName+'?editor=wiki#!XWebIDE" id="tmEditWebIDE" title="Edit sheet '+data.sheetDocumentSpace+'.'+data.sheetDocumentName+' in XWebIDE as part of '+data.sheetProject+'"&gt;&lt;span class="glyphicon  glyphicon-folder-open"&gt;&lt;/span&gt; XWebIDE (Sheet)&lt;/a&gt;&lt;/li&gt;');
+          $('#tmEdit .dropdown-menu .divider').before('&lt;li class=""&gt;&lt;a href="/xwiki/bin/edit/'+data.sheetDocumentSpace+'/'+data.sheetDocumentName+'?language=default&amp;editor=wiki#!XWebIDE" id="tmEditWebIDE" title="Edit sheet '+data.sheetDocumentSpace+'.'+data.sheetDocumentName+' in XWebIDE as part of '+data.sheetProject+'"&gt;&lt;span class="glyphicon  glyphicon-folder-open"&gt;&lt;/span&gt; XWebIDE (Sheet)&lt;/a&gt;&lt;/li&gt;');
         }
       }
-      shortcut.add("Shift+W", function() { window.location.href = '/xwiki/bin/edit/'+encodeURI(data.sheetDocumentSpace)+'/'+encodeURI(data.sheetDocumentName)+'?editor=wiki#!XWebIDE'; },{'disable_in_input':'true'});
+      shortcut.add("Shift+W", function() { window.location.href = '/xwiki/bin/edit/'+encodeURI(data.sheetDocumentSpace)+'/'+encodeURI(data.sheetDocumentName)+'?language=default&amp;editor=wiki#!XWebIDE'; },{'disable_in_input':'true'});
     }
 
   });
