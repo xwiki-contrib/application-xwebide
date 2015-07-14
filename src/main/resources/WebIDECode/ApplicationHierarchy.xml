@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434700712000</creationDate>
-  <date>1435928149000</date>
+  <date>1436869428000</date>
   <contentUpdateDate>1435927523000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -255,6 +255,7 @@ $(function(){
         e.preventDefault();
         $('#hierarchyNextDocName').val($(this).attr('page'));
         $('#hierarchyNextDocSpace').val($(this).attr('space'));
+        $('#hierarchyNextDocTitle').val($(this).attr('rawtitle'));
 
         if(XWiki.editor == "wiki"){
           if(savedContent != $('#content').val()) {
@@ -312,22 +313,17 @@ $(function(){
         var formattedData = dataContent.replace(/^&lt;pre&gt;/, '').replace(/&lt;\/pre&gt;$/, '');
         $('#content').val($('&lt;div /&gt;').html(formattedData).text());
         savedContent = $('#content').val();
-        $.ajax({
-          url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+currentSpace+"/pages/"+currentPage,
-          type: "GET",
-          contentType: "application/xml",
-        }).success(function(dataTitle){
-          $('#xwikidoctitleinput').val($(dataTitle).find('title').text());
-          $('#hierarchyNewFolderName').val('');
-          if(bootstrap) {
-            $('#hierarchyChangePageModal').modal('hide');
-          }
-          reloadHierarchy();
-          loading = false;
-          $('#hierarchyLoadingState').html('&lt;strong class="green"&gt;Loaded&lt;/strong&gt;').show().delay(2500).queue(function(n) {
-            $(this).hide().html('');
-            n();
-          });
+        $('#xwikidoctitleinput').val(decodeURIComponent($('#hierarchyNextDocTitle').val()));
+        $('#hierarchyNextDocTitle').val('');
+        $('#hierarchyNewFolderName').val('');
+        if(bootstrap) {
+          $('#hierarchyChangePageModal').modal('hide');
+        }
+        reloadHierarchy();
+        loading = false;
+        $('#hierarchyLoadingState').html('&lt;strong class="green"&gt;Loaded&lt;/strong&gt;').show().delay(2500).queue(function(n) {
+          $(this).hide().html('');
+          n();
         });
       });
     }
@@ -497,11 +493,11 @@ $(function(){
   var mainBlock = '';
   var mainBlockContainer = '';
   var wikiGetURL = '/xwiki/bin/get/';
-  if(window.docgeturl.indexOf('/get/') != 0) {
+  if(window.docgeturl.indexOf('/get/') &gt;= 0) {
     wikiGetURL = window.docgeturl.substring(0,window.docgeturl.indexOf('/get/')+5);
   }
   var wikiViewURL = '/xwiki/bin/view/';
-  if(window.docviewurl.indexOf('/'+XWiki.currentSpace+'/') != 0) {
+  if(window.docviewurl.indexOf('/'+XWiki.currentSpace+'/') &gt;= 0) {
     wikiViewURL = window.docviewurl.substring(0,window.docviewurl.indexOf('/'+XWiki.currentSpace+'/')+1);
   }
   if(typeof($.fn.modal) === 'undefined') {
@@ -1163,6 +1159,7 @@ $(function(){
   #foreach($page in $spacePageList)
     #set($pageFullName = "${space.replace('\', '\\').replace('.', '\.')}.${page.replace('\', '\\').replace('.', '\.')}")
     #set($pageFullNameEscaped = $util.encodeURI($pageFullName).replace("+", "%20"))
+    #set($pageRawTitleEscaped = $util.encodeURI($xwiki.getDocument($pageFullName).title).replace("+", "%20"))
     #set($pageClassHidden = "")
     #set($iconBulletToggle = "bullet_toggle_minus")
     #if($hiddenPages.contains($pageFullNameEscaped) &amp;&amp; $pageFullName != $currentDoc.fullName)
@@ -1202,7 +1199,7 @@ $(function(){
     #if($currentEditor == "wiki" &amp;&amp; $pageFullName == $currentDoc.fullName)
       *** image:icon:page_edit {{html}}&lt;span class='hierarchyCurrentSpacePageAction'&gt;Edit (wiki) &lt;span id="hierarchyStar" class="hierarchy-hidden"&gt;*&lt;/span&gt;&lt;/span&gt;{{/html}}
     #elseif($currentEditor == "wiki")
-      *** image:icon:page_edit {{html clean=false}}&lt;a href='#!XWebIDE' space='$spaceEscaped' page='$pageEscaped' class='editPage'&gt;Edit (wiki)&lt;/a&gt;{{/html}}
+      *** image:icon:page_edit {{html clean=false}}&lt;a href='#!XWebIDE' space='$spaceEscaped' page='$pageEscaped' rawtitle="$pageRawTitleEscaped" class='editPage'&gt;Edit (wiki)&lt;/a&gt;{{/html}}
     #else
       *** [[image:icon:page_edit Edit (wiki)&gt;&gt;path:$xwiki.getURL("$pageFullName", 'edit', 'editor=wiki')#!XWebIDE]]
     #end
@@ -1292,7 +1289,7 @@ $(function(){
       &lt;/div&gt;
     &lt;/div&gt;
   &lt;/div&gt;
-  &lt;div class="hierarchy-hidden"&gt;&lt;input type="hidden" id="hierarchyMasterDocName" value="$escapetool.url($masterDoc.name)" /&gt;&lt;input type="hidden" id="hierarchyMasterDocSpace" value="$escapetool.url($masterDoc.space)" /&gt;&lt;input type="hidden" id="hierarchyCurrentDocName" value="$escapetool.url($doc.name)" /&gt;&lt;input type="hidden" id="hierarchyCurrentDocSpace" value="$escapetool.url($doc.space)" /&gt;&lt;input type="hidden" id="hierarchyNextDocName" value="" /&gt;&lt;input type="hidden" id="hierarchyNextDocSpace" value="" /&gt;&lt;/div&gt;
+  &lt;div class="hierarchy-hidden"&gt;&lt;input type="hidden" id="hierarchyMasterDocName" value="$escapetool.url($masterDoc.name)" /&gt;&lt;input type="hidden" id="hierarchyMasterDocSpace" value="$escapetool.url($masterDoc.space)" /&gt;&lt;input type="hidden" id="hierarchyCurrentDocName" value="$escapetool.url($doc.name)" /&gt;&lt;input type="hidden" id="hierarchyCurrentDocSpace" value="$escapetool.url($doc.space)" /&gt;&lt;input type="hidden" id="hierarchyNextDocName" value="" /&gt;&lt;input type="hidden" id="hierarchyNextDocSpace" value="" /&gt;&lt;input type="hidden" id="hierarchyNextDocTitle" value="" /&gt;&lt;/div&gt;
 {{/html}}
 
 {{/velocity}}</code>
