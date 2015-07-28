@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434700712000</creationDate>
-  <date>1436869428000</date>
-  <contentUpdateDate>1435927523000</contentUpdateDate>
+  <date>1438073262000</date>
+  <contentUpdateDate>1438072258000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -292,172 +292,6 @@ $(function(){
     $('#hierarchyNewFolderName').val('');
   }
   
-  function loadPage(saveContent) {
-    if(!loading) {
-      loading = true;
-      $('#hierarchyLoadingState').html('&lt;strong class="red"&gt;Loading...&lt;/strong&gt;');
-      if(saveContent) {
-        saveAndContinueIDE(currentSpace, currentPage, $('#content').val(), $('#xwikidoctitleinput').val(), false);
-      }
-      currentSpace = $('#hierarchyNextDocSpace').val();
-      currentPage = $('#hierarchyNextDocName').val();
-      currentPageEscaped = currentPage.replace(/\\/g, '%5C%5C').replace(/\./g, '%5C.');
-      currentSpaceEscaped = currentSpace.replace(/\\/g, '%5C%5C').replace(/\./g, '%5C.');
-      $('#hierarchyCurrentDocName').val(currentPage); // Used in the JSInjector file to know which is the current page to save
-      $('#hierarchyCurrentDocSpace').val(currentSpace);
-      $.ajax({
-        url: wikiViewURL+currentSpace+"/"+currentPage+"?xpage=plain&amp;raw=1&amp;language=default",
-        type: "GET",
-        contentType: "plain/text",
-      }).success(function(dataContent){
-        var formattedData = dataContent.replace(/^&lt;pre&gt;/, '').replace(/&lt;\/pre&gt;$/, '');
-        $('#content').val($('&lt;div /&gt;').html(formattedData).text());
-        savedContent = $('#content').val();
-        $('#xwikidoctitleinput').val(decodeURIComponent($('#hierarchyNextDocTitle').val()));
-        $('#hierarchyNextDocTitle').val('');
-        $('#hierarchyNewFolderName').val('');
-        if(bootstrap) {
-          $('#hierarchyChangePageModal').modal('hide');
-        }
-        reloadHierarchy();
-        loading = false;
-        $('#hierarchyLoadingState').html('&lt;strong class="green"&gt;Loaded&lt;/strong&gt;').show().delay(2500).queue(function(n) {
-          $(this).hide().html('');
-          n();
-        });
-      });
-    }
-  }
-
-  function saveAndViewIDE(space, page, newContent, newTitle, changeSavedContent) {
-    if(!saving) {
-      saving = true;
-      $('#hierarchySavingState').html('&lt;strong class="red"&gt;Saving...&lt;/strong&gt;');
-      $.ajax({
-        url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+space+"/pages/"+page,
-        type: "PUT",
-        contentType: "application/x-www-form-urlencoded",
-        accept: "application/xml",
-        data: "title="+encodeURIComponent(newTitle)+"&amp;content="+encodeURIComponent(newContent),
-      }).error(function(){
-        saving = false;
-        return false;
-      }).success(function(data){
-        if(changeSavedContent) {
-          savedContent = $('#content').val();
-        }
-        $('#hierarchyStar').hide();
-        $('#hierarchySavingState').html('&lt;strong class="green"&gt;Saved&lt;/strong&gt;').show().delay(2500).queue(function(n) {
-          $(this).hide().html('');
-          n();
-        });
-        saving = false;
-        window.location.href = wikiViewURL+currentSpace+'/'+currentPage;
-      });
-    }
-  }
-
-  function saveAndContinueIDE(space, page, newContent, newTitle, changeSavedContent) {
-    if(!saving) {
-      saving = true;
-      $('#hierarchySavingState').html('&lt;strong class="red"&gt;Saving...&lt;/strong&gt;');
-      $.ajax({
-        url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+space+"/pages/"+page,
-        type: "PUT",
-        contentType: "application/x-www-form-urlencoded",
-        accept: "application/xml",
-        data: "title="+encodeURIComponent(newTitle)+"&amp;content="+encodeURIComponent(newContent),
-      }).error(function(){
-        saving = false;
-        return false;
-      }).success(function(data){
-        if(changeSavedContent) {
-          savedContent = $('#content').val();
-        }
-        $('#hierarchyStar').hide();
-        $('#hierarchySavingState').html('&lt;strong class="green"&gt;Saved&lt;/strong&gt;').show().delay(2500).queue(function(n) {
-          $(this).hide().html('');
-          n();
-        });
-        saving = false;
-        return true;
-      });
-    }
-  }
-
-  function cancelAndViewIDE() {
-    if(savedContent != $('#content').val()) {
-      if(confirm("Are you sure?")) {
-        window.location.href = wikiViewURL+currentSpace+'/'+currentPage;
-      }
-    }
-    else {
-      window.location.href = wikiViewURL+currentSpace+'/'+currentPage;
-    }
-  }
-
-  function reloadHierarchy() {
-    $.ajax({
-      url: wikiGetURL+"WebIDECode/ApplicationHierarchy?xpage=plain",
-      type: "GET",
-      datatype : "html",
-      data : "action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+masterSpace+"."+masterName+"&amp;remotePage="+currentSpaceEscaped+"."+currentPageEscaped+"&amp;hiddenSpaces="+encodeURIComponent(hiddenSpaces)+"&amp;hiddenPages="+encodeURIComponent(hiddenPages),
-      contentType: "text/html",
-    }).success(function(data){
-      var result = $('&lt;div /&gt;').append(data).find('#hierarchyContent').html();
-      $('#hierarchyContent').html(result);
-      initialization();
-    });
-  }
-
-  function removeFolder(folder) {
-    $.ajax({
-      url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+masterSpace+"/pages/"+masterName+"/objects/WebIDECode.ApplicationClass/0/properties/spaces",
-      type: "GET",
-      contentType: "application/xml",
-    }).success(function(res){
-      var oldSpaces = $(res).find('value').text();
-      var spaceArray = oldSpaces.split('|');
-      var indexSpace = $.inArray(folder, spaceArray)
-      if(indexSpace &gt;= 0) {
-        spaceArray.splice(indexSpace, 1);
-        $.ajax({
-          url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+masterSpace+"/pages/"+masterName+"/objects/WebIDECode.ApplicationClass/0/properties/spaces",
-          type: "PUT",
-          contentType: "application/x-www-form-urlencoded",
-          accept: "application/xml",
-          data: "property#spaces="+encodeURIComponent(spaceArray),
-        }).success(function(){
-          reloadHierarchy();
-        });
-      }
-    });
-  }
-
-  function removePage(page) {
-    $.ajax({
-      url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+masterSpace+"/pages/"+masterName+"/objects/WebIDECode.ApplicationClass/0/properties/pages",
-      type: "GET",
-      contentType: "application/xml",
-    }).success(function(res){
-      var oldPages = $(res).find('value').text();
-      var pageArray = oldPages.split('|');
-      var indexSpace = $.inArray(page, pageArray)
-      if(indexSpace &gt;= 0) {
-        pageArray.splice(indexSpace, 1);
-        $.ajax({
-          url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+masterSpace+"/pages/"+masterName+"/objects/WebIDECode.ApplicationClass/0/properties/pages",
-          type: "PUT",
-          contentType: "application/x-www-form-urlencoded",
-          accept: "application/xml",
-          data: "property#pages="+encodeURIComponent(pageArray),
-        }).success(function(){
-          reloadHierarchy();
-        });
-      }
-    });
-  }
-
   function setCookieHierarchy(cname, cvalue, exdays) {
     var d = new Date();
     d.setTime(d.getTime() + (exdays*24*60*60*1000));
@@ -580,7 +414,230 @@ $(function(){
     shortcut.remove("D");
     shortcut.remove("W");
   }
+  
+  $('#hierarchyAddFolder').click(function(e){
+    $('body').removeClass('modal-open');
+    e.preventDefault();
+    addFolder();
+  });
+  $('#hierarchyAddPage').click(function(e){
+    $('body').removeClass('modal-open');
+    e.preventDefault();
+    addPage();
+  });
+  $('#hierarchyAddExistingPage').click(function(e){
+    $('body').removeClass('modal-open');
+    e.preventDefault();
+    addExistingPage();
+  });
   initialization();
+
+  //-------------------------
+  //---------- API ----------
+  //-------------------------
+  //
+  //loadPage(boolean saveContent)
+  //saveAndViewIDE(string space, string page, string newContent, string newTitle, boolean changeSavedContent)
+  //saveAndContinueIDE(string space, string page, string newContent, string newTitle, boolean changeSavedContent)
+  //cancelAndViewIDE()
+  //reloadHierarchy()
+  //removeFolder(string folder)
+  //removePage(string page)
+  //addFolder()
+  //addPage()
+  //addExistingPage()
+
+  function loadPage(saveContent) {
+    if(!loading) {
+      loading = true;
+      $('#hierarchyLoadingState').html('&lt;strong class="red"&gt;Loading...&lt;/strong&gt;');
+      if(saveContent) {
+        saveAndContinueIDE(currentSpace, currentPage, $('#content').val(), $('#xwikidoctitleinput').val(), false);
+      }
+      currentSpace = $('#hierarchyNextDocSpace').val();
+      currentPage = $('#hierarchyNextDocName').val();
+      currentPageEscaped = currentPage.replace(/\\/g, '%5C%5C').replace(/\./g, '%5C.');
+      currentSpaceEscaped = currentSpace.replace(/\\/g, '%5C%5C').replace(/\./g, '%5C.');
+      $('#hierarchyCurrentDocName').val(currentPage); // Used in the JSInjector file to know which is the current page to save
+      $('#hierarchyCurrentDocSpace').val(currentSpace);
+      $.ajax({
+        url: wikiViewURL+currentSpace+"/"+currentPage+"?xpage=plain&amp;raw=1&amp;language=default",
+        type: "GET",
+        contentType: "plain/text",
+      }).success(function(dataContent){
+        var formattedData = dataContent.replace(/^&lt;pre&gt;/, '').replace(/&lt;\/pre&gt;$/, '');
+        $('#content').val($('&lt;div /&gt;').html(formattedData).text());
+        savedContent = $('#content').val();
+        $('#xwikidoctitleinput').val(decodeURIComponent($('#hierarchyNextDocTitle').val()));
+        $('#hierarchyNextDocTitle').val('');
+        $('#hierarchyNewFolderName').val('');
+        if(bootstrap) {
+          $('#hierarchyChangePageModal').modal('hide');
+        }
+        reloadHierarchy();
+        loading = false;
+        $('#hierarchyLoadingState').html('&lt;strong class="green"&gt;Loaded&lt;/strong&gt;').show().delay(2500).queue(function(n) {
+          $(this).hide().html('');
+          n();
+        });
+      });
+    }
+  }
+
+  function saveAndViewIDE(space, page, newContent, newTitle, changeSavedContent) {
+    if(!saving) {
+      saving = true;
+      $('#hierarchySavingState').html('&lt;strong class="red"&gt;Saving...&lt;/strong&gt;');
+      $.ajax({
+        url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+space+"/pages/"+page,
+        type: "PUT",
+        contentType: "application/x-www-form-urlencoded",
+        accept: "application/xml",
+        data: "title="+encodeURIComponent(newTitle)+"&amp;content="+encodeURIComponent(newContent),
+      }).error(function(){
+        saving = false;
+        $('#hierarchySavingState').attr('class', 'red').html('&lt;strong&gt;'+xhr.statusText+'&lt;/strong&gt;').show().delay(4000).queue(function(n) {
+          $(this).hide().removeAttr('class').html('');
+          n();
+        });
+        return false;
+      }).success(function(data){
+        if(changeSavedContent) {
+          savedContent = $('#content').val();
+        }
+        $('#hierarchyStar').hide();
+        $('#hierarchySavingState').html('&lt;strong class="green"&gt;Saved&lt;/strong&gt;').show().delay(2500).queue(function(n) {
+          $(this).hide().html('');
+          n();
+        });
+        saving = false;
+        window.location.href = wikiViewURL+currentSpace+'/'+currentPage;
+      });
+    }
+  }
+
+  function saveAndContinueIDE(space, page, newContent, newTitle, changeSavedContent) {
+    if(!saving) {
+      saving = true;
+      $('#hierarchySavingState').html('&lt;strong class="red"&gt;Saving...&lt;/strong&gt;');
+      $.ajax({
+        url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+space+"/pages/"+page,
+        type: "PUT",
+        contentType: "application/x-www-form-urlencoded",
+        accept: "application/xml",
+        data: "title="+encodeURIComponent(newTitle)+"&amp;content="+encodeURIComponent(newContent),
+      }).error(function(xhr, errorStatus){
+        saving = false;
+        $('#hierarchySavingState').attr('class', 'red').html('&lt;strong&gt;'+xhr.statusText+'&lt;/strong&gt;').show().delay(4000).queue(function(n) {
+          $(this).hide().removeAttr('class').html('');
+          n();
+        });
+        return false;
+      }).success(function(data){
+        if(changeSavedContent) {
+          savedContent = $('#content').val();
+        }
+        $('#hierarchyStar').hide();
+        $('#hierarchySavingState').html('&lt;strong&gt;Saved&lt;/strong&gt;').show().delay(2500).queue(function(n) {
+          $(this).hide().html('');
+          n();
+        });
+        saving = false;
+        return true;
+      });
+    }
+  }
+
+  function cancelAndViewIDE() {
+    if(savedContent != $('#content').val()) {
+      if(confirm("Are you sure?")) {
+        window.location.href = wikiViewURL+currentSpace+'/'+currentPage;
+      }
+    }
+    else {
+      window.location.href = wikiViewURL+currentSpace+'/'+currentPage;
+    }
+  }
+
+  function reloadHierarchy() {
+    $.ajax({
+      url: wikiGetURL+"WebIDECode/ApplicationHierarchy?xpage=plain",
+      type: "GET",
+      datatype : "html",
+      data : "action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+masterSpace+"."+masterName+"&amp;remotePage="+currentSpaceEscaped+"."+currentPageEscaped+"&amp;hiddenSpaces="+encodeURIComponent(hiddenSpaces)+"&amp;hiddenPages="+encodeURIComponent(hiddenPages),
+      contentType: "text/html",
+    }).success(function(data){
+      var result = $('&lt;div /&gt;').append(data).find('#hierarchyContent').html();
+      $('#hierarchyContent').html(result);
+      initialization();
+    });
+  }
+
+  function removeFolder(folder) {
+    $.ajax({
+      url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+masterSpace+"/pages/"+masterName+"/objects/WebIDECode.ApplicationClass/0/properties/spaces",
+      type: "GET",
+      contentType: "application/xml",
+    }).success(function(res){
+      var oldSpaces = $(res).find('value').text();
+      var spaceArray = oldSpaces.split('|');
+      var indexSpace = $.inArray(folder, spaceArray)
+      if(indexSpace &gt;= 0) {
+        spaceArray.splice(indexSpace, 1);
+        $.ajax({
+          url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+masterSpace+"/pages/"+masterName+"/objects/WebIDECode.ApplicationClass/0/properties/spaces",
+          type: "PUT",
+          contentType: "application/x-www-form-urlencoded",
+          accept: "application/xml",
+          data: "property#spaces="+encodeURIComponent(spaceArray),
+        }).success(function(){
+          $('#hierarchySavingState').html('&lt;strong&gt;Folder removed from project&lt;/strong&gt;').show().delay(2500).queue(function(n) {
+            $(this).hide().html('');
+            n();
+          });
+          reloadHierarchy();
+        }).error(function(xhr){
+          $('#hierarchySavingState').attr('class', 'red').html('&lt;strong&gt;'+xhr.statusText+'&lt;/strong&gt;').show().delay(4000).queue(function(n) {
+            $(this).hide().removeAttr('class').html('');
+            n();
+          });
+        });
+      }
+    });
+  }
+
+  function removePage(page) {
+    $.ajax({
+      url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+masterSpace+"/pages/"+masterName+"/objects/WebIDECode.ApplicationClass/0/properties/pages",
+      type: "GET",
+      contentType: "application/xml",
+    }).success(function(res){
+      var oldPages = $(res).find('value').text();
+      var pageArray = oldPages.split('|');
+      var indexSpace = $.inArray(page, pageArray)
+      if(indexSpace &gt;= 0) {
+        pageArray.splice(indexSpace, 1);
+        $.ajax({
+          url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+masterSpace+"/pages/"+masterName+"/objects/WebIDECode.ApplicationClass/0/properties/pages",
+          type: "PUT",
+          contentType: "application/x-www-form-urlencoded",
+          accept: "application/xml",
+          data: "property#pages="+encodeURIComponent(pageArray),
+        }).success(function(){
+          $('#hierarchySavingState').html('&lt;strong&gt;Page removed from project&lt;/strong&gt;').show().delay(2500).queue(function(n) {
+            $(this).hide().html('');
+            n();
+          });
+          reloadHierarchy();
+        }).error(function(xhr){
+          $('#hierarchySavingState').attr('class', 'red').html('&lt;strong&gt;'+xhr.statusText+'&lt;/strong&gt;').show().delay(4000).queue(function(n) {
+            $(this).hide().removeAttr('class').html('');
+            n();
+          });
+        });
+      }
+    });
+  }
 
   /* 
   ** Add a folder in the hierarchy list :
@@ -588,11 +645,6 @@ $(function(){
   ** 2/ Add the folder in the list alphabetically sorted
   ** 3/ Update the hierarchy
   */
-  $('#hierarchyAddFolder').click(function(e){
-    $('body').removeClass('modal-open');
-    e.preventDefault();
-    addFolder();
-  });
   function addFolder() {
     var newFolder = $('#hierarchyNewFolderName').val();
     $.ajax({
@@ -616,7 +668,20 @@ $(function(){
           if(bootstrap) {
             $('#hierarchyFolderModal').modal('hide');
           }
+          $('#hierarchySavingState').html('&lt;strong&gt;Folder added&lt;/strong&gt;').show().delay(4000).queue(function(n) {
+            $(this).hide().html('');
+            n();
+          });
           reloadHierarchy();
+        }).error(function(xhr){
+          $('#hierarchyNewFolderName').val('');
+          if(bootstrap) {
+            $('#hierarchyFolderModal').modal('hide');
+          }
+          $('#hierarchySavingState').attr('class', 'red').html('&lt;strong&gt;'+xhr.statusText+'&lt;/strong&gt;').show().delay(4000).queue(function(n) {
+            $(this).hide().removeAttr('class').html('');
+            n();
+          });
         });
       }
     });
@@ -628,11 +693,6 @@ $(function(){
   ** 2/ Create the page in the wiki
   ** 3/ Update the hierarchy
   */
-  $('#hierarchyAddPage').click(function(e){
-    $('body').removeClass('modal-open');
-    e.preventDefault();
-    addPage();
-  });
   function addPage() {
     var folder = encodeURIComponent(unescape($('#hierarchyPageFolder').text()));
     var newPage = encodeURIComponent($('#hierarchyNewPageName').val());
@@ -640,6 +700,16 @@ $(function(){
       url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+folder+"/pages/"+newPage,
       type: "GET",
       contentType: "application/xml",
+    }).success(function(xhr){
+      if(bootstrap) {
+        $('#hierarchyExistingPageModalError').html('ERROR : A page with the same name already exist').show().delay(4000).queue(function(n) {
+          $(this).hide().html('');
+          n();
+        });
+      }
+      else {
+        alert('That page doesn\'t exist!');
+      }
     }).error(function(res){
       $.ajax({
         url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+folder+"/pages/"+newPage,
@@ -652,7 +722,20 @@ $(function(){
         if(bootstrap) {
           $('#hierarchyPageModal').modal('hide');
         }
+        $('#hierarchySavingState').html('&lt;strong&gt;Page added&lt;/strong&gt;').show().delay(4000).queue(function(n) {
+          $(this).hide().html('');
+          n();
+        });
         reloadHierarchy();
+      }).error(function(xhr){
+        $('#hierarchyNewPageName').val('');
+        if(bootstrap) {
+          $('#hierarchyPageModal').modal('hide');
+        }
+        $('#hierarchySavingState').attr('class', 'red').html('&lt;strong&gt;'+xhr.statusText+'&lt;/strong&gt;').show().delay(4000).queue(function(n) {
+          $(this).hide().removeAttr('class').html('');
+          n();
+        });
       });
     });
   }
@@ -663,11 +746,6 @@ $(function(){
   ** 2/ Add the page in the list alphabetically sorted
   ** 3/ Update the hierarchy
   */
-  $('#hierarchyAddExistingPage').click(function(e){
-    $('body').removeClass('modal-open');
-    e.preventDefault();
-    addExistingPage();
-  });
   function addExistingPage() {
     var existingPage = $('#hierarchyExistingPageName').val();
     var existingPageSpace = existingPage.substr(0,existingPage.indexOf('.'));
@@ -678,10 +756,10 @@ $(function(){
       contentType: "application/xml",
     }).error(function(){
       if(bootstrap) {
-        $('#hierarchyExistingPageModalError').html('ERROR : Unexisting page').show().delay(2500).queue(function(n) {
+        $('#hierarchyExistingPageModalError').html('ERROR : Unexisting page').show().delay(4000).queue(function(n) {
           $(this).hide().html('');
           n();
-        });;
+        });
       }
       else {
         alert('That page doesn\'t exist!');
@@ -708,7 +786,20 @@ $(function(){
             if(bootstrap) {
               $('#hierarchyExistingPageModal').modal('hide');
             }
+            $('#hierarchySavingState').html('&lt;strong&gt;Page added&lt;/strong&gt;').show().delay(4000).queue(function(n) {
+              $(this).hide().html('');
+              n();
+            });
             reloadHierarchy();
+          }).error(function(xhr){
+            $('#hierarchyExistingPageName').val('');
+            if(bootstrap) {
+              $('#hierarchyExistingPageModal').modal('hide');
+            }
+            $('#hierarchySavingState').attr('class', 'red').html('&lt;strong&gt;'+xhr.statusText+'&lt;/strong&gt;').show().delay(4000).queue(function(n) {
+              $(this).hide().removeAttr('class').html('');
+              n();
+            });
           });
         }
       });
@@ -945,7 +1036,7 @@ $(function(){
   padding-left: 18%;
   padding-right: 2%;
 }
-#hierarchyExistingPageModalError {
+#hierarchyExistingPageModalError, #hierarchyPageModalError {
   font-weight: bold;
   color: #8A0808;
 }</code>
@@ -1186,39 +1277,54 @@ $(function(){
     #if($pagesList.contains($pageFullName))
       #set($addRemoveButton = "[[image:icon:cross||title='Remove page $pageFullNameEscaped' pageid='$pageFullNameEscaped' class='hierarchy-right hierarchy-remove hierarchy-remove-page']]")
     #end
-    #set($objectCount = $services.query.xwql("select count(obj.className) from BaseObject as obj, Document as doc where obj.name  = doc.fullName and doc.fullName = :pageFullName and doc.translation=0").bindValue('pageFullName', $pageFullName).execute()[0])
     #set($attachmentCount = $xwiki.getDocument($pageFullName).getAttachmentList().size())
-    #set($classCount = $xwiki.getClass($pageFullName).properties.size())
-    ** (% pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((([[image:icon:$iconBulletToggle||class="hierarchyDisplayPageIcon"]][[image:icon:$displayedIcon||class="hierarchyContextActionIcon"]]$pageName $!addRemoveButton
-    (% id='hierarchyPageDetails_$spaceEscapedBackslash.$pageEscapedBackslash' class='hierarchy-list${pageClassHidden}' %)
-    #if($xcontext.action != "edit" &amp;&amp; "$!{xcontext.macro.params.action}" != "edit" &amp;&amp; $pageFullName == $currentDoc.fullName)
-      *** image:icon:page {{html}}&lt;span class='hierarchyCurrentSpacePageAction'&gt;View&lt;/span&gt;{{/html}}
-    #else
-      *** [[image:icon:page View&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')]]
+    #if($xwiki.getDocument($pageFullName).hasAccessLevel('edit'))
+      #set($objectCount = $services.query.xwql("select count(obj.className) from BaseObject as obj, Document as doc where obj.name  = doc.fullName and doc.fullName = :pageFullName and doc.translation=0").bindValue('pageFullName', $pageFullName).execute()[0])
+      #set($classCount = $xwiki.getClass($pageFullName).properties.size())
+      ** (% pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((([[image:icon:$iconBulletToggle||class="hierarchyDisplayPageIcon"]][[image:icon:$displayedIcon||class="hierarchyContextActionIcon"]]$pageName $!addRemoveButton
+      (% id='hierarchyPageDetails_$spaceEscapedBackslash.$pageEscapedBackslash' class='hierarchy-list${pageClassHidden}' %)
+      #if($xcontext.action != "edit" &amp;&amp; "$!{xcontext.macro.params.action}" != "edit" &amp;&amp; $pageFullName == $currentDoc.fullName)
+        *** image:icon:page {{html}}&lt;span class='hierarchyCurrentSpacePageAction'&gt;View&lt;/span&gt;{{/html}}
+      #else
+        *** [[image:icon:page View&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')]]
+      #end
+      #if($currentEditor == "wiki" &amp;&amp; $pageFullName == $currentDoc.fullName)
+        *** image:icon:page_edit {{html}}&lt;span class='hierarchyCurrentSpacePageAction'&gt;Edit (wiki) &lt;span id="hierarchyStar" class="hierarchy-hidden"&gt;*&lt;/span&gt;&lt;/span&gt;{{/html}}
+      #elseif($currentEditor == "wiki")
+        *** image:icon:page_edit {{html clean=false}}&lt;a href='#!XWebIDE' space='$spaceEscaped' page='$pageEscaped' rawtitle="$pageRawTitleEscaped" class='editPage'&gt;Edit (wiki)&lt;/a&gt;{{/html}}
+      #else
+        *** [[image:icon:page_edit Edit (wiki)&gt;&gt;path:$xwiki.getURL("$pageFullName", 'edit', 'language=default&amp;editor=wiki')#!XWebIDE]]
+      #end
+      #if($currentEditor == "object" &amp;&amp; $pageFullName == $currentDoc.fullName)
+        *** image:icon:application_edit {{html}}&lt;span class='hierarchyCurrentSpacePageAction'&gt;Objects ($objectCount)&lt;/span&gt;{{/html}}
+      #else
+        *** [[image:icon:application_edit Objects ($objectCount)&gt;&gt;path:$xwiki.getURL("$pageFullName", 'edit', 'editor=object')#!XWebIDE]]
+      #end
+      #if($currentEditor == "class" &amp;&amp; $pageFullName == $currentDoc.fullName)
+        *** image:icon:monitor_edit {{html}}&lt;span class='hierarchyCurrentSpacePageAction'&gt;Class ($classCount)&lt;/span&gt;{{/html}}
+      #else
+        *** [[image:icon:monitor_edit Class ($classCount)&gt;&gt;path:$xwiki.getURL("$pageFullName", 'edit', 'editor=class')#!XWebIDE]]
+      #end
+      *** [[image:icon:attach Attachments ($attachmentCount)&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')#Attachments]]
+    #elseif($xwiki.getDocument($pageFullName).hasAccessLevel('view'))
+      ** (% pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((([[image:icon:$iconBulletToggle||class="hierarchyDisplayPageIcon"]][[image:icon:$displayedIcon||class="hierarchyContextActionIcon"]]$pageName $!addRemoveButton
+      (% id='hierarchyPageDetails_$spaceEscapedBackslash.$pageEscapedBackslash' class='hierarchy-list${pageClassHidden}' %)
+      #if($xcontext.action != "edit" &amp;&amp; "$!{xcontext.macro.params.action}" != "edit" &amp;&amp; $pageFullName == $currentDoc.fullName)
+        *** image:icon:page {{html}}&lt;span class='hierarchyCurrentSpacePageAction'&gt;View&lt;/span&gt;{{/html}}
+      #else
+        *** [[image:icon:page View&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')]]
+      #end
+      *** [[image:icon:attach Attachments ($attachmentCount)&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')#Attachments]]
     #end
-    #if($currentEditor == "wiki" &amp;&amp; $pageFullName == $currentDoc.fullName)
-      *** image:icon:page_edit {{html}}&lt;span class='hierarchyCurrentSpacePageAction'&gt;Edit (wiki) &lt;span id="hierarchyStar" class="hierarchy-hidden"&gt;*&lt;/span&gt;&lt;/span&gt;{{/html}}
-    #elseif($currentEditor == "wiki")
-      *** image:icon:page_edit {{html clean=false}}&lt;a href='#!XWebIDE' space='$spaceEscaped' page='$pageEscaped' rawtitle="$pageRawTitleEscaped" class='editPage'&gt;Edit (wiki)&lt;/a&gt;{{/html}}
-    #else
-      *** [[image:icon:page_edit Edit (wiki)&gt;&gt;path:$xwiki.getURL("$pageFullName", 'edit', 'language=default&amp;editor=wiki')#!XWebIDE]]
-    #end
-    #if($currentEditor == "object" &amp;&amp; $pageFullName == $currentDoc.fullName)
-      *** image:icon:application_edit {{html}}&lt;span class='hierarchyCurrentSpacePageAction'&gt;Objects ($objectCount)&lt;/span&gt;{{/html}}
-    #else
-      *** [[image:icon:application_edit Objects ($objectCount)&gt;&gt;path:$xwiki.getURL("$pageFullName", 'edit', 'editor=object')#!XWebIDE]]
-    #end
-    #if($currentEditor == "class" &amp;&amp; $pageFullName == $currentDoc.fullName)
-      *** image:icon:monitor_edit {{html}}&lt;span class='hierarchyCurrentSpacePageAction'&gt;Class ($classCount)&lt;/span&gt;{{/html}}
-    #else
-      *** [[image:icon:monitor_edit Class ($classCount)&gt;&gt;path:$xwiki.getURL("$pageFullName", 'edit', 'editor=class')#!XWebIDE]]
-    #end
-    *** [[image:icon:attach Attachments ($attachmentCount)&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')#Attachments]]
   #end
-  ** image:icon:add {{html}}&lt;a href="#!XWebIDE" space="$spaceEscaped" class="newPage" data-toggle="modal" data-target="#hierarchyPageModal"&gt;Add new page&lt;/a&gt;{{/html}}
+  #if($xwiki.hasAccessLevel('edit', "$spaceEscaped.$reservedDocumentName")) ## Check if the user can create a page in that space
+    ** image:icon:add {{html}}&lt;a href="#!XWebIDE" space="$spaceEscaped" class="newPage" data-toggle="modal" data-target="#hierarchyPageModal"&gt;Add new page&lt;/a&gt;{{/html}}
+  #end
 #end
-* image:icon:add {{html}}&lt;a href="#!XWebIDE" class="newFolder" data-toggle="modal" data-target="#hierarchyFolderModal"&gt;Add new/existing folder&lt;/a&gt;{{/html}}
-* image:icon:add {{html}}&lt;a href="#!XWebIDE" class="newExistingPage" data-toggle="modal" data-target="#hierarchyExistingPageModal"&gt;Add existing page&lt;/a&gt;{{/html}}
+#if($masterDoc.hasAccessLevel('edit'))
+  * image:icon:add {{html}}&lt;a href="#!XWebIDE" class="newFolder" data-toggle="modal" data-target="#hierarchyFolderModal"&gt;Add new/existing folder&lt;/a&gt;{{/html}}
+  * image:icon:add {{html}}&lt;a href="#!XWebIDE" class="newExistingPage" data-toggle="modal" data-target="#hierarchyExistingPageModal"&gt;Add existing page&lt;/a&gt;{{/html}}
+#end
 )))
 
 {{html}}
@@ -1235,7 +1341,7 @@ $(function(){
         &lt;/div&gt;
         &lt;div class="modal-body"&gt;
           Folder : &lt;input type="text" id="hierarchyNewFolderName" /&gt;
-          &lt;a href="#$!{anchorHash}" id="hierarchyAddFolder" class="btn btn-success"&gt;Add the folder&lt;/a&gt;
+          &lt;a href="#$!{anchorHash}" id="hierarchyAddFolder" class="btn btn-success"&gt;Add the folder&lt;/a&gt;&lt;br&gt;
         &lt;/div&gt;
       &lt;/div&gt;
     &lt;/div&gt;
@@ -1250,7 +1356,8 @@ $(function(){
         &lt;div class="modal-body"&gt;
           Folder : &lt;span id="hierarchyPageFolder"&gt;&lt;/span&gt;&lt;br /&gt;
           Page : &lt;input type="text" id="hierarchyNewPageName" /&gt;
-          &lt;a href="#$!{anchorHash}" id="hierarchyAddPage" class="btn btn-success"&gt;Add the page&lt;/a&gt;
+          &lt;a href="#$!{anchorHash}" id="hierarchyAddPage" class="btn btn-success"&gt;Add the page&lt;/a&gt;&lt;br&gt;
+          &lt;p id="hierarchyPageModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
         &lt;/div&gt;
       &lt;/div&gt;
     &lt;/div&gt;
