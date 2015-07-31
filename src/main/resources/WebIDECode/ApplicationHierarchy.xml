@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434700712000</creationDate>
-  <date>1438073262000</date>
-  <contentUpdateDate>1438072258000</contentUpdateDate>
+  <date>1438350596000</date>
+  <contentUpdateDate>1438346208000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -62,7 +62,7 @@
         <prettyName>Caching policy</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators> ,|</separators>
+        <separators>|, </separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>long|short|default|forbid</values>
@@ -107,7 +107,7 @@
         <prettyName>Use this extension</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators> ,|</separators>
+        <separators>|, </separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>currentPage|onDemand|always</values>
@@ -137,12 +137,12 @@ $(function(){
       $('#hierarchyContent').hide();
       $('#hierarchyOpenBlock').show();
       $("#hierarchyBlock").css({
-        "min-width": "0px", 
+        "min-width": "0px",
         "width": "42px"
       });
       if(XWiki.contextaction == "edit") {
-        $('#'+mainBlock).css({
-          "maxWidth": "100%", 
+        $(mainBlock).css({
+          "maxWidth": "100%",
           "width": ($('#'+mainBlockContainer).width()-42)+"px"
         });
       }
@@ -151,12 +151,12 @@ $(function(){
       $('#hierarchyOpenBlock').hide();
       $('#hierarchyContent').show();
       $("#hierarchyBlock").css({
-        "minWidth": "17%", 
+        "minWidth": "17%",
         "width": "17%"
       });
       if(XWiki.contextaction == "edit") {
-        $('#'+mainBlock).css({
-          "maxWidth": "83%", 
+        $(mainBlock).css({
+          "maxWidth": "83%",
           "width": "83%"
         });
       }
@@ -256,7 +256,6 @@ $(function(){
         $('#hierarchyNextDocName').val($(this).attr('page'));
         $('#hierarchyNextDocSpace').val($(this).attr('space'));
         $('#hierarchyNextDocTitle').val($(this).attr('rawtitle'));
-
         if(XWiki.editor == "wiki"){
           if(savedContent != $('#content').val()) {
             if(bootstrap) {
@@ -291,7 +290,7 @@ $(function(){
     $('#hierarchyNewPageName').val('');
     $('#hierarchyNewFolderName').val('');
   }
-  
+
   function setCookieHierarchy(cname, cvalue, exdays) {
     var d = new Date();
     d.setTime(d.getTime() + (exdays*24*60*60*1000));
@@ -314,6 +313,7 @@ $(function(){
   //-------------------------
 
   // Variables
+  var syntaxHighlighting = (typeof(CodeMirror) !== 'undefined');
   var masterSpace = $('#hierarchyMasterDocSpace').val();
   var masterName = $('#hierarchyMasterDocName').val();
   var currentPage = encodeURIComponent(XWiki.currentPage);
@@ -326,6 +326,7 @@ $(function(){
   var hiddenPages = getCookieHierarchy('hiddenPages').split(',');
   var mainBlock = '';
   var mainBlockContainer = '';
+  // Get the "get" and "view" url structure for ajax queries
   var wikiGetURL = '/xwiki/bin/get/';
   if(window.docgeturl.indexOf('/get/') &gt;= 0) {
     wikiGetURL = window.docgeturl.substring(0,window.docgeturl.indexOf('/get/')+5);
@@ -334,27 +335,59 @@ $(function(){
   if(window.docviewurl.indexOf('/'+XWiki.currentSpace+'/') &gt;= 0) {
     wikiViewURL = window.docviewurl.substring(0,window.docviewurl.indexOf('/'+XWiki.currentSpace+'/')+1);
   }
-  if(typeof($.fn.modal) === 'undefined') {
-    var bootstrap = false;
-  }
-  else {
-    var bootstrap = true;
-  }
+  // Modal won't work without bootstrap
+  var bootstrap = (typeof($.fn.modal) !== 'undefined');
   if(XWiki.contextaction =="view") {
     $('#hierarchyBlock').css({"resize" : "none"});
   }
+  // Define the main div, where the content is located
   if(XWiki.editor == "wiki") {
-    mainBlock = 'content';
+    if(syntaxHighlighting) {
+      mainBlock = '.CodeMirror';
+    }
+    else {
+      mainBlock = '#content';
+    }
     mainBlockContainer = 'xwikieditcontentinner';
     var savedContent = $('#content').val();
   }
   else if(XWiki.editor == "object"){
-    mainBlock = 'update';
+    mainBlock = '#update';
     mainBlockContainer = 'mainEditArea';
   }
   else if(XWiki.editor == "class"){
-    mainBlock = 'propupdate';
+    mainBlock = '#propupdate';
     mainBlockContainer = 'mainEditArea';
+  }
+  // Add Word Wrap option to the .CodeMirror elements
+  if(syntaxHighlighting) {
+    $.each(codeMirrors, function (index) {
+      codeMirrors[index].setOption('lineWrapping', true);
+    });
+    if(XWiki.editor == "object") {
+      $('.CodeMirror').css({
+        "width" : "100%",
+        "maxWidth" : "100%",
+        "overflow" : "hidden",
+        "resize" : "both"
+      });
+      $(mainBlock).on('DOMNodeInserted', function(e) {
+        if ($(e.target).is('.CodeMirror')) {
+          $.delay(1000);
+            window.setTimeout(function() {
+            $.each(codeMirrors, function (index) {
+              codeMirrors[index].setOption('lineWrapping', true);
+            });
+            $(e.target).css({
+              "width" : "100%",
+              "maxWidth" : "100%",
+              "overflow" : "hidden",
+              "resize" : "both"
+            });
+          }, 50);
+        }
+      });
+    }
   }
   // Autofocus on text inputs when a modal appears:
   if(bootstrap) {
@@ -376,6 +409,18 @@ $(function(){
     shortcut.remove("Alt+P");
 
     // Add a star in the hierarchy if the content has changed
+    if(syntaxHighlighting) {
+    codeMirrors[0].on('keyup', function(){
+      codeMirrors[0].save();
+      if(savedContent != $('#content').val()) {
+        $('#hierarchyStar').show();
+      }
+      else {
+        $('#hierarchyStar').hide();
+      }
+    });
+    }
+    else {
     $('#content').keyup(function(){
       if(savedContent != $('#content').val()) {
         $('#hierarchyStar').show();
@@ -384,6 +429,7 @@ $(function(){
         $('#hierarchyStar').hide();
       }
     });
+    }
 
     // Add events on buttons and shortcuts
     $('#hierarchySaveButtonIDE').click(function(e){
@@ -398,8 +444,18 @@ $(function(){
       e.preventDefault();
       cancelAndViewIDE();
     });
-    shortcut.add("Alt+Shift+S", function() {saveAndContinueIDE(currentSpace, currentPage, $('#content').val(), $('#xwikidoctitleinput').val(), true);});
-    shortcut.add("Alt+S", function() {saveAndViewIDE(currentSpace, currentPage, $('#content').val(), $('#xwikidoctitleinput').val(), true);});
+    shortcut.add("Alt+Shift+S", function() {
+      if(syntaxHighlighting) {
+        codeMirrors[0].save();
+      }
+      saveAndContinueIDE(currentSpace, currentPage, $('#content').val(), $('#xwikidoctitleinput').val(), true);
+    });
+    shortcut.add("Alt+S", function() {
+      if(syntaxHighlighting) {
+        codeMirrors[0].save();
+      }
+      saveAndViewIDE(currentSpace, currentPage, $('#content').val(), $('#xwikidoctitleinput').val(), true);
+    });
     shortcut.add("Alt+C", function() {cancelAndViewIDE();});
   }
   if(XWiki.contextaction == 'edit') {
@@ -414,7 +470,6 @@ $(function(){
     shortcut.remove("D");
     shortcut.remove("W");
   }
-  
   $('#hierarchyAddFolder').click(function(e){
     $('body').removeClass('modal-open');
     e.preventDefault();
@@ -467,6 +522,9 @@ $(function(){
       }).success(function(dataContent){
         var formattedData = dataContent.replace(/^&lt;pre&gt;/, '').replace(/&lt;\/pre&gt;$/, '');
         $('#content').val($('&lt;div /&gt;').html(formattedData).text());
+        if(syntaxHighlighting) {
+          codeMirrors[0].getDoc().setValue($('#content').val());
+        }
         savedContent = $('#content').val();
         $('#xwikidoctitleinput').val(decodeURIComponent($('#hierarchyNextDocTitle').val()));
         $('#hierarchyNextDocTitle').val('');
@@ -839,7 +897,7 @@ $(function(){
         <prettyName>Caching policy</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators> ,|</separators>
+        <separators>|, </separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>long|short|default|forbid</values>
@@ -865,7 +923,7 @@ $(function(){
         <prettyName>Content Type</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators> ,|</separators>
+        <separators>|, </separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>CSS|LESS</values>
@@ -900,7 +958,7 @@ $(function(){
         <prettyName>Use this extension</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators> ,|</separators>
+        <separators>|, </separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>currentPage|onDemand|always</values>
@@ -912,7 +970,7 @@ $(function(){
     <className>XWiki.StyleSheetExtension</className>
     <guid>0c7773fa-9a7a-49a4-b0db-44800f0bf911</guid>
     <property>
-      <cache>forbid</cache>
+      <cache>default</cache>
     </property>
     <property>
       <code>#template('colorThemeInit.vm')
