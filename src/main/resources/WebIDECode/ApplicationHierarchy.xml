@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434700712000</creationDate>
-  <date>1438350596000</date>
-  <contentUpdateDate>1438346208000</contentUpdateDate>
+  <date>1438590125000</date>
+  <contentUpdateDate>1438072258000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -62,7 +62,7 @@
         <prettyName>Caching policy</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators>|, </separators>
+        <separators> ,|</separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>long|short|default|forbid</values>
@@ -107,7 +107,7 @@
         <prettyName>Use this extension</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators>|, </separators>
+        <separators> ,|</separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>currentPage|onDemand|always</values>
@@ -552,7 +552,7 @@ $(function(){
         contentType: "application/x-www-form-urlencoded",
         accept: "application/xml",
         data: "title="+encodeURIComponent(newTitle)+"&amp;content="+encodeURIComponent(newContent),
-      }).error(function(){
+      }).error(function(xhr){
         saving = false;
         $('#hierarchySavingState').attr('class', 'red').html('&lt;strong&gt;'+xhr.statusText+'&lt;/strong&gt;').show().delay(4000).queue(function(n) {
           $(this).hide().removeAttr('class').html('');
@@ -897,7 +897,7 @@ $(function(){
         <prettyName>Caching policy</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators>|, </separators>
+        <separators> ,|</separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>long|short|default|forbid</values>
@@ -923,7 +923,7 @@ $(function(){
         <prettyName>Content Type</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators>|, </separators>
+        <separators> ,|</separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>CSS|LESS</values>
@@ -958,7 +958,7 @@ $(function(){
         <prettyName>Use this extension</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators>|, </separators>
+        <separators> ,|</separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>currentPage|onDemand|always</values>
@@ -970,7 +970,7 @@ $(function(){
     <className>XWiki.StyleSheetExtension</className>
     <guid>0c7773fa-9a7a-49a4-b0db-44800f0bf911</guid>
     <property>
-      <cache>default</cache>
+      <cache>forbid</cache>
     </property>
     <property>
       <code>#template('colorThemeInit.vm')
@@ -1025,6 +1025,9 @@ $(function(){
   padding-bottom: 5px;
   text-align: center;
 }
+.exportLink {
+  font-weight: bold;
+}
 
 /* Project Block - Colibri skin */
 #hierarchyContent ul {
@@ -1035,6 +1038,9 @@ $(function(){
 }
 .hierarchy-list img {
   padding: 0px !important;
+}
+.CodeMirror {
+  border: 0px !important;
 }
 
 /* Project Content */
@@ -1271,7 +1277,10 @@ $(function(){
 (% class="hierarchy-right" id="hierarchyCloseBlock" %)(((
 [[image:icon:control_start_blue||title="Hide hierarchy" id="hierarchyClose" class="hierarchy-right"]]
 )))
-//**Project** :// **[[$masterObj.getProperty('projectName').value&gt;&gt;$masterDoc.fullName||target="_blank"]]** 
+//**Project** :// **[[$masterObj.getProperty('projectName').value&gt;&gt;$masterDoc.fullName||target="_blank"]]**
+#if($xcontext.action != "view")
+[[image:icon:disk&gt;&gt;$masterDoc.fullName||queryString="export=1" target="_blank"]] [[Export the project&gt;&gt;$masterDoc.fullName||queryString="export=1" target="_blank" class="exportLink"]]
+#end
 (% class="hierarchy-list hierarchy-no-padding" id="hierarchyMainList" %)
 #foreach($space in $spacesList)
   #set($spaceEscaped = $util.encodeURI($space).replace("+", "%20"))
