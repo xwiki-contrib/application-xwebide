@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434955733000</creationDate>
-  <date>1436348911000</date>
-  <contentUpdateDate>1436348911000</contentUpdateDate>
+  <date>1438675096000</date>
+  <contentUpdateDate>1438675096000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationCheck</title>
   <defaultTemplate/>
@@ -47,36 +47,76 @@ $response.setContentType('application/json')
 {
 #if($xwiki.exists($request.get('doc')))
   #set($document = $xwiki.getDocument($request.get('doc')))
-  #set($xwqlstatement = "where doc.object(WebIDECode.ApplicationClass).spaces like :spacesA or doc.object(WebIDECode.ApplicationClass).spaces like :spacesB or doc.object(WebIDECode.ApplicationClass).spaces like :spacesC or doc.object(WebIDECode.ApplicationClass).spaces like :spacesD or doc.object(WebIDECode.ApplicationClass).pages like :pagesA or doc.object(WebIDECode.ApplicationClass).pages like :pagesB or doc.object(WebIDECode.ApplicationClass).pages like :pagesC or doc.object(WebIDECode.ApplicationClass).pages like :pagesD")
-  #set($queryResults = $services.query.xwql($xwqlstatement).bindValue('pagesA', "%|$document.fullName|%").bindValue('pagesB', "$document.fullName|%").bindValue('pagesC', "%|$document.fullName").bindValue('pagesD', "$document.fullName").bindValue('spacesA', "%|${document.space}|%").bindValue('spacesB', "${document.space}|%").bindValue('spacesC', "%|${document.space}").bindValue('spacesD', "${document.space}").execute())
-  #if($queryResults.size() == 1)
-    #set($masterDoc = $xwiki.getDocument($queryResults.get(0)))
+  #if($document.getObject('WebIDECode.ApplicationClass')) ## Check if this is a master page
     "error" : -1,
+    "size" : 1,
     "documentName" : "$document.name.replace('"', '%22')",
     "documentSpace" : "$document.space.replace('"', '%22')",
-    "masterName" : "$masterDoc.name.replace('"', '%22')",
-    "masterSpace" : "$masterDoc.space.replace('"', '%22')",
-    "project" : "$masterDoc.projectName.replace('"', '%22')",
+    "projectData" : [{
+    "masterName" : "$document.name.replace('"', '%22')",
+    "masterSpace" : "$document.space.replace('"', '%22')",
+    "project" : "$document.projectName.replace('"', '%22')"
+    }],
+    "sheetError" : 1,
+    "sheetSize" : 0
   #else
-    "error" : 1,
-  #end
-  #set($sheetError = "1")
-  #foreach($documentFullName in $services.sheet.getSheets($document, 'view'))
-    #set($document = $xwiki.getDocument($documentFullName))
     #set($xwqlstatement = "where doc.object(WebIDECode.ApplicationClass).spaces like :spacesA or doc.object(WebIDECode.ApplicationClass).spaces like :spacesB or doc.object(WebIDECode.ApplicationClass).spaces like :spacesC or doc.object(WebIDECode.ApplicationClass).spaces like :spacesD or doc.object(WebIDECode.ApplicationClass).pages like :pagesA or doc.object(WebIDECode.ApplicationClass).pages like :pagesB or doc.object(WebIDECode.ApplicationClass).pages like :pagesC or doc.object(WebIDECode.ApplicationClass).pages like :pagesD")
     #set($queryResults = $services.query.xwql($xwqlstatement).bindValue('pagesA', "%|$document.fullName|%").bindValue('pagesB', "$document.fullName|%").bindValue('pagesC', "%|$document.fullName").bindValue('pagesD', "$document.fullName").bindValue('spacesA', "%|${document.space}|%").bindValue('spacesB', "${document.space}|%").bindValue('spacesC', "%|${document.space}").bindValue('spacesD', "${document.space}").execute())
-    #if($queryResults.size() == 1)
-      #set($sheetError = "-1")
-      #set($masterDoc = $xwiki.getDocument($queryResults.get(0)))
-      "sheetDocumentName" : "$document.name.replace('"', '%22')",
-      "sheetDocumentSpace" : "$document.space.replace('"', '%22')",
-      "sheetMasterName" : "$masterDoc.name.replace('"', '%22')",
-      "sheetMasterSpace" : "$masterDoc.space.replace('"', '%22')",
-      "sheetProject" : "$masterDoc.projectName.replace('"', '%22')",
-      #break
+    #if($queryResults.size() &gt;= 1)
+      "error" : -1,
+      "size" : $queryResults.size(),
+      "documentName" : "$document.name.replace('"', '%22')",
+      "documentSpace" : "$document.space.replace('"', '%22')",
+      "projectData" : [
+      #set($i = 0)
+      #foreach($result in $queryResults)
+        #if($i != 0)
+          ,
+        #end
+        #set($i = 1)
+        #set($masterDoc = $xwiki.getDocument($result))
+        {"masterName" : "$masterDoc.name.replace('"', '%22')",
+        "masterSpace" : "$masterDoc.space.replace('"', '%22')",
+        "project" : "$masterDoc.projectName.replace('"', '%22')"}
+      #end
+      ],
+    #else
+      "error" : 1,
     #end
+    #set($sheetError = "1")
+    #set($sheetsize = 0)
+    "sheet" : [
+    #foreach($documentFullName in $services.sheet.getSheets($document, 'view'))
+      #set($document = $xwiki.getDocument($documentFullName))
+      #set($xwqlstatement = "where doc.object(WebIDECode.ApplicationClass).spaces like :spacesA or doc.object(WebIDECode.ApplicationClass).spaces like :spacesB or doc.object(WebIDECode.ApplicationClass).spaces like :spacesC or doc.object(WebIDECode.ApplicationClass).spaces like :spacesD or doc.object(WebIDECode.ApplicationClass).pages like :pagesA or doc.object(WebIDECode.ApplicationClass).pages like :pagesB or doc.object(WebIDECode.ApplicationClass).pages like :pagesC or doc.object(WebIDECode.ApplicationClass).pages like :pagesD")
+      #set($queryResults = $services.query.xwql($xwqlstatement).bindValue('pagesA', "%|$document.fullName|%").bindValue('pagesB', "$document.fullName|%").bindValue('pagesC', "%|$document.fullName").bindValue('pagesD', "$document.fullName").bindValue('spacesA', "%|${document.space}|%").bindValue('spacesB', "${document.space}|%").bindValue('spacesC', "%|${document.space}").bindValue('spacesD', "${document.space}").execute())
+      #if($queryResults.size() &gt;= 1)
+        #set($sheetError = "-1")
+        #if($sheetsize != 0)
+          ,
+        #end
+        #set($sheetsize = $sheetsize + $queryResults.size())
+        {"sheetDocumentName" : "$document.name.replace('"', '%22')",
+        "sheetDocumentSpace" : "$document.space.replace('"', '%22')",
+        "sheetProjectData" : [
+        #set($i = 0)
+        #foreach($result in $queryResults)
+          #if($i != 0)
+            ,
+          #end
+          #set($i = 1)
+          #set($masterDoc = $xwiki.getDocument($result))
+          {"sheetMasterName" : "$masterDoc.name.replace('"', '%22')",
+          "sheetMasterSpace" : "$masterDoc.space.replace('"', '%22')",
+          "sheetProject" : "$masterDoc.projectName.replace('"', '%22')"}
+        #end
+        ]}
+      #end
+    #end
+    ],
+    "sheetSize" : $sheetsize,
+    "sheetError" : $sheetError
   #end
-  "sheetError" : $sheetError
 #else
   "error" : 0,
   "sheetError" : 0

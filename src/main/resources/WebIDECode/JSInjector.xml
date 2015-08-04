@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434954547000</creationDate>
-  <date>1438352436000</date>
-  <contentUpdateDate>1438346208000</contentUpdateDate>
+  <date>1438677190000</date>
+  <contentUpdateDate>1434977986000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -62,7 +62,7 @@
         <prettyName>Caching policy</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators>|, </separators>
+        <separators> ,|</separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>long|short|default|forbid</values>
@@ -107,7 +107,7 @@
         <prettyName>Use this extension</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators>|, </separators>
+        <separators> ,|</separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>currentPage|onDemand|always</values>
@@ -124,61 +124,133 @@
     <property>
       <code>require(['jquery'], function ($) {
 $(function(){
+  var syntaxHighlighting = (typeof(CodeMirror) !== 'undefined');
   var currentPage = encodeURIComponent(XWiki.currentPage);
   var currentSpace = encodeURIComponent(XWiki.currentSpace);
   var currentPageEscaped = encodeURIComponent(XWiki.currentPage.replace(/\\/g, '\\\\').replace(/\./g, '\\\.'));
   var currentSpaceEscaped = encodeURIComponent(XWiki.currentSpace.replace(/\\/g, '\\\\').replace(/\./g, '\\\.'));
   var wikiViewURL = '/xwiki/bin/view/';
+  var bootstrap = (typeof($.fn.modal) !== 'undefined'); // Modal won't work without bootstrap
   if(window.docviewurl.indexOf('/'+XWiki.currentSpace+'/') &gt;= 0) {
     wikiViewURL = window.docviewurl.substring(0,window.docviewurl.indexOf('/'+XWiki.currentSpace+'/')+1);
   }
-
+  var wikiEditURL = '/xwiki/bin/edit/';
+  if(window.docediturl.indexOf('/'+XWiki.currentSpace+'/') &gt;= 0) {
+    wikiGetURL = window.docediturl.substring(0,window.docediturl.indexOf('/'+XWiki.currentSpace+'/')+1);
+  }
+  var hashURL = window.location.hash.substring(1).split('&amp;!!');
   // Determine if that page is part of a project. Add the XWebIDE link in the Actions menu if that's the case and the "W" shortcut to use the XWebIDE editor.
   $.ajax({
     url: wikiViewURL+"WebIDECode/ApplicationCheck?xpage=plain&amp;outputSyntax=plain&amp;doc="+currentSpaceEscaped+"."+currentPageEscaped,
     type: "GET",
     contentType: "application/json",
   }).success(function(data){
-    if(data.error == "-1") {
+    if(data.error == "-1") { // Type = 1, Is the page part of a project?
       if(XWiki.contextaction == 'edit' || XWiki.contextaction == 'view') {
         if($('#tmEdit .submenu .submenuseparator').length) { //Colibri Skin
-          $('#tmEdit .submenu .submenuseparator').before('&lt;span class="submenuitem "&gt;&lt;a href="/xwiki/bin/edit/'+data.documentSpace+'/'+data.documentName+'?language=default&amp;editor=wiki#!XWebIDE" id="tmEditWebIDE" class="tmEditXWebIDE" title="Edit '+data.documentName+' in XWebIDE as part of '+data.project+'"&gt;XWebIDE&lt;/a&gt;&lt;/span&gt;');
+          //$('#tmEdit .submenu .submenuseparator').before('&lt;span class="submenuitem "&gt;&lt;a href="'+wikiEditURL+data.masterSpace+'/'+data.masterName+'?language=default&amp;editor=wiki#!XWebIDE&amp;'+currentPage+'&amp;'+currentSpace+'" id="tmEditWebIDE" class="tmEditXWebIDE" title="Edit '+data.documentName+' in XWebIDE as part of '+data.project+'"&gt;XWebIDE&lt;/a&gt;&lt;/span&gt;');
+          $('#tmEdit .submenu .submenuseparator').before('&lt;span class="submenuitem "&gt;&lt;a href="#" id="tmEditWebIDE" class="tmEditXWebIDE" title="Edit '+data.documentName+' in XWebIDE"&gt;XWebIDE&lt;/a&gt;&lt;/span&gt;');
           $('.tmEditXWebIDE').css({
             "backgroundImage": "url('/xwiki/resources/icons/silk/folder_page.png')"
           });
         }
         else { //Flamingo
-          $('#tmEdit .dropdown-menu .divider').before('&lt;li class=""&gt;&lt;a href="/xwiki/bin/edit/'+data.documentSpace+'/'+data.documentName+'?language=default&amp;editor=wiki#!XWebIDE" id="tmEditWebIDE" title="Edit '+data.documentName+' in XWebIDE as part of '+data.project+'"&gt;&lt;span class="glyphicon  glyphicon-folder-open"&gt;&lt;/span&gt; XWebIDE&lt;/a&gt;&lt;/li&gt;');
+          //$('#tmEdit .dropdown-menu .divider').before('&lt;li class=""&gt;&lt;a href="'+wikiEditURL+data.masterSpace+'/'+data.masterName+'?language=default&amp;editor=wiki#!XWebIDE&amp;'+currentPage+'&amp;'+currentSpace+'" id="tmEditWebIDE" title="Edit '+data.documentName+' in XWebIDE as part of '+data.project+'"&gt;&lt;span class="glyphicon  glyphicon-folder-open"&gt;&lt;/span&gt; XWebIDE&lt;/a&gt;&lt;/li&gt;');
+          $('#tmEdit .dropdown-menu .divider').before('&lt;li class=""&gt;&lt;a href="#" id="tmEditWebIDE" class="tmEditXWebIDE" title="Edit '+data.documentName+' in XWebIDE"&gt;&lt;span class="glyphicon  glyphicon-folder-open"&gt;&lt;/span&gt; XWebIDE&lt;/a&gt;&lt;/li&gt;');
         }
-      }
-      if(XWiki.contextaction == 'edit' &amp;&amp; window.location.hash &amp;&amp; !hierarchyStatus) {
-        if(window.location.hash.substring(1) == '!XWebIDE') {
-          displayHierarchy(data.masterSpace, data.masterName);
-        }
-      }
-      else if(XWiki.contextaction == 'edit' &amp;&amp; !hierarchyStatus) {
-        $('#tmEditWebIDE').click(function(){
-          if(!hierarchyStatus) {
-            displayHierarchy(data.masterSpace, data.masterName);
-          }
+        $('.tmEditXWebIDE').click(function(e) {
+          e.preventDefault();
+          loadMasterPage(1);
         });
       }
-      shortcut.add("W", function() { window.location.href = '/xwiki/bin/edit/'+encodeURIComponent(unescape(data.documentSpace))+'/'+encodeURIComponent(unescape(data.documentName))+'?language=default&amp;editor=wiki#!XWebIDE'; },{'disable_in_input':'true'});
+      shortcut.add("W", function() {
+        loadMasterPage(1);
+      } ,{'disable_in_input':'true'});
+
+      // Display the hierarchy if the hash is in the URL
+      if(XWiki.contextaction == 'edit' &amp;&amp; window.location.hash &amp;&amp; !hierarchyStatus) {
+        if(hashURL[0] == '!XWebIDE') {
+          displayHierarchy(data.projectData[0].masterSpace, data.projectData[0].masterName);
+        }
+      }
     }
 
-    if(data.sheetError == "-1") {
+    if(data.sheetError == "-1") { // Type = 2, Does the page use a sheet which is part of a project?
       if(XWiki.contextaction == 'edit' || XWiki.contextaction == 'view') {
         if($('#tmEdit .submenu .submenuseparator').length) { //Colibri Skin
-          $('#tmEdit .submenu .submenuseparator').before('&lt;span class="submenuitem "&gt;&lt;a href="/xwiki/bin/edit/'+data.sheetDocumentSpace+'/'+data.sheetDocumentName+'?language=default&amp;editor=wiki#!XWebIDE" id="tmEditWebIDE" class="tmEditXWebIDESheet" title="Edit sheet '+data.sheetDocumentSpace+'.'+data.sheetDocumentName+' in XWebIDE as part of '+data.sheetProject+'"&gt;XWebIDE (Sheet)&lt;/a&gt;&lt;/span&gt;');
+          //$('#tmEdit .submenu .submenuseparator').before('&lt;span class="submenuitem "&gt;&lt;a href="'+wikiEditURL+data.sheetMasterSpace+'/'+data.sheetMasterName+'?language=default&amp;editor=wiki#!XWebIDE&amp;'+currentPage+'&amp;'+currentSpace+'" id="tmEditWebIDE" class="tmEditXWebIDESheet" title="Edit sheet '+data.sheetDocumentSpace+'.'+data.sheetDocumentName+' in XWebIDE as part of '+data.sheetProject+'"&gt;XWebIDE (Sheet)&lt;/a&gt;&lt;/span&gt;');
+          $('#tmEdit .submenu .submenuseparator').before('&lt;span class="submenuitem "&gt;&lt;a href="#" id="tmEditWebIDE" class="tmEditXWebIDESheet" title="Edit the sheet of '+data.documentName+' in XWebIDE"&gt;XWebIDE (Sheet)&lt;/a&gt;&lt;/span&gt;');
           $('.tmEditXWebIDESheet').css({
             "backgroundImage": "url('/xwiki/resources/icons/silk/folder_page.png')"
           });
         }
         else { //Flamingo
-          $('#tmEdit .dropdown-menu .divider').before('&lt;li class=""&gt;&lt;a href="/xwiki/bin/edit/'+data.sheetDocumentSpace+'/'+data.sheetDocumentName+'?language=default&amp;editor=wiki#!XWebIDE" id="tmEditWebIDE" title="Edit sheet '+data.sheetDocumentSpace+'.'+data.sheetDocumentName+' in XWebIDE as part of '+data.sheetProject+'"&gt;&lt;span class="glyphicon  glyphicon-folder-open"&gt;&lt;/span&gt; XWebIDE (Sheet)&lt;/a&gt;&lt;/li&gt;');
+          //$('#tmEdit .dropdown-menu .divider').before('&lt;li class=""&gt;&lt;a href="'+wikiEditURL+data.sheetMasterSpace+'/'+data.sheetMasterName+'?language=default&amp;editor=wiki#!XWebIDE&amp;'+currentPage+'&amp;'+currentSpace+'" id="tmEditWebIDE" title="Edit sheet '+data.sheetDocumentSpace+'.'+data.sheetDocumentName+' in XWebIDE as part of '+data.sheetProject+'"&gt;&lt;span class="glyphicon  glyphicon-folder-open"&gt;&lt;/span&gt; XWebIDE (Sheet)&lt;/a&gt;&lt;/li&gt;');
+          $('#tmEdit .dropdown-menu .divider').before('&lt;li class=""&gt;&lt;a href="#" id="tmEditWebIDE" class="tmEditXWebIDESheet" title="Edit the sheet of '+data.documentName+' in XWebIDE"&gt;&lt;span class="glyphicon  glyphicon-folder-open"&gt;&lt;/span&gt; XWebIDE (Sheet)&lt;/a&gt;&lt;/li&gt;');
+        }
+        $('.tmEditXWebIDESheet').click(function(e) {
+          e.preventDefault();
+          loadMasterPage(2);
+        });
+      }
+      shortcut.add("Shift+W", function() {
+        loadMasterPage(2);
+      } ,{'disable_in_input':'true'});
+    }
+
+    function loadMasterPage(checkType) {
+      if(checkType == 1 &amp;&amp; data.size == "1") {
+        window.location.href = wikiEditURL+encodeURIComponent(unescape(data.projectData[0].masterSpace))+'/'+encodeURIComponent(unescape(data.projectData[0].masterName))+'?language=default&amp;editor=wiki#!XWebIDE&amp;!!'+currentPage+'&amp;!!'+currentSpace;
+      }
+      else if(checkType == 2 &amp;&amp; data.sheetSize == "1") {
+        window.location.href = wikiEditURL+encodeURIComponent(unescape(data.sheet[0].sheetProjectData[0].sheetMasterSpace))+'/'+encodeURIComponent(unescape(data.sheet[0].sheetProjectData[0].sheetMasterName))+'?language=default&amp;editor=wiki#!XWebIDE&amp;!!'+encodeURIComponent(unescape(data.sheet[0].sheetDocumentName))+'&amp;!!'+encodeURIComponent(unescape(data.sheet[0].sheetDocumentSpace))+'';
+      }
+      else if(parseInt(data.size) &gt; 1 || parseInt(data.sheetSize) &gt; 1){
+        var message = 'That page is in several projects. Which one do you want to edit?';
+        var projectURLList = '';
+        if(checkType == 1) {
+          $.each(data.projectData, function(key, value) {
+            projectURLList += '&lt;a href="'+wikiEditURL+value.masterSpace+'/'+value.masterName+'?language=default&amp;editor=wiki#!XWebIDE&amp;!!'+currentPage+'&amp;!!'+currentSpace+'" id="tmEditWebIDE" class="tmEditXWebIDE" title="Edit '+data.documentName+' in XWebIDE as part of '+value.project+'"&gt;Edit &lt;strong&gt;'+data.documentName+'&lt;/strong&gt; in project &lt;strong&gt;'+value.project+'&lt;/strong&gt;&lt;/a&gt;&lt;br /&gt;';
+          });
+        }
+        else if(checkType == 2) {
+          message = 'That page uses sheets from several projects. Which project do you want to edit?';
+          $.each(data.sheet, function(keySheet, valueSheet) {
+            $.each(valueSheet.sheetProjectData, function(key, value) {
+              projectURLList += '&lt;a href="'+wikiEditURL+value.sheetMasterSpace+'/'+value.sheetMasterName+'?language=default&amp;editor=wiki#!XWebIDE&amp;!!'+valueSheet.sheetDocumentName+'&amp;!!'+valueSheet.sheetDocumentSpace+'" id="tmEditWebIDE" class="tmEditXWebIDE" title="Edit '+valueSheet.sheetDocumentName+' in XWebIDE as part of '+value.sheetProject+'"&gt;Edit &lt;strong&gt;'+valueSheet.sheetDocumentName+'&lt;/strong&gt; in project &lt;strong&gt;'+value.sheetProject+'&lt;/strong&gt;&lt;/a&gt;&lt;br /&gt;';
+            });
+          });
+        }
+        $('#modalProjectSelection').remove();
+        $('&lt;div id="modalProjectSelection" class="modal fade" role="dialog"&gt;&lt;div class="modal-dialog"&gt;&lt;div class="modal-content"&gt;&lt;div class="modal-header"&gt;&lt;button type="button" class="close" data-dismiss="modal"&gt;&amp;times;&lt;/button&gt;&lt;h4 class="modal-title"&gt;XWebIDE editor&lt;/h4&gt;&lt;/div&gt;&lt;div class="modal-body"&gt;&lt;p&gt;'+message+'&lt;/p&gt;&lt;p&gt;'+projectURLList+'&lt;/p&gt;&lt;/div&gt;&lt;div class="modal-footer"&gt;&lt;button type="button" class="btn btn-default" data-dismiss="modal"&gt;Close&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;').appendTo('body');
+        if(bootstrap) {
+          $('#modalProjectSelection').modal('show');
+        }
+        else {
+          $('button[data-dismiss="modal"]').click(function() {
+            $('#modalProjectSelection').hide();
+          });
+          $('#modalProjectSelection').css({
+            "width" : "40%",
+            "border" : "1px solid black",
+            "backgroundColor" : "#CCCCCC",
+            "borderRadius" : "5px",
+            "position" : "absolute",
+            "left" : "30%",
+            "top" : "20%",
+            "padding" : "10px"
+          });
+          $('.modal-header .close').css({
+            "float" : "right",
+            "position" : "absolute",
+            "right" : "5px",
+            "top" : "5px"
+          });
+          $('.modal-header .modal-title').css({
+            "marginTop" : "0px"
+          });
         }
       }
-      shortcut.add("Shift+W", function() { window.location.href = '/xwiki/bin/edit/'+encodeURI(data.sheetDocumentSpace)+'/'+encodeURI(data.sheetDocumentName)+'?language=default&amp;editor=wiki#!XWebIDE'; },{'disable_in_input':'true'});
     }
 
   });
@@ -188,13 +260,21 @@ $(function(){
   function displayHierarchy(masterSpace, masterName) {
     if(!hierarchyStatus &amp;&amp; !document.getElementById('hierarchyBlock')) {
       hierarchyStatus = true;
-      var syntaxHighlighting = ($('.CodeMirror').length&gt;0 || typeof(CodeMirror) !== 'undefined');
       var hiddenSpaces = getCookieHierarchy(escape(masterName), 'hiddenSpaces');
       var hiddenPages = getCookieHierarchy(escape(masterName), 'hiddenPages');
       var wikiGetURL = '/xwiki/bin/get/';
+      var remotePageName = currentPageEscaped;
+      var remoteSpaceName = currentSpaceEscaped;
+      if(hashURL.size() == 3) {
+        var sourcePage = hashURL[1];
+        var sourceSpace = hashURL[2];
+        remotePageName = encodeURIComponent(sourcePage.replace(/\\/g, '\\\\').replace(/\./g, '\\\.'));
+        remoteSpaceName = encodeURIComponent(sourceSpace.replace(/\\/g, '\\\\').replace(/\./g, '\\\.'));
+        window.location.hash = '#!XWebIDE';
+      }
       if(window.docgeturl.indexOf('/get/') != 0) wikiGetURL = window.docgeturl.substring(0,window.docgeturl.indexOf('/get/')+5);
       $.ajax({
-        url: wikiGetURL+"WebIDECode/ApplicationHierarchy?xpage=plain&amp;action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+encodeURI(masterSpace)+"."+encodeURI(masterName)+"&amp;remotePage="+currentSpaceEscaped+"."+currentPageEscaped+"&amp;hiddenSpaces="+encodeURIComponent(hiddenSpaces)+"&amp;hiddenPages="+encodeURIComponent(hiddenPages),
+        url: wikiGetURL+"WebIDECode/ApplicationHierarchy?xpage=plain&amp;action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+encodeURI(masterSpace)+"."+encodeURI(masterName)+"&amp;remotePage="+remoteSpaceName+"."+remotePageName+"&amp;hiddenSpaces="+encodeURIComponent(hiddenSpaces)+"&amp;hiddenPages="+encodeURIComponent(hiddenPages),
         type: "GET",
         contentType: "text/plain",
       }).success(function(data){
@@ -202,7 +282,6 @@ $(function(){
         if(XWiki.editor == "wiki") {
           if(syntaxHighlighting) {
             mainBlock = '.CodeMirror';
-            codeMirrors[0].setOption('lineWrapping', true)
           }
           else {
             mainBlock = '#content';
@@ -228,6 +307,9 @@ $(function(){
           "resize" : "none",
         });
         if(XWiki.editor == "wiki") {
+          if(syntaxHighlighting) {
+            codeMirrors[0].setOption('lineWrapping', true);
+          }
           $('#editPanels').remove();
           $('.leftsidecolumns.main').css({'width' : '100%'});
           $(mainBlock).css({
