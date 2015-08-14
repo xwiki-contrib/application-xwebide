@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434695260000</creationDate>
-  <date>1438599104000</date>
-  <contentUpdateDate>1438599104000</contentUpdateDate>
+  <date>1439551307000</date>
+  <contentUpdateDate>1439550461000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -119,26 +119,25 @@
     <className>XWiki.JavaScriptExtension</className>
     <guid>0a47000e-f76d-478a-873b-b76355402a3b</guid>
     <property>
-      <cache>long</cache>
+      <cache>forbid</cache>
     </property>
     <property>
       <code>require(['jquery'], function ($) {
   $(function(){
 
-  $('#saveName').click(function(e){
-    var newName = $('#WebIDECode\\.ApplicationClass_0_projectName').val().replace('%', '%25');
-    e.preventDefault();
-    $.ajax({
-      url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+XWiki.currentSpace+"/pages/"+XWiki.currentPage+"/objects/WebIDECode.ApplicationClass/0/properties/projectName",
-      type: "PUT",
-      contentType: "application/x-www-form-urlencoded",
-      accept: "application/xml",
-      data: "property#projectName="+newName,
-    }).success(function(res){
-      $('#result').html('Name successfully changed');
+    $('#saveName').click(function(e){
+      var newName = $('#WebIDECode\\.ApplicationClass_0_projectName').val().replace('%', '%25');
+      e.preventDefault();
+      $.ajax({
+        url: "/xwiki/rest/wikis/"+XWiki.currentWiki+"/spaces/"+XWiki.currentSpace+"/pages/"+XWiki.currentPage+"/objects/WebIDECode.ApplicationClass/0/properties/projectName",
+        type: "PUT",
+        contentType: "application/x-www-form-urlencoded",
+        accept: "application/xml",
+        data: "property#projectName="+newName,
+      }).success(function(res){
+        $('#result').html('Name successfully changed');
+      });
     });
-  });
-
 
   });
 });</code>
@@ -151,6 +150,277 @@
     </property>
     <property>
       <use>onDemand</use>
+    </property>
+  </object>
+  <object>
+    <class>
+      <name>XWiki.StyleSheetExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <contentType>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>contentType</name>
+        <number>6</number>
+        <prettyName>Content Type</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>CSS|LESS</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </contentType>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage|onDemand|always</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <name>WebIDECode.ApplicationSheet</name>
+    <number>0</number>
+    <className>XWiki.StyleSheetExtension</className>
+    <guid>539f3922-1eeb-46af-8dd4-5df87d6d97b7</guid>
+    <property>
+      <cache>forbid</cache>
+    </property>
+    <property>
+      <code>/* Main layout */
+
+.main {
+  left: 0 !important;
+  width: 100% !important;
+  margin: 0 !important;
+  box-sizing: border-box;
+}
+#xwikicontent {
+  overflow: inherit !important;
+}
+#editorBlock {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #DDDDDD;
+  height: 650px;
+  min-height: 650px;
+  resize: vertical;
+}
+#displayBlock {
+  width: 83%;
+  height: 100%;
+  padding: 10px;
+}
+#contentMainBlock {
+  width: 83%;
+  bottom: 0px;
+  top: 33px;
+  right: 0px;
+  position: absolute;
+  background-color: #DDDDDD;
+}
+#objectMainBlock {
+  width: 83%;
+  height: 100%;
+  overflow: auto;
+  padding: 10px;
+  box-sizing: border-box;
+}
+#hierarchyBlock {
+  height: 100%;
+}
+
+/* Editor metadata */
+
+#titleBlock {
+  width: 60%;
+}
+#xwikidoctitleinput {
+  width: 80%;
+}
+#hierarchyStateBlock {
+  position: fixed;
+  bottom: 5px;
+  right: 5px;
+  z-index: 50;
+}
+
+/* Editor content */
+
+#content {
+  height: 100%;
+  width: 100%;
+  resize: none;
+}
+.CoreMirror {
+  height: 100% !important;
+}
+#contentMainBlock .CodeMirror {
+  border: 0px !important;
+}
+.CodeMirror-scroll {
+  position: static !important;
+}
+#editorWikiButtonBar {
+  position: relative;
+  border: 1px solid #DDDDDD;
+  width: 83%;
+  height: 33px;
+  -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+box-sizing: border-box;         /* Opera/IE 8+ */
+}
+.editorElement {
+  display: none;
+}
+#objectMainBlock textarea{
+  width: 100%;
+  max-width: 100%;
+  resize: both;
+}
+#editorObjectMenu {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: auto;
+  background-color: #EEEEEE;
+  padding: 10px;
+  z-index: 50;
+}
+#editorObjectMenuTitle {
+  text-transform: uppercase;
+  font-weight: bold;
+}
+#editorObjectMenuContent {
+  display: none;
+}
+#editorObjectMenu:hover #editorObjectMenuContent{
+  display: block;
+}
+#objectIDEform {
+  z-index: 10;
+}
+.editorPropertyLabel {
+  margin: 0px;
+  font-weight: bold;
+  font-size: 0.8em;
+}
+.editorPropertyLabel p {
+  margin: 0px;
+}
+.editorDisplayedObject {
+  padding-left: 10px;
+}
+.editorObjectDetails {
+  padding-left: 10px;
+  display: none;
+}
+.editorObjectTitle, .editorObjectClassTitle {
+  cursor: pointer;
+  position: relative;
+}
+.editorObjectTitle:hover, .editorObjectClassTitle:hover {
+  text-decoration: underline;
+  background-color: #EEEEEE;
+}
+.editorObjectTitle h4 {
+  padding: 0px;
+  -webkit-user-select: none;  /* Chrome all / Safari all */
+  -moz-user-select: none;     /* Firefox all */
+  -ms-user-select: none;      /* IE 10+ */
+  user-select: none;
+}
+.editorObjectTitle p {
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  cursor: pointer;
+
+}
+.editorRemoveObject {
+}
+
+/* Top bar (project name / export) */
+
+.masterExportForm {
+  display: inline-block;
+}
+.btn {
+  vertical-align: inherit !important;
+}</code>
+    </property>
+    <property>
+      <contentType>CSS</contentType>
+    </property>
+    <property>
+      <name/>
+    </property>
+    <property>
+      <parse>0</parse>
+    </property>
+    <property>
+      <use>currentPage</use>
     </property>
   </object>
   <content>{{velocity}}
@@ -184,14 +454,95 @@
     $doc.save()
     $response.sendRedirect($doc.getURL('view'))
   #else
-  $xwiki.jsx.use("WebIDECode.ApplicationSheet")
-  ; $doc.displayPrettyName('projectName') : $doc.display('projectName', 'edit') {{html clean=false}}&lt;input type="button" id="saveName" class="btn btn-success" value="Save" title="Change the application name" /&gt; &lt;span id="result"&gt;&lt;/span&gt;{{/html}}
-  {{html clean=false}}&lt;form method="post"&gt;&lt;input type="hidden" name="export" value="1" /&gt;&lt;input type="submit" class="btn btn-success" value="Export the project (XAR)" title="Export the project" /&gt;&lt;/form&gt;{{/html}}
+  #set($showRightPanels = 0)
+  #set($showLeftPanels = 0)
+  #set($enableSyntaxH = '')
+  #set($disableSyntaxH = ' hierarchy-hidden')
+  #set($cookieSyntaxH = $request.getCookie("${doc.name}-syntaxH").value)
+  #if("$!cookieSyntaxH" == "1")
+    #set($enableSyntaxH = ' hierarchy-hidden')
+    #set($disableSyntaxH = '')
+  #end
+  #set($discard = $xwiki.jsx.use("WebIDECode.ApplicationSheet"))
+  #set($discard = $xwiki.ssx.use("WebIDECode.ApplicationSheet"))
+  ## Check the version of Syntax Highlighting installed, and load the custom JS if version &gt; 2.1
+  #if($xwiki.exists('SyntaxHighlighting.ConfigurationClass'))
+    #set($discard = $xwiki.jsx.use("WebIDECode.SyntaxHighlighting"))
+    #set($discard = $xwiki.ssx.use("WebIDECode.SyntaxHighlighting"))
+  #end
+  ; $doc.displayPrettyName('projectName') : $doc.display('projectName', 'edit') {{html clean=false}}
+  &lt;input type="button" id="saveName" class="btn btn-success" value="Save" title="Change the application name" /&gt;
+  &lt;span id="result"&gt;&lt;/span&gt;&lt;input type="button" id="enableSyntaxH" class="btn btn-success $enableSyntaxH" value="Enable Syntax Highlighting" /&gt;&lt;input type="button" id="disableSyntaxH" class="btn btn-primary $disableSyntaxH" value="Disable Syntax Highlighting" /&gt;
+  &lt;form method="post" class="masterExportForm"&gt;&lt;input type="hidden" name="export" value="1" /&gt;&lt;input type="submit" class="btn btn-success" value="Export the project (XAR)" title="Export the project" /&gt;&lt;/form&gt;
+  {{/html}}
 
-  **Content :**
+  {{html clean=false}}
+  &lt;div id="titleBlock" class="editorElement editorWikiElement"&gt;&lt;strong&gt;Title&lt;/strong&gt; &lt;input type="text" id="xwikidoctitleinput"&gt;&lt;/div&gt;
+  {{/html}}
+
+
+  (% id="editorBlock" %)
+  (((
   (% id="hierarchyBlock" %)
   (((
-    {{displayHierarchy masterPage="$doc.fullName.replace('"', '%22')" /}}
+    {{displayHierarchy masterPage="$doc.fullName.replace('"', '%22')" editor="view" hiddenSpaces="$!request.getCookie("${doc.name}-hiddenSpaces").value" hiddenPages="$!request.getCookie("${doc.name}-hiddenPages").value"/}}
+    ##{{displayHierarchy masterPage="$util.encodeURI(${request.masterPage}).replace("+", "%20")" action="$!request.action" remotePage="$util.encodeURI(${request.remotePage}).replace("+", "%20")" hiddenSpaces="$!{request.hiddenSpaces}" hiddenPages="$!{request.hiddenPages}"  editor="$!request.editor" /}}
+  )))
+  (% id="displayBlock" class="editorElement editorViewElement" %)
+  (((
+== XWebIDE Editor ==
+This is the master page of your project.
+You can choose in the left panel which page you want to edit and the editor to use.
+  )))
+  (% id="objectMainBlock" class="editorElement editorObjectElement" %)
+  (((
+  Object editor here
+  )))
+  {{html clean=false}}
+  &lt;script type="text/javascript" src="/xwiki/resources/js/xwiki/wikieditor/wikibits.js"&gt;&lt;/script&gt;
+  &lt;script type="text/javascript"&gt;
+  // &lt;![CDATA[
+  document.writeln("&lt;div id='editorWikiButtonBar' class='leftmenu2 clearfix editorElement editorWikiElement'&gt;");
+    addButton('/xwiki/resources/icons/silk/text_bold.png', 'Bold', '**', '**', 'Text in Bold');
+    addButton('/xwiki/resources/icons/silk/text_italic.png', 'Italics', '\/\/', '\/\/', 'Text in Italics');
+    addButton('/xwiki/resources/icons/silk/text_underline.png', 'Underline', '__', '__', 'Text in Underline');
+    addButton('/xwiki/resources/icons/silk/text_strikethrough.png', 'Strikethrough', '--', '--', 'Strikethrough');
+    addButton('/xwiki/resources/icons/silk/text_subscript.png', 'Subscript', ',,', ',,', 'Text in subscript');
+    addButton('/xwiki/resources/icons/silk/text_superscript.png', 'Superscript', '^^', '^^', 'Text in superscript');
+    addButton('/xwiki/resources/icons/silk/text_list_bullets.png', 'Bulleted list', '\\r\\n* ', '\\r\\n* List item\\r\\n* List item\\r\\n', 'List item');
+    addButton('/xwiki/resources/icons/silk/text_list_numbers.png', 'Numbered list', '\\r\\n1. ', '\\r\\n1. List item\\r\\n1. List item\\r\\n', 'List item');
+    addButton('/xwiki/resources/icons/silk/link.png', 'Internal Link', '[[', ']]', 'Link Example');
+    addButton('/xwiki/resources/icons/silk/link_go.png', 'External Link (do not forget http:\/\/)', '[[', ']]', 'name of link&gt;&gt;http:\/\/www.example.com');
+    addButton('/xwiki/resources/icons/silk/text_heading_1.png', 'Heading 1', '\\r\\n= ', '=\\r\\n', 'Heading 1');
+    addButton('/xwiki/resources/icons/silk/text_heading_2.png', 'Heading 2', '\\r\\n== ', '==\\r\\n', 'Heading 2');
+    addButton('/xwiki/resources/icons/silk/text_heading_3.png', 'Heading 3', '\\r\\n=== ', '===\\r\\n', 'Heading 3');
+    addButton('/xwiki/resources/icons/silk/text_heading_4.png', 'Heading 4', '\\r\\n==== ', '====\\r\\n', 'Heading 4');
+    addButton('/xwiki/resources/icons/silk/text_horizontalrule.png', 'Horizontal ruler', '\\r\\n----\\r\\n', '', '');
+    addButton('/xwiki/resources/icons/silk/image.png', 'Attached Image', '[[image:', ']]', 'example.jpg');
+    addButton('/xwiki/resources/icons/silk/html.png', 'HTML code', '\\r\\n\\&amp;#123;{html}}\\r\\n', '\\r\\n&amp;#123;{\/html}}\\r\\n', '&lt;!-- Your HTML code here --&gt;');
+    addButton('/xwiki/resources/icons/silk/cog.png', 'Velocity code', '\\r\\n&amp;#123;{velocity}}\\r\\n', '\\r\\n&amp;#123;{\/velocity}}\\r\\n', '#* Your velocity code here *#');
+  document.writeln("&lt;" + "/div&gt;");
+  // ]]&gt;
+  &lt;/script&gt;
+  {{/html}}
+
+  (% id="contentMainBlock" class="editorElement editorWikiElement" %)
+  (((
+  {{html clean=false}}
+  &lt;textarea id="content"&gt;&lt;/textarea&gt;
+  {{/html}}
+  )))
+  )))
+  (% id="hierarchyBottomActionsBar" class="editorElement editorEditElement" %)
+  (((
+  {{html clean=false}}
+  &lt;input type="button" id="hierarchySaveButtonIDE" class="btn btn-primary" value="Save &amp; Continue" title="Save the page and continue editing" /&gt; 
+  &lt;input type="button" id="hierarchySaveViewButtonIDE" class="btn btn-success" value="Save &amp; View" title="Save the page and view it" /&gt; 
+  &lt;input type="button" id="hierarchyDiscardViewButtonIDE" class="btn btn-default" value="Discard &amp; View" title="View the page without saving" /&gt; 
+  {{/html}}
+  )))
+  (% id="hierarchyStateBlock" %)(((
+    (% id="hierarchySavingState" %)((()))(% id="hierarchyLoadingState" %)((()))
   )))
   #end
 #end

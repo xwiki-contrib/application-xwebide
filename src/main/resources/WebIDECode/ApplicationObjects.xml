@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc>
+  <web>WebIDECode</web>
+  <name>ApplicationObjects</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <parent>WebIDECode.ApplicationHierarchy</parent>
+  <creator>xwiki:XWiki.Admin</creator>
+  <author>xwiki:XWiki.Admin</author>
+  <customClass/>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <creationDate>1435234589000</creationDate>
+  <date>1439454423000</date>
+  <contentUpdateDate>1439454423000</contentUpdateDate>
+  <version>1.1</version>
+  <title>ApplicationObjects</title>
+  <defaultTemplate/>
+  <validationScript/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <content>{{velocity}}
+#if($request.docFullName &amp;&amp; $request.className &amp;&amp; $request.number)
+#set($Integer = 0)
+#set($requestedObj = $xwiki.getDocument($request.docFullName).getObject($request.className, $Integer.parseInt($request.number)))
+#set($requestedClassProperties = $xwiki.getClass($request.className).properties)
+#if($requestedObj.getProperty('name').value)
+  #set($objectTitleAdd = "- ${requestedObj.getProperty('name').value} ")
+#end
+(% class="editorObjectTitle" data-classname="$request.className" data-number="$request.number" %)(((==== $request.className - $request.number $!objectTitleAdd====[[image:icon:cross||title='Remove object' data-classname='$request.className' data-number='$request.number' class='editorRemoveObject']])))
+(% id="editorObject-${request.className}-${request.number}" class="editorObjectDetails xobject" %)(((
+#foreach($prop in $requestedClassProperties)
+  (% class="editorPropertyLabel" %)((( $prop.prettyName )))
+  $requestedObj.display($prop.name, 'edit')
+#end
+)))
+#elseif($request.allClasses)
+{{html clean=false}}
+Add an object: &lt;select id="addClassList"&gt;
+  &lt;option value="" disabled&gt;Select a class&lt;/option&gt;
+#foreach($class in $xwiki.getClassList())
+  #set($classDoc = $xwiki.getDocument($class))
+  #set($newspace = $classDoc.space)
+  #if("$!newspace" != "$!space")
+  #if($velocityCount != 0)
+  &lt;/optgroup&gt;
+  #end
+  &lt;optgroup label="$newspace"&gt;
+  #set($space = $newspace)
+  #end
+  &lt;option value="$class"&gt;$classDoc.name&lt;/option&gt;
+#end
+&lt;/optgroup&gt;
+&lt;/select&gt;
+&lt;button class="btn btn-success" id="editorObjectAddButton"&gt;Add&lt;/button&gt; &lt;button class="btn btn-default" id="editorExpandAllButton"&gt;Expand all&lt;/button&gt;&lt;button class="btn btn-default" id="editorCollapseAllButton"&gt;Collapse all&lt;/button&gt;
+{{/html}}
+#elseif($request.addObject &amp;&amp; $request.docFullName)
+#set($requestedDoc = $xwiki.getDocument($request.docFullName))
+#set($requestedObj = $requestedDoc.newObject($request.addObject))
+#set($discard = $requestedDoc.save())
+#set($requestedClassProperties = $xwiki.getClass($request.addObject).properties)
+(% class="editorObjectTitle" data-classname="$request.addObject" data-number="$requestedObj.number" %)(((==== $request.addObject - $requestedObj.number ====[[image:icon:cross||title='Remove object' data-classname='$request.addObject' data-number='$requestedObj.number' class='editorRemoveObject']])))
+(% id="editorObject-${request.addObject}-${requestedObj.number}" class="editorObjectDetails xobject" %)(((
+#foreach($prop in $requestedClassProperties)
+  (% class="editorPropertyLabel" %)((( $prop.prettyName )))
+  $requestedObj.display($prop.name, 'edit')
+#end
+)))
+#end
+{{/velocity}}</content>
+</xwikidoc>
