@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1440670832000</date>
-  <contentUpdateDate>1440670832000</contentUpdateDate>
+  <date>1441026442000</date>
+  <contentUpdateDate>1441026442000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -459,11 +459,6 @@ box-sizing: border-box;         /* Opera/IE 8+ */
   $export.export()
 #end
 #if($xcontext.action == "view")
-  #if($doc.isNew())
-    $doc.getObject('WebIDECode.ApplicationClass').set('projectName', $doc.name)
-    $doc.save()
-    $response.sendRedirect($doc.getURL('view'))
-  #else
   #set($showRightPanels = 0)
   #set($showLeftPanels = 0)
   #set($enableSyntaxH = '')
@@ -554,7 +549,6 @@ You can choose in the left panel which page you want to edit and the editor to u
   (% id="hierarchyStateBlock" %)(((
     (% id="hierarchySavingState" %)((()))(% id="hierarchyLoadingState" %)((()))
   )))
-  #end
 #end
 {{/velocity}}</content>
 </xwikidoc>

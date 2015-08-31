@@ -31,9 +31,9 @@
   <author>xwiki:XWiki.Admin</author>
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
-  <creationDate>1435134965000</creationDate>
-  <date>1435657759000</date>
-  <contentUpdateDate>1435654686000</contentUpdateDate>
+  <creationDate>1435138565000</creationDate>
+  <date>1441026402000</date>
+  <contentUpdateDate>1441026402000</contentUpdateDate>
   <version>1.1</version>
   <title>WebHome</title>
   <defaultTemplate/>
@@ -44,7 +44,7 @@
   <hidden>false</hidden>
   <object>
     <class>
-      <name>AppWithinMinutes.LiveTableClass</name>
+      <name>XWiki.JavaScriptExtension</name>
       <customClass/>
       <customMapping/>
       <defaultViewSheet/>
@@ -52,60 +52,245 @@
       <defaultWeb/>
       <nameField/>
       <validationScript/>
-      <class>
-        <customDisplay/>
+      <cache>
+        <cache>0</cache>
         <disabled>0</disabled>
-        <name>class</name>
-        <number>1</number>
-        <picker>0</picker>
-        <prettyName>Class</prettyName>
-        <size>30</size>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
         <unmodifiable>0</unmodifiable>
-        <validationMessage/>
-        <validationRegExp/>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </class>
-      <columns>
-        <customDisplay/>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
         <disabled>0</disabled>
-        <name>columns</name>
-        <number>3</number>
-        <picker>0</picker>
-        <prettyName>Columns</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <validationMessage/>
-        <validationRegExp/>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </columns>
-      <description>
-        <customDisplay/>
-        <disabled>0</disabled>
-        <editor>---</editor>
-        <name>description</name>
+        <name>code</name>
         <number>2</number>
-        <picker>0</picker>
-        <prettyName>Description</prettyName>
-        <rows>5</rows>
-        <size>40</size>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
         <unmodifiable>0</unmodifiable>
-        <validationMessage/>
-        <validationRegExp/>
         <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
-      </description>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage|onDemand|always</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
     </class>
     <name>WebIDE.WebHome</name>
     <number>0</number>
-    <className>AppWithinMinutes.LiveTableClass</className>
-    <guid>b26d43c8-012f-4810-b064-63c78dce177f</guid>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>d9cd3135-bae4-479a-b22e-6af8bfde5505</guid>
     <property>
-      <class>WebIDECode.ApplicationClass</class>
+      <cache>long</cache>
     </property>
     <property>
-      <columns>projectName doc.date spaces _actions</columns>
+      <code>(function(){
+  //Auto-Complete:
+  document.observe('dom:loaded', function () {
+    if($('spacesList')) {
+      Event.observe($('spacesList'), "focus", function() {
+        new XWiki.widgets.Suggest(this, {
+          script: '$xwiki.getURL("${doc.space}.WebHome", "view")?xpage=suggest&amp;classname=WebIDECode.ApplicationClass&amp;fieldname=spaces&amp;firCol=doc.space&amp;secCol=-&amp;',
+          varname: "input",
+          seps: " ,|",
+          offsety: 13
+        });
+      });
+    }
+    if($('pagesList')) {
+      Event.observe($('pagesList'), "focus", function() {
+        new XWiki.widgets.Suggest(this, {
+          script: '$xwiki.getURL("${doc.space}.WebHome", "view")?xpage=suggest&amp;classname=WebIDECode.ApplicationClass&amp;fieldname=pages&amp;firCol=doc.fullName&amp;secCol=-&amp;',
+          varname: "input",
+          seps: " ,|",
+          offsety: 13
+        });
+      });
+    }
+  }); // end of doc observe for auto-complete
+})();
+
+require(['jquery'], function ($) {
+  $(function(){
+
+    $('#openCreationBlock').click(function(e){
+      e.preventDefault();
+      $('#createProjectBlock').show();
+      $('#openCreationBlock').hide();
+    });
+
+  });
+});</code>
     </property>
     <property>
-      <description/>
+      <name/>
+    </property>
+    <property>
+      <parse>1</parse>
+    </property>
+    <property>
+      <use>currentPage</use>
+    </property>
+  </object>
+  <object>
+    <class>
+      <name>XWiki.StyleSheetExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <contentType>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>contentType</name>
+        <number>6</number>
+        <prettyName>Content Type</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>CSS|LESS</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </contentType>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage|onDemand|always</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <name>WebIDE.WebHome</name>
+    <number>0</number>
+    <className>XWiki.StyleSheetExtension</className>
+    <guid>a1d9e013-67f5-47ba-95db-af36ffb61490</guid>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>#template('colorThemeInit.vm')
+
+#createProjectBlock {
+  display: none;
+  background-color: $theme.fieldGradientColor;
+  border: 1px solid $theme.borderColor;
+  padding: 5px;
+  font-weight: bold;
+}
+
+#createProjectBlock input {
+  font-weight: normal;
+}</code>
+    </property>
+    <property>
+      <contentType>CSS</contentType>
+    </property>
+    <property>
+      <name/>
+    </property>
+    <property>
+      <parse>1</parse>
+    </property>
+    <property>
+      <use>currentPage</use>
     </property>
   </object>
   <object>
@@ -196,6 +381,29 @@ icon=icon:folder</parameters>
     </property>
   </object>
   <content>{{velocity}}
+#if($request.projectName)
+  #set($projectName = $request.projectName)
+  #set($pageName = $xwiki.getUniquePageName('WebIDE', $util.clearName($projectName)))
+  #set($spacesList = $request.spacesList)
+  #set($pagesList = $request.pagesList)
+  #set($newDoc = $xwiki.getDocument($pageName))
+  #set($newObj = $newDoc.newObject("WebIDECode.ApplicationClass"))
+  #set($discard = $newObj.set('projectName', $projectName))
+  #set($discard = $newObj.set('spaces', $spacesList))
+  #set($discard = $newObj.set('pages', $pagesList))
+  #set($discard = $newObj.set('xarVersion', 0))
+  #set($discard = $newDoc.save())
+  $response.sendRedirect($newDoc.getURL('view'))
+#else
+{{html clean=false}}
+&lt;div align="center"&gt;&lt;input type="button" id="openCreationBlock" class="btn btn-success" value="Add a project"&gt;&lt;/div&gt;
+&lt;form id="createProjectBlock" method="post"&gt;
+  Project Name: &lt;input type="text" name="projectName"&gt;&lt;br&gt;
+  Spaces in the project (*): &lt;input type="text" name="spacesList" id="spacesList"&gt;&lt;br&gt;
+  Other pages in the project (*): &lt;input type="text" name="pagesList" id="pagesList"&gt;&lt;br&gt;
+  &lt;input type="submit" value="Create the project" class="btn btn-primary"&gt;&lt;br&gt;
+  &lt;em&gt;(*): Can be completed later&lt;/em&gt;
+&lt;/form&gt;{{/html}}
 #set ($columnsProperties = {
   'projectName': {"displayName":"Project Name", "type":"text","size":10,"link":"view"},
   'doc.date': {"type":"text","size":10},
@@ -212,6 +420,8 @@ icon=icon:folder</parameters>
 })
 #set ($columns = ['projectName', 'doc.date', 'spaces', '_actions'])
 #livetable('webIDE' $columns $columnsProperties $options)
+
+#end
 {{/velocity}}
 </content>
 </xwikidoc>
