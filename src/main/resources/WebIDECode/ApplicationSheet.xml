@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1441026442000</date>
-  <contentUpdateDate>1441026442000</contentUpdateDate>
+  <date>1441031630000</date>
+  <contentUpdateDate>1441031630000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -470,6 +470,8 @@ box-sizing: border-box;         /* Opera/IE 8+ */
   #end
   #set($discard = $xwiki.jsx.use("WebIDECode.ApplicationSheet"))
   #set($discard = $xwiki.ssx.use("WebIDECode.ApplicationSheet"))
+  ##Check if Syntax Highlighting is installed
+  #set($syntaxState = $xwiki.exists("SyntaxHighlighting.SyntaxHighlighting"))
   ## Check the version of Syntax Highlighting installed, and load the custom JS if version &gt; 2.1
   #if($xwiki.exists('SyntaxHighlighting.ConfigurationClass'))
     #set($discard = $xwiki.jsx.use("WebIDECode.SyntaxHighlighting"))
@@ -477,7 +479,7 @@ box-sizing: border-box;         /* Opera/IE 8+ */
   #end
   ; $doc.displayPrettyName('projectName') : $doc.display('projectName', 'edit') {{html clean=false}}
   &lt;input type="button" id="saveName" class="btn btn-success" value="Save" title="Change the application name" /&gt;
-  &lt;span id="result"&gt;&lt;/span&gt;&lt;input type="button" id="enableSyntaxH" class="btn btn-success $enableSyntaxH" value="Enable Syntax Highlighting" /&gt;&lt;input type="button" id="disableSyntaxH" class="btn btn-primary $disableSyntaxH" value="Disable Syntax Highlighting" /&gt;
+  &lt;span id="result"&gt;&lt;/span&gt;#if($syntaxState == true)&lt;input type="button" id="enableSyntaxH" class="btn btn-success $enableSyntaxH" value="Enable Syntax Highlighting" /&gt;&lt;input type="button" id="disableSyntaxH" class="btn btn-primary $disableSyntaxH" value="Disable Syntax Highlighting" /&gt;#end
   &lt;form method="post" class="masterExportForm"&gt;&lt;input type="hidden" name="export" value="1" /&gt;&lt;input type="submit" class="btn btn-success" value="Export the project (XAR)" title="Export the project" /&gt;&lt;/form&gt;
   {{/html}}
 
