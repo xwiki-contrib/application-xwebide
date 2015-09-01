@@ -31,9 +31,9 @@
   <author>xwiki:XWiki.Admin</author>
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
-  <creationDate>1434700712000</creationDate>
-  <date>1439552519000</date>
-  <contentUpdateDate>1439551183000</contentUpdateDate>
+  <creationDate>1434704312000</creationDate>
+  <date>1441096656000</date>
+  <contentUpdateDate>1439554783000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -211,7 +211,7 @@ $(function(){
     $('.newPage').click(function(e){
       e.preventDefault();
       $('#hierarchyPageFolder').html(unescape($(this).attr('data-space')));
-      if(!bootstrap) {
+      if(!bootstrap()) {
         var newPageNoBootstrap = prompt("Name of the new page:", "");
         if(newPageNoBootstrap != null) {
           $('#hierarchyNewPageName').val(newPageNoBootstrap);
@@ -222,7 +222,7 @@ $(function(){
     // Add a folder (if no bootstrap)
     $('.newFolder').click(function(e){
       e.preventDefault();
-      if(!bootstrap) {
+      if(!bootstrap()) {
         var newFodlerNoBootstrap = prompt("Name of the folder:", "");
         if(newFodlerNoBootstrap != null) {
           $('#hierarchyNewFolderName').val(newFodlerNoBootstrap);
@@ -233,7 +233,7 @@ $(function(){
     // Add an existing page (if no bootstrap)
     $('.newExistingPage').click(function(e){
       e.preventDefault();
-      if(!bootstrap) {
+      if(!bootstrap()) {
         var newExistingPageNoBootstrap = prompt("Name of the existing page:", "");
         if(newExistingPageNoBootstrap != null) {
           $('#hierarchyExistingPageName').val(newExistingPageNoBootstrap);
@@ -273,7 +273,7 @@ $(function(){
             synchronizeObjects();
           }
           if(savedContent != $(textEditor).val()) {
-            if(bootstrap) {
+            if(bootstrap()) {
               nextEditor = 'wiki';
               $('#hierarchyChangePageModal').modal('show');
             }
@@ -298,7 +298,7 @@ $(function(){
             synchronizeObjects();
           }
           if(savedContent != $(textEditor).val()) {
-            if(bootstrap) {
+            if(bootstrap()) {
               nextEditor = 'object';
               $('#hierarchyChangePageModal').modal('show');
             }
@@ -405,8 +405,9 @@ $(function(){
   }
 
   // Determine if bootstrap is enabled or not for modals
-  var bootstrap = (typeof($.fn.modal) !== 'undefined');
-
+  var bootstrap = function() {
+    return (typeof($.fn.modal) !== 'undefined');
+  }
   // Initialize the first editor to display
   if(currentEditor == "wiki") {
     initWikiEditor();
@@ -422,17 +423,27 @@ $(function(){
   }
 
   // Autofocus on text inputs when a modal appears:
-  if(bootstrap) {
-    $('#hierarchyFolderModal').on('shown.bs.modal', function () {
-      $('#hierarchyNewFolderName').focus();
-    })
-    $('#hierarchyPageModal').on('shown.bs.modal', function () {
-      $('#hierarchyNewPageName').focus();
-    })
-    $('#hierarchyExistingPageModal').on('shown.bs.modal', function () {
-      $('#hierarchyExistingPageName').focus();
-    })
-  }
+  $('#hierarchyFolderModal').on('shown.bs.modal', function () {
+    $('#hierarchyNewFolderName').focus();
+    shortcut.add("Enter", function() {addFolder();});
+  });
+  $('#hierarchyPageModal').on('shown.bs.modal', function () {
+    $('#hierarchyNewPageName').focus();
+    shortcut.add("Enter", function() {addPage();});
+  });
+  $('#hierarchyExistingPageModal').on('shown.bs.modal', function () {
+    $('#hierarchyExistingPageName').focus();
+    shortcut.add("Enter", function() {addExistingPage();});
+  });
+  $('#hierarchyFolderModal').on('hidden.bs.modal', function () {
+    shortcut.remove('Enter');
+  });
+  $('#hierarchyPageModal').on('hidden.bs.modal', function () {
+    shortcut.remove('Enter');
+  });
+  $('#hierarchyExistingPageModal').on('hidden.bs.modal', function () {
+    shortcut.remove('Enter');
+  });
 
   // Improve the F5 shortcut to stay on the current editor and the current page
   shortcut.add("F5", function() {
@@ -530,7 +541,7 @@ $(function(){
       }).success(function(dataContent){
         formattedData = dataContent.replace(/^&lt;pre&gt;/, '').replace(/&lt;\/pre&gt;$/, '');
         $('#hierarchyNewFolderName').val('');
-        if(bootstrap) {
+        if(bootstrap()) {
           $('#hierarchyChangePageModal').modal('hide');
         }
         reloadHierarchy(true);
@@ -630,13 +641,8 @@ $(function(){
         var objectsListSize = objectsList.size();
         var index = -1;
         // Start the loading and displaying
-        if(objectsListSize &gt;= 1){
-          displayObjectIDE(objectsList, index, objectsListSize, '', dataHTML, menuHTML, addObjectHTML);
-        }
-        else {
-          completeObjectLoadingIDE(dataHTML, menuHTML, addObjectHTML, objectsListSize);
-        }
-        if(bootstrap) {
+        displayObjectIDE(objectsList, index, objectsListSize, '', dataHTML, menuHTML, addObjectHTML);
+        if(bootstrap()) {
           $('#hierarchyChangePageModal').modal('hide');
         }
       });
@@ -716,7 +722,7 @@ $(function(){
         }).success(function(dataContent) {
           var divSelector = 'div[id="editorObjects-'+className+'"]';
           var anchor = $('&lt;div /&gt;').append(dataContent).find('h4').attr('id');
-          var number = $('&lt;div/&gt;').append(dataContent).find('div[number]').attr('data-number');
+          var number = $('&lt;div/&gt;').append(dataContent).find('div[data-number]').attr('data-number');
           // Add the object in the right class if an object of that class is already in that page
           if($(divSelector).length){
             $(divSelector).show();
@@ -726,7 +732,12 @@ $(function(){
           // Else add the object at the end of the page and quick access menu
           else {
             $('#objectIDEform').html($('#objectIDEform').html()+'&lt;h2 class="wikigeneratedheader editorObjectClassTitle" data-classname="'+className+'"&gt;'+className+'&lt;/h2&gt;&lt;div id="editorObjects-'+className+'" class="editorObjectClassDetails"&gt;&lt;div class="editorDisplayedObject"&gt;'+dataContent+'&lt;/div&gt;&lt;/div&gt;');
-            $('#editorObjectMenu a:last').after('&lt;br&gt;&lt;a href="#'+anchor+'" class="editorObjectMenuLink" data-classname="'+className+'" data-number="'+number+'"&gt;'+className+' - '+number+'&lt;/a&gt;');
+            if($('#editorObjectMenu a:last').length) {
+              $('#editorObjectMenu a:last').after('&lt;br&gt;&lt;a href="#'+anchor+'" class="editorObjectMenuLink" data-classname="'+className+'" data-number="'+number+'"&gt;'+className+' - '+number+'&lt;/a&gt;');
+            }
+            else {
+              $('#editorObjectMenuContent').append('&lt;a href="#'+anchor+'" class="editorObjectMenuLink" data-classname="'+className+'" data-number="'+number+'"&gt;'+className+' - '+number+'&lt;/a&gt;');
+            }
           }
           initObjects();
           if(syntaxHighlighting) {
@@ -777,7 +788,7 @@ $(function(){
     });
     $('.editorRemoveObject').on('click', function(e) {
       e.preventDefault();
-      if(bootstrap) {
+      if(bootstrap()) {
         $('#editorDeletedObjectModalInfo').html($(this).attr('data-classname')+' - '+$(this).attr('data-number'));
         $('#editorDeleteObjectConfirmed').attr('data-classname', $(this).attr('data-classname'));
         $('#editorDeleteObjectConfirmed').attr('data-number', $(this).attr('data-number'));
@@ -824,7 +835,7 @@ $(function(){
           $(this).hide().html('');
           n();
         });
-        if(bootstrap) {
+        if(bootstrap()) {
           $('#editorDeleteObjectModal').modal('hide');
         }
       }).error(function(xhr){
@@ -863,9 +874,9 @@ $(function(){
 
   // Synchronize the original textareas' contents with the codemirrors' contents.
   function synchronizeObjects() {
-    for (var i=0; i &lt; codeMirrors.length; ++i) {
-      codeMirrors[i].save();
-    }
+    codeMirrors.each(function (cMElement) {
+      cMElement.save();
+    });
   }
 
   //-------------------------------------
@@ -992,7 +1003,7 @@ $(function(){
           data: "property#spaces="+encodeURIComponent(spaceArray),
         }).success(function(){
           $('#hierarchyNewFolderName').val('');
-          if(bootstrap) {
+          if(bootstrap()) {
             $('#hierarchyFolderModal').modal('hide');
           }
           $('#hierarchySavingState').html('&lt;strong&gt;Folder added&lt;/strong&gt;').show().delay(4000).queue(function(n) {
@@ -1002,7 +1013,7 @@ $(function(){
           reloadHierarchy(false);
         }).error(function(xhr){
           $('#hierarchyNewFolderName').val('');
-          if(bootstrap) {
+          if(bootstrap()) {
             $('#hierarchyFolderModal').modal('hide');
           }
           $('#hierarchySavingState').attr('class', 'red').html('&lt;strong&gt;'+xhr.statusText+'&lt;/strong&gt;').show().delay(4000).queue(function(n) {
@@ -1028,7 +1039,7 @@ $(function(){
       type: "GET",
       contentType: "application/xml",
     }).success(function(xhr){
-      if(bootstrap) {
+      if(bootstrap()) {
         $('#hierarchyExistingPageModalError').html('ERROR : A page with the same name already exist').show().delay(4000).queue(function(n) {
           $(this).hide().html('');
           n();
@@ -1046,7 +1057,7 @@ $(function(){
         data: "title="+newPage+"&amp;parent="+currentSpaceEscaped+"."+currentPageEscaped,
       }).success(function(){
         $('#hierarchyNewPageName').val('');
-        if(bootstrap) {
+        if(bootstrap()) {
           $('#hierarchyPageModal').modal('hide');
         }
         $('#hierarchySavingState').html('&lt;strong&gt;Page added&lt;/strong&gt;').show().delay(4000).queue(function(n) {
@@ -1056,7 +1067,7 @@ $(function(){
         reloadHierarchy(false);
       }).error(function(xhr){
         $('#hierarchyNewPageName').val('');
-        if(bootstrap) {
+        if(bootstrap()) {
           $('#hierarchyPageModal').modal('hide');
         }
         $('#hierarchySavingState').attr('class', 'red').html('&lt;strong&gt;'+xhr.statusText+'&lt;/strong&gt;').show().delay(4000).queue(function(n) {
@@ -1082,7 +1093,7 @@ $(function(){
       type: "GET",
       contentType: "application/xml",
     }).error(function(){
-      if(bootstrap) {
+      if(bootstrap()) {
         $('#hierarchyExistingPageModalError').html('ERROR : Unexisting page').show().delay(4000).queue(function(n) {
           $(this).hide().html('');
           n();
@@ -1110,7 +1121,7 @@ $(function(){
             data: "property#pages="+encodeURIComponent(pageArray),
           }).success(function(){
             $('#hierarchyExistingPageName').val('');
-            if(bootstrap) {
+            if(bootstrap()) {
               $('#hierarchyExistingPageModal').modal('hide');
             }
             $('#hierarchySavingState').html('&lt;strong&gt;Page added&lt;/strong&gt;').show().delay(4000).queue(function(n) {
@@ -1120,7 +1131,7 @@ $(function(){
             reloadHierarchy(false);
           }).error(function(xhr){
             $('#hierarchyExistingPageName').val('');
-            if(bootstrap) {
+            if(bootstrap()) {
               $('#hierarchyExistingPageModal').modal('hide');
             }
             $('#hierarchySavingState').attr('class', 'red').html('&lt;strong&gt;'+xhr.statusText+'&lt;/strong&gt;').show().delay(4000).queue(function(n) {
@@ -1752,6 +1763,7 @@ $(function(){
 **Project documents:**
 (% class="hierarchy-list hierarchy-no-padding" id="hierarchyMainList" %)
 #foreach($space in $spacesList)
+  #set($spaceComplete = $spacesListInit.contains($space))
   #set($spaceEscaped = $util.encodeURI($space).replace("+", "%20"))
   #set($spaceEscapedBackslash = $util.encodeURI($space.replace('\', '\\').replace('.', '\.')).replace("+", "%20"))
   #if($hiddenSpaces.contains($spaceEscapedBackslash) &amp;&amp; $space != $currentDoc.space)
@@ -1855,7 +1867,7 @@ $(function(){
       *** [[image:icon:attach Attachments ($attachmentCount)&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')#Attachments]]
     #end
   #end
-  #if($xwiki.hasAccessLevel('edit', "$spaceEscaped.$reservedDocumentName")) ## Check if the user can create a page in that space
+  #if($xwiki.hasAccessLevel('edit', "$spaceEscaped.$reservedDocumentName") &amp;&amp; $spaceComplete) ## Check if the user can create a page in that space and if the space is in the folder list
     ** image:icon:add {{html clean=false}}&lt;a href="#!XWebIDE" data-space="$spaceEscaped" class="newPage" data-toggle="modal" data-target="#hierarchyPageModal"&gt;Add new page&lt;/a&gt;{{/html}}
   #end
 #end
