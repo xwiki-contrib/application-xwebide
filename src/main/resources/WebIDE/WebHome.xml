@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1435138565000</creationDate>
-  <date>1441026402000</date>
-  <contentUpdateDate>1441026402000</contentUpdateDate>
+  <date>1441293501000</date>
+  <contentUpdateDate>1441293093000</contentUpdateDate>
   <version>1.1</version>
   <title>WebHome</title>
   <defaultTemplate/>
@@ -123,10 +123,10 @@
     </property>
     <property>
       <code>(function(){
-  //Auto-Complete:
+  //Auto-suggest:
   document.observe('dom:loaded', function () {
-    if($('spacesList')) {
-      Event.observe($('spacesList'), "focus", function() {
+    if($('spaceAdd')) {
+      Event.observe($('spaceAdd'), "focus", function() {
         new XWiki.widgets.Suggest(this, {
           script: '$xwiki.getURL("${doc.space}.WebHome", "view")?xpage=suggest&amp;classname=WebIDECode.ApplicationClass&amp;fieldname=spaces&amp;firCol=doc.space&amp;secCol=-&amp;',
           varname: "input",
@@ -135,8 +135,8 @@
         });
       });
     }
-    if($('pagesList')) {
-      Event.observe($('pagesList'), "focus", function() {
+    if($('pageAdd')) {
+      Event.observe($('pageAdd'), "focus", function() {
         new XWiki.widgets.Suggest(this, {
           script: '$xwiki.getURL("${doc.space}.WebHome", "view")?xpage=suggest&amp;classname=WebIDECode.ApplicationClass&amp;fieldname=pages&amp;firCol=doc.fullName&amp;secCol=-&amp;',
           varname: "input",
@@ -145,143 +145,140 @@
         });
       });
     }
-  }); // end of doc observe for auto-complete
+  }); // end of doc observe for auto-suggest
 })();
 
 require(['jquery'], function ($) {
   $(function(){
 
+    var bootstrap = (typeof($.fn.modal) !== 'undefined');
+    $('html &gt; head').append($('&lt;style&gt;#backgroundModalNoBootstrap{position:fixed;left:0px;top:0px;right:0px;bottom:0px;z-index:999;background-color:black;opacity:0.3;display:none;}&lt;/style&gt;'));
+    if(!bootstrap) {
+      $('html &gt; head').append($('&lt;style&gt;.btn{border-radius:5px;padding:3px;color:white;cursor:pointer;}.btn-primary{background-color:#337AB7;border-color:#2E6DA4;}.btn-success{background-color:#5CB85C;border-color:#4CAE4C;}.btn-danger{background-color:#C9302C;border-color:#AC2925;}.btn-default{border-color:#000000;color:black;}&lt;/style&gt;'));
+      function openModalNoBootstrap(modalId) {
+        $(modalId).show();
+        $('#backgroundModalNoBootstrap').show();
+      }
+      function closeModalNoBootstrap() {
+        $('#backgroundModalNoBootstrap').hide();
+        $('.modal').hide();
+      }
+      $('#backgroundModalNoBootstrap').click(function () {
+        closeModalNoBootstrap();
+      });
+    }
+    $('#modalProjectCreation').hide();
+
     $('#openCreationBlock').click(function(e){
+      $('#modalProjectCreation').show();
       e.preventDefault();
-      $('#createProjectBlock').show();
-      $('#openCreationBlock').hide();
+      $('#projectCreationName').show();
+      $('#projectCreationSpaces, #projectCreationPages').hide();
+      $('#projectName, #spacesList, #pagesList').val('');
+      if(bootstrap) {
+        $('#modalProjectCreation').modal('show');
+      }
+      else {
+        openModalNoBootstrap('#backgroundModalNoBootstrap');
+        $('button[data-dismiss="modal"]').click(function() {
+          closeModalNoBootstrap();
+        });
+        $('.modal').css({
+          "width" : "40%",
+          "border" : "1px solid black",
+          "backgroundColor" : "#FFFFFF",
+          "borderRadius" : "5px",
+          "position" : "fixed",
+          "left" : "30%",
+          "top" : "20%",
+          "padding" : "10px",
+          "zIndex" : "1000"
+        });
+        $('.modal-header .close').css({
+          "float" : "right",
+          "position" : "absolute",
+          "right" : "5px",
+          "top" : "5px"
+        });
+        $('.modal-header .modal-title').css({
+          "marginTop" : "0px"
+        });
+      }
+      $('#projectName').focus();
     });
 
+    $('#createProjectBlock').on('submit', function(e) {
+      if(!$('#projectName').val()) {
+        e.preventDefault();
+        $('.projectCreationNameError').html('You have to choose a project name!');
+        return false;
+      }
+    });
+    $('#projectCreationNameButton').click(function(e) {
+      e.preventDefault();
+      if($('#projectName').val()) {
+        $('.projectCreationNameDisplayed').html($('#projectName').val());
+        $('#projectCreationName').hide();
+        $('#projectCreationSpaces').show();
+        $('#spaceAdd').focus();
+      }
+      else {
+        $('.projectCreationNameError').html('You have to choose a project name!');
+      }
+    });
+    $('#projectCreationSpacesButton').click(function(e) {
+      e.preventDefault();
+      $('#projectCreationSpaces').hide();
+      $('#projectCreationPages').show();
+      $('#pageAdd').focus();
+    });
+
+    // Press enter at the first step = go to step 2
+    $('#projectName').keydown(function(e) {
+      if(e.which == 13) {
+        e.preventDefault();
+        $('#projectCreationNameButton').click();
+      }
+    });
+
+    // Add spaces to the project
+    $('#projectCreationSpacesAdd').click(function(e) {
+      if($('#spaceAdd').val()) {
+        if($('#spacesList').val()) {
+          $('#spacesList').val($('#spacesList').val()+',');
+        }
+        $('#spacesList').val($('#spacesList').val()+$('#spaceAdd').val());
+        $('#spaceAdd').val('');
+        $('.projectCreationSpacesDisplayed').html($('#spacesList').val());
+      }
+    });
+    $('#spaceAdd').keydown(function(e) {
+      // Add the current space if the user types , or | (separators of the list) or presses Enter
+      if(e.which == 188 || e.which == 54 || e.which == 13) {
+        e.preventDefault();
+        $('#projectCreationSpacesAdd').click();
+      }
+    });
+    // Add additional pages to the project
+    $('#projectCreationPagesAdd').click(function(e) {
+      if($('#pageAdd').val()) {
+        if($('#pagesList').val()) {
+          $('#pagesList').val($('#pagesList').val()+',');
+        }
+        $('#pagesList').val($('#pagesList').val()+$('#pageAdd').val());
+        $('#pageAdd').val('');
+        $('.projectCreationPagesDisplayed').html($('#pagesList').val());
+      }
+    });
+    $('#pageAdd').keydown(function(e) {
+      // Add the current space if the user types , or | (separators of the list) or presses Enter
+      if(e.which == 188 || e.which == 54 || e.which == 13) {
+        e.preventDefault();
+        $('#projectCreationPagesAdd').click();
+      }
+    });
   });
 });</code>
-    </property>
-    <property>
-      <name/>
-    </property>
-    <property>
-      <parse>1</parse>
-    </property>
-    <property>
-      <use>currentPage</use>
-    </property>
-  </object>
-  <object>
-    <class>
-      <name>XWiki.StyleSheetExtension</name>
-      <customClass/>
-      <customMapping/>
-      <defaultViewSheet/>
-      <defaultEditSheet/>
-      <defaultWeb/>
-      <nameField/>
-      <validationScript/>
-      <cache>
-        <cache>0</cache>
-        <disabled>0</disabled>
-        <displayType>select</displayType>
-        <multiSelect>0</multiSelect>
-        <name>cache</name>
-        <number>5</number>
-        <prettyName>Caching policy</prettyName>
-        <relationalStorage>0</relationalStorage>
-        <separator> </separator>
-        <separators> ,|</separators>
-        <size>1</size>
-        <unmodifiable>0</unmodifiable>
-        <values>long|short|default|forbid</values>
-        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
-      </cache>
-      <code>
-        <disabled>0</disabled>
-        <name>code</name>
-        <number>2</number>
-        <prettyName>Code</prettyName>
-        <rows>20</rows>
-        <size>50</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
-      </code>
-      <contentType>
-        <cache>0</cache>
-        <disabled>0</disabled>
-        <displayType>select</displayType>
-        <multiSelect>0</multiSelect>
-        <name>contentType</name>
-        <number>6</number>
-        <prettyName>Content Type</prettyName>
-        <relationalStorage>0</relationalStorage>
-        <separator> </separator>
-        <separators> ,|</separators>
-        <size>1</size>
-        <unmodifiable>0</unmodifiable>
-        <values>CSS|LESS</values>
-        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
-      </contentType>
-      <name>
-        <disabled>0</disabled>
-        <name>name</name>
-        <number>1</number>
-        <prettyName>Name</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </name>
-      <parse>
-        <disabled>0</disabled>
-        <displayFormType>select</displayFormType>
-        <displayType>yesno</displayType>
-        <name>parse</name>
-        <number>4</number>
-        <prettyName>Parse content</prettyName>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
-      </parse>
-      <use>
-        <cache>0</cache>
-        <disabled>0</disabled>
-        <displayType>select</displayType>
-        <multiSelect>0</multiSelect>
-        <name>use</name>
-        <number>3</number>
-        <prettyName>Use this extension</prettyName>
-        <relationalStorage>0</relationalStorage>
-        <separator> </separator>
-        <separators> ,|</separators>
-        <size>1</size>
-        <unmodifiable>0</unmodifiable>
-        <values>currentPage|onDemand|always</values>
-        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
-      </use>
-    </class>
-    <name>WebIDE.WebHome</name>
-    <number>0</number>
-    <className>XWiki.StyleSheetExtension</className>
-    <guid>a1d9e013-67f5-47ba-95db-af36ffb61490</guid>
-    <property>
-      <cache>long</cache>
-    </property>
-    <property>
-      <code>#template('colorThemeInit.vm')
-
-#createProjectBlock {
-  display: none;
-  background-color: $theme.fieldGradientColor;
-  border: 1px solid $theme.borderColor;
-  padding: 5px;
-  font-weight: bold;
-}
-
-#createProjectBlock input {
-  font-weight: normal;
-}</code>
-    </property>
-    <property>
-      <contentType>CSS</contentType>
     </property>
     <property>
       <name/>
@@ -397,13 +394,54 @@ icon=icon:folder</parameters>
 #else
 {{html clean=false}}
 &lt;div align="center"&gt;&lt;input type="button" id="openCreationBlock" class="btn btn-success" value="Add a project"&gt;&lt;/div&gt;
-&lt;form id="createProjectBlock" method="post"&gt;
-  Project Name: &lt;input type="text" name="projectName"&gt;&lt;br&gt;
-  Spaces in the project (*): &lt;input type="text" name="spacesList" id="spacesList"&gt;&lt;br&gt;
-  Other pages in the project (*): &lt;input type="text" name="pagesList" id="pagesList"&gt;&lt;br&gt;
-  &lt;input type="submit" value="Create the project" class="btn btn-primary"&gt;&lt;br&gt;
-  &lt;em&gt;(*): Can be completed later&lt;/em&gt;
-&lt;/form&gt;{{/html}}
+
+&lt;div id="modalProjectCreation" class="modal fade" role="dialog"&gt;
+  &lt;div class="modal-dialog"&gt;
+    &lt;div class="modal-content"&gt;
+      &lt;div class="modal-header"&gt;
+        &lt;button type="button" class="close" data-dismiss="modal"&gt;&amp;times;&lt;/button&gt;&lt;h4 class="modal-title"&gt;New XWebIDE Project&lt;/h4&gt;
+      &lt;/div&gt;
+      &lt;form id="createProjectBlock" method="post"&gt;
+        ##&lt;!-- Step 1 : Project Name --&gt;
+        &lt;div id="projectCreationName"&gt;
+          &lt;div class="modal-body"&gt;
+            &lt;strong&gt;Project Name:&lt;/strong&gt; &lt;input type="text" name="projectName" id="projectName" autocomplete="off"&gt; &lt;span class="projectCreationNameError"&gt;&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;div class="modal-footer"&gt;
+            &lt;input type="submit" value="Create an empty project" class="btn btn-success"&gt; &lt;button type="button" id="projectCreationNameButton" class="btn btn-primary"&gt;Add files to the project&lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+        ##&lt;!-- Step 2 : Project Spaces --&gt;
+        &lt;div id="projectCreationSpaces"&gt;
+          &lt;div class="modal-body"&gt;
+            &lt;strong&gt;Project Name:&lt;/strong&gt; &lt;span class="projectCreationNameDisplayed"&gt;&lt;/span&gt;&lt;br&gt;
+            &lt;strong&gt;Spaces List:&lt;/strong&gt; &lt;span class="projectCreationSpacesDisplayed"&gt;&lt;/span&gt;&lt;br&gt;
+            &lt;em&gt;Here you can choose the spaces you want to add as a folder in your project. All current and future pages from these spaces will be added in the project. You will still be able to change that list later (add or remove spaces).&lt;/em&gt;&lt;br&gt;
+            &lt;strong&gt;Spaces to add:&lt;/strong&gt; &lt;input type="hidden" name="spacesList" id="spacesList"&gt;&lt;input type="text" name="spaceAdd" id="spaceAdd"&gt; &lt;button type="button" id="projectCreationSpacesAdd" class="btn btn-success"&gt;Add&lt;/button&gt;
+          &lt;/div&gt;
+          &lt;div class="modal-footer"&gt;
+            &lt;input type="submit" value="Create the project" class="btn btn-success"&gt; &lt;button type="button" id="projectCreationSpacesButton" class="btn btn-primary"&gt;Add additional pages&lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+        ##&lt;!-- Step 3 : Project Pages --&gt;
+        &lt;div id="projectCreationPages"&gt;
+          &lt;div class="modal-body"&gt;
+            &lt;strong&gt;Project Name:&lt;/strong&gt; &lt;span class="projectCreationNameDisplayed"&gt;&lt;/span&gt;&lt;br&gt;
+            &lt;strong&gt;Spaces List:&lt;/strong&gt; &lt;span class="projectCreationSpacesDisplayed"&gt;&lt;/span&gt;&lt;br&gt;
+            &lt;strong&gt;Additional pages List:&lt;/strong&gt; &lt;span class="projectCreationPagesDisplayed"&gt;&lt;/span&gt;&lt;br&gt;
+            &lt;em&gt;Here you can choose additional pages you want to add in your project. They will appear in the project pages even if the corresponding space in not in the previous list.&lt;/em&gt;&lt;br&gt;
+            &lt;strong&gt;Additional pages to add:&lt;/strong&gt; &lt;input type="hidden" name="pagesList" id="pagesList"&gt;&lt;input type="text" name="pageAdd" id="pageAdd"&gt; &lt;button type="button" id="projectCreationPagesAdd" class="btn btn-success"&gt;Add&lt;/button&gt;
+          &lt;/div&gt;
+          &lt;div class="modal-footer"&gt;
+            &lt;input type="submit" value="Create the project" class="btn btn-success"&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/form&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="backgroundModalNoBootstrap"&gt;&lt;/div&gt;
+{{/html}}
 #set ($columnsProperties = {
   'projectName': {"displayName":"Project Name", "type":"text","size":10,"link":"view"},
   'doc.date': {"type":"text","size":10},

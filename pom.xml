@@ -32,7 +32,7 @@
   <groupId>org.xwiki.contrib</groupId>
   <artifactId>application-webide</artifactId>
   <name>XWebIDE Application</name>
-  <version>0.6-SNAPSHOT</version>
+  <version>0.6.1-SNAPSHOT</version>
   <packaging>xar</packaging>
   <description>An IDE which allows user to create projects in XWiki.</description>
   <scm>
@@ -70,14 +70,6 @@
       </plugin>
     </plugins>
   </build>
-  <dependencies>
-    <dependency>
-      <groupId>org.xwiki.contrib.editortool</groupId>
-      <artifactId>editor-tool-highlighting</artifactId>
-      <version>2.2</version>
-      <type>xar</type>
-    </dependency>
-  </dependencies>
   <distributionManagement>
     <repository>
       <id>xwiki-staging</id>
