@@ -20,7 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<xwikidoc reference="WebIDECode.ApplicationHierarchy" locale="">
+<xwikidoc>
   <web>WebIDECode</web>
   <name>ApplicationHierarchy</name>
   <language/>
@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1441357216000</date>
-  <contentUpdateDate>1441356645000</contentUpdateDate>
+  <date>1441806817000</date>
+  <contentUpdateDate>1439554783000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -62,7 +62,7 @@
         <prettyName>Caching policy</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators>|, </separators>
+        <separators> ,|</separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>long|short|default|forbid</values>
@@ -107,7 +107,7 @@
         <prettyName>Use this extension</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators>|, </separators>
+        <separators> ,|</separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>currentPage|onDemand|always</values>
@@ -1441,7 +1441,7 @@ $(function(){
         <prettyName>Caching policy</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators>|, </separators>
+        <separators> ,|</separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>long|short|default|forbid</values>
@@ -1467,7 +1467,7 @@ $(function(){
         <prettyName>Content Type</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators>|, </separators>
+        <separators> ,|</separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>CSS|LESS</values>
@@ -1502,7 +1502,7 @@ $(function(){
         <prettyName>Use this extension</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators>|, </separators>
+        <separators> ,|</separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>currentPage|onDemand|always</values>
@@ -1865,6 +1865,10 @@ $(function(){
     #set($addRemoveButton = "[[image:icon:cross||title='Remove folder $spaceEscaped' data-space='$spaceEscaped' class='hierarchy-right hierarchy-remove hierarchy-remove-folder']]")
   #end 
   * (% class="hierarchy-toggleFolder" data-space="$spaceEscapedBackslash" %)((([[image:icon:$folderIcon||id="hierarchyFolderIcon_$spaceEscapedBackslash"]][[image:icon:folder]] {{html clean=false}}&lt;span$!{displayCurrentSpace}&gt;$space&lt;/span&gt; {{/html}}))) $!addRemoveButton
+  (% id="hierarchySpace_$spaceEscapedBackslash" class="hierarchy-list${contentDisplay}" %)
+  #if($xwiki.hasAccessLevel('edit', "$spaceEscaped.$reservedDocumentName") &amp;&amp; $spaceComplete) ## Check if the user can create a page in that space and if the space is in the folder list
+    ** image:icon:add {{html clean=false}}&lt;a href="#!XWebIDE" data-space="$spaceEscaped" class="newPage" data-toggle="modal" data-target="#hierarchyPageModal"&gt;Add new page&lt;/a&gt;{{/html}}
+  #end
   #if($spacesListInit.contains($space))
     #set($spacePageList = $xwiki.getSpaceDocsName($space))
   #else
@@ -1876,10 +1880,6 @@ $(function(){
       #end
     #end
     #set($spacePageList = $sorttool.sort($spacePageList))
-  #end
-  (% id="hierarchySpace_$spaceEscapedBackslash" class="hierarchy-list${contentDisplay}" %)
-  #if($xwiki.hasAccessLevel('edit', "$spaceEscaped.$reservedDocumentName") &amp;&amp; $spaceComplete) ## Check if the user can create a page in that space and if the space is in the folder list
-    ** image:icon:add {{html clean=false}}&lt;a href="#!XWebIDE" data-space="$spaceEscaped" class="newPage" data-toggle="modal" data-target="#hierarchyPageModal"&gt;Add new page&lt;/a&gt;{{/html}}
   #end
   #foreach($page in $spacePageList)
     #set($pageFullName = "${space.replace('\', '\\').replace('.', '\.')}.${page.replace('\', '\\').replace('.', '\.')}")
