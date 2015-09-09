@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1441806817000</date>
+  <date>1441808326000</date>
   <contentUpdateDate>1439554783000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -125,10 +125,194 @@
       <code>require(['jquery', 'xwiki-meta'], function ($, xm) {
 
 $(function(){
+
+  // Variables
+  var masterSpace = XWiki.currentSpace;
+  var masterName = XWiki.currentPage;
+  var currentPage = encodeURIComponent(XWiki.currentPage);
+  var currentSpace = encodeURIComponent(XWiki.currentSpace);
+  var currentEditor = 'view';
+  var nextEditor = '';
+  var syntaxHighlighting = (typeof(codeMirrors) !== 'undefined');
+  var saving = false;
+  var loading = false;
+  var hiddenSpaces = getCookieHierarchy('hiddenSpaces').split(',');
+  var hiddenPages = getCookieHierarchy('hiddenPages').split(',');
+  var mainBlock = '';
+  var buttonBarBlock = '';
+  var textEditor = '#content';
+  var mainBlockContainer = '#editorBlock';
+  var titleBlock = '#titleBlock';
+  var formattedData = '';
+  var savedContent = '';
+  var insertTagsOriginal = function(){return true};
+
+  // Change current editor and page if there is a hash
+  var hashURL = window.location.hash.substring(1).split('&amp;!!');
+  if(hashURL.size() == 4){
+    currentEditor = hashURL[1];
+    currentPage = encodeURIComponent(hashURL[2]);
+    currentSpace = encodeURIComponent(hashURL[3]);
+    window.location.hash = '';
+    $('#hierarchyNextDocSpace').val(currentSpace);
+    $('#hierarchyNextDocName').val(currentPage);
+  }
+  var currentPageEscaped = encodeURIComponent(currentPage.replace(/\\/g, '\\').replace(/\./g, '\.'));
+  var currentSpaceEscaped = encodeURIComponent(currentSpace.replace(/\\/g, '\\').replace(/\./g, '\.'));
+
+  // Update the hierarchy background-color to be the same as the default wiki editor top bar
+  $("#hierarchyBlock").css({"backgroundColor" : $('div.leftmenu2').css('backgroundColor')});
+
+  // Get the "get" and "view" url structure for ajax queries
+  var wikiGetURL = '/xwiki/bin/get/';
+  if(window.docgeturl.indexOf('/get/') &gt;= 0) {
+    wikiGetURL = window.docgeturl.substring(0,window.docgeturl.indexOf('/get/')+5);
+  }
+  var wikiViewURL = '/xwiki/bin/view/';
+  if(window.docviewurl.indexOf('/'+XWiki.currentSpace+'/') &gt;= 0) {
+    wikiViewURL = window.docviewurl.substring(0,window.docviewurl.indexOf('/'+XWiki.currentSpace+'/')+1);
+  }
+
+  // Determine if bootstrap is enabled or not for modals
+  var bootstrap = function() {
+    return (typeof($.fn.modal) !== 'undefined');
+  }
+
+  // If Bootstrap is disabled (Colibri skin), create custom modals. Let a delay before testing bootstrap in case it is loaded after the Web IDE.
+  window.setTimeout(function () {
+    if(!bootstrap()) {
+      $('button[data-dismiss="modal"]').click(function() {
+        closeModalNoBootstrap();
+      });
+      $('.modal').css({
+        "width" : "40%",
+        "border" : "1px solid black",
+        "backgroundColor" : "#FFFFFF",
+        "borderRadius" : "5px",
+        "position" : "fixed",
+        "left" : "30%",
+        "top" : "20%",
+        "padding" : "10px",
+        "zIndex" : "1000"
+      });
+      $('.modal-header .close').css({
+        "float" : "right",
+        "position" : "absolute",
+        "right" : "5px",
+        "top" : "5px"
+      });
+      // Add support for the bootstrap buttons in Colibri skin (.btn, .btn-primary, .btn-success, .btn-danger, .btn-default)
+      $('html &gt; head').append($('&lt;style&gt;.btn{border-radius:5px;padding:3px;color:white;cursor:pointer;}.btn-primary{background-color:#337AB7;border-color:#2E6DA4;}.btn-success{background-color:#5CB85C;border-color:#4CAE4C;}.btn-danger{background-color:#C9302C;border-color:#AC2925;}.btn-default{border-color:#000000;color:black;}&lt;/style&gt;'));
+    }
+  }, 100);
+  function openModalNoBootstrap(modalId) {
+    $(modalId).show();
+    $('#backgroundModalNoBootstrap').show();
+  }
+  function closeModalNoBootstrap() {
+    $('#backgroundModalNoBootstrap').hide();
+    $('.modal').hide();
+  }
+  $('#backgroundModalNoBootstrap').click(function () {
+    closeModalNoBootstrap();
+  });
+  // Initialize the first editor to display
+  if(currentEditor == "wiki") {
+    initWikiEditor();
+  }
+  else if(currentEditor == "view") {
+    initViewEditor();
+  }
+  else if(currentEditor == "object") {
+    initObjectEditor();
+  }
+  else if(currentEditor == "class"){
+    initClassEditor();
+  }
+
+  // Autofocus on text inputs when a modal appears:
+  $('#hierarchyFolderModal').on('shown.bs.modal', function () {
+    $('#hierarchyNewFolderName').focus();
+    shortcut.add("Enter", function() {addFolder();});
+  });
+  $('#hierarchyPageModal').on('shown.bs.modal', function () {
+    $('#hierarchyNewPageName').focus();
+    shortcut.add("Enter", function() {addPage();});
+  });
+  $('#hierarchyExistingPageModal').on('shown.bs.modal', function () {
+    $('#hierarchyExistingPageName').focus();
+    shortcut.add("Enter", function() {addExistingPage();});
+  });
+  $('#hierarchyFolderModal').on('hidden.bs.modal', function () {
+    shortcut.remove('Enter');
+  });
+  $('#hierarchyPageModal').on('hidden.bs.modal', function () {
+    shortcut.remove('Enter');
+  });
+  $('#hierarchyExistingPageModal').on('hidden.bs.modal', function () {
+    shortcut.remove('Enter');
+  });
+
+  // Improve the F5 shortcut to stay on the current editor and the current page
+  shortcut.add("F5", function() {
+    window.location.href = window.docviewurl+'#!XWebIDE&amp;!!'+currentEditor+'&amp;!!'+encodeURIComponent(currentPage)+'&amp;!!'+encodeURIComponent(currentSpace);
+    location.reload();
+  });
+
+  // Register permanent events
+  $('body').on('DOMNodeInserted', function(e) {
+    if ($(e.target).is('.CodeMirror')) {
+      window.setTimeout(function() {
+        $.each(codeMirrors, function (index) {
+          codeMirrors[index].setOption('lineWrapping', true);
+        });
+        if(currentEditor == 'wiki') {
+          $('.CodeMirror').css({
+            "height" : "100%",
+          });
+        }
+        else if(currentEditor == 'object') {
+          $('.CodeMirror').css({
+            "width" : "100%",
+            "maxWidth" : "100%",
+            "resize" : "both",
+            "overflow" : "hidden"
+          });
+        }
+        // User has just switch to wiki editor
+        if(currentEditor == 'wiki') {
+          setStarEvent(true);
+          addButtonEvents('wiki');
+          loadPage();
+        }
+      }, 50);
+    }
+  });
+  $('#hierarchyAddFolder').click(function(e){
+    $('body').removeClass('modal-open');
+    e.preventDefault();
+    addFolder();
+  });
+  $('#hierarchyAddPage').click(function(e){
+    $('body').removeClass('modal-open');
+    e.preventDefault();
+    addPage();
+  });
+  $('#hierarchyAddExistingPage').click(function(e){
+    $('body').removeClass('modal-open');
+    e.preventDefault();
+    addExistingPage();
+  });
+  $('#editorDeleteObjectConfirmed').click(function(e){
+    $('body').removeClass('modal-open');
+    e.preventDefault();
+    removeObject($(this).attr('data-classname'), $(this).attr('data-number'));
+  });
+
   //-------------------------
   //---- Initialization -----
   //-------------------------
-  // Contains all operations that have to be done each time the hierarchy is updated.
+  // Contains all events that have to be registered again each time the hierarchy is updated (mostly "click" events on elements in the hierarchy)
   function initialization() {
     // Buttons to hide or show the hierarchy and resize the textarea
     $('#hierarchyClose').click(function(e){
@@ -394,192 +578,6 @@ $(function(){
       loadObject();
     }
   }
-  //-------------------------
-  //-- End initialization ---
-  //-------------------------
-  // Variables
-
-  var masterSpace = XWiki.currentSpace;
-  var masterName = XWiki.currentPage;
-  var currentPage = encodeURIComponent(XWiki.currentPage);
-  var currentSpace = encodeURIComponent(XWiki.currentSpace);
-  var currentEditor = 'view';
-  var nextEditor = '';
-  var syntaxHighlighting = (typeof(codeMirrors) !== 'undefined');
-  var saving = false;
-  var loading = false;
-  var hiddenSpaces = getCookieHierarchy('hiddenSpaces').split(',');
-  var hiddenPages = getCookieHierarchy('hiddenPages').split(',');
-  var mainBlock = '';
-  var buttonBarBlock = '';
-  var textEditor = '#content';
-  var mainBlockContainer = '#editorBlock';
-  var titleBlock = '#titleBlock';
-  var formattedData = '';
-  var savedContent = '';
-  var insertTagsOriginal = function(){return true};
-
-  // Change current editor and page if there is a hash
-  var hashURL = window.location.hash.substring(1).split('&amp;!!');
-  if(hashURL.size() == 4){
-    currentEditor = hashURL[1];
-    currentPage = encodeURIComponent(hashURL[2]);
-    currentSpace = encodeURIComponent(hashURL[3]);
-    window.location.hash = '';
-    $('#hierarchyNextDocSpace').val(currentSpace);
-    $('#hierarchyNextDocName').val(currentPage);
-  }
-  var currentPageEscaped = encodeURIComponent(currentPage.replace(/\\/g, '\\').replace(/\./g, '\.'));
-  var currentSpaceEscaped = encodeURIComponent(currentSpace.replace(/\\/g, '\\').replace(/\./g, '\.'));
-
-  // Update the hierarchy background-color to be the same as the default wiki editor top bar
-  $("#hierarchyBlock").css({"backgroundColor" : $('div.leftmenu2').css('backgroundColor')});
-
-  // Get the "get" and "view" url structure for ajax queries
-  var wikiGetURL = '/xwiki/bin/get/';
-  if(window.docgeturl.indexOf('/get/') &gt;= 0) {
-    wikiGetURL = window.docgeturl.substring(0,window.docgeturl.indexOf('/get/')+5);
-  }
-  var wikiViewURL = '/xwiki/bin/view/';
-  if(window.docviewurl.indexOf('/'+XWiki.currentSpace+'/') &gt;= 0) {
-    wikiViewURL = window.docviewurl.substring(0,window.docviewurl.indexOf('/'+XWiki.currentSpace+'/')+1);
-  }
-
-  // Determine if bootstrap is enabled or not for modals
-  var bootstrap = function() {
-    return (typeof($.fn.modal) !== 'undefined');
-  }
-
-  // If Bootstrap is disabled (Colibri skin), create custom modals. Let a delay before testing bootstrap in case it is loaded after the Web IDE.
-  window.setTimeout(function () {
-    if(!bootstrap()) {
-      $('button[data-dismiss="modal"]').click(function() {
-        closeModalNoBootstrap();
-      });
-      $('.modal').css({
-        "width" : "40%",
-        "border" : "1px solid black",
-        "backgroundColor" : "#FFFFFF",
-        "borderRadius" : "5px",
-        "position" : "fixed",
-        "left" : "30%",
-        "top" : "20%",
-        "padding" : "10px",
-        "zIndex" : "1000"
-      });
-      $('.modal-header .close').css({
-        "float" : "right",
-        "position" : "absolute",
-        "right" : "5px",
-        "top" : "5px"
-      });
-      // Add support for the bootstrap buttons in Colibri skin (.btn, .btn-primary, .btn-success, .btn-danger, .btn-default)
-      $('html &gt; head').append($('&lt;style&gt;.btn{border-radius:5px;padding:3px;color:white;cursor:pointer;}.btn-primary{background-color:#337AB7;border-color:#2E6DA4;}.btn-success{background-color:#5CB85C;border-color:#4CAE4C;}.btn-danger{background-color:#C9302C;border-color:#AC2925;}.btn-default{border-color:#000000;color:black;}&lt;/style&gt;'));
-    }
-  }, 100);
-  function openModalNoBootstrap(modalId) {
-    $(modalId).show();
-    $('#backgroundModalNoBootstrap').show();
-  }
-  function closeModalNoBootstrap() {
-    $('#backgroundModalNoBootstrap').hide();
-    $('.modal').hide();
-  }
-  $('#backgroundModalNoBootstrap').click(function () {
-    closeModalNoBootstrap();
-  });
-  // Initialize the first editor to display
-  if(currentEditor == "wiki") {
-    initWikiEditor();
-  }
-  else if(currentEditor == "view") {
-    initViewEditor();
-  }
-  else if(currentEditor == "object") {
-    initObjectEditor();
-  }
-  else if(currentEditor == "class"){
-    initClassEditor();
-  }
-
-  // Autofocus on text inputs when a modal appears:
-  $('#hierarchyFolderModal').on('shown.bs.modal', function () {
-    $('#hierarchyNewFolderName').focus();
-    shortcut.add("Enter", function() {addFolder();});
-  });
-  $('#hierarchyPageModal').on('shown.bs.modal', function () {
-    $('#hierarchyNewPageName').focus();
-    shortcut.add("Enter", function() {addPage();});
-  });
-  $('#hierarchyExistingPageModal').on('shown.bs.modal', function () {
-    $('#hierarchyExistingPageName').focus();
-    shortcut.add("Enter", function() {addExistingPage();});
-  });
-  $('#hierarchyFolderModal').on('hidden.bs.modal', function () {
-    shortcut.remove('Enter');
-  });
-  $('#hierarchyPageModal').on('hidden.bs.modal', function () {
-    shortcut.remove('Enter');
-  });
-  $('#hierarchyExistingPageModal').on('hidden.bs.modal', function () {
-    shortcut.remove('Enter');
-  });
-
-  // Improve the F5 shortcut to stay on the current editor and the current page
-  shortcut.add("F5", function() {
-    window.location.href = window.docviewurl+'#!XWebIDE&amp;!!'+currentEditor+'&amp;!!'+encodeURIComponent(currentPage)+'&amp;!!'+encodeURIComponent(currentSpace);
-    location.reload();
-  });
-
-  // Register permanent events
-  $('body').on('DOMNodeInserted', function(e) {
-    if ($(e.target).is('.CodeMirror')) {
-      window.setTimeout(function() {
-        $.each(codeMirrors, function (index) {
-          codeMirrors[index].setOption('lineWrapping', true);
-        });
-        if(currentEditor == 'wiki') {
-          $('.CodeMirror').css({
-            "height" : "100%",
-          });
-        }
-        else if(currentEditor == 'object') {
-          $('.CodeMirror').css({
-            "width" : "100%",
-            "maxWidth" : "100%",
-            "resize" : "both",
-            "overflow" : "hidden"
-          });
-        }
-        // User has just switch to wiki editor
-        if(currentEditor == 'wiki') {
-          setStarEvent(true);
-          addButtonEvents('wiki');
-          loadPage();
-        }
-      }, 50);
-    }
-  });
-  $('#hierarchyAddFolder').click(function(e){
-    $('body').removeClass('modal-open');
-    e.preventDefault();
-    addFolder();
-  });
-  $('#hierarchyAddPage').click(function(e){
-    $('body').removeClass('modal-open');
-    e.preventDefault();
-    addPage();
-  });
-  $('#hierarchyAddExistingPage').click(function(e){
-    $('body').removeClass('modal-open');
-    e.preventDefault();
-    addExistingPage();
-  });
-  $('#editorDeleteObjectConfirmed').click(function(e){
-    $('body').removeClass('modal-open');
-    e.preventDefault();
-    removeObject($(this).attr('data-classname'), $(this).attr('data-number'));
-  });
 
   //-------------------------------------
   //---------- Wiki Editor API ----------
@@ -588,12 +586,6 @@ $(function(){
   //loadPage()
   //savePage(string space, string page, string newContent, string newTitle, boolean changeSavedContent, boolean continueEditing)
   //cancelAndViewIDE()
-  //reloadHierarchy()
-  //removeFolder(string folder)
-  //removePage(string page)
-  //addFolder()
-  //addPage()
-  //addExistingPage()
 
   function loadPage() {
     if(!loading) {
