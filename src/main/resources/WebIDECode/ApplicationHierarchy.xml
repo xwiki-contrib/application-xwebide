@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1441808326000</date>
-  <contentUpdateDate>1439554783000</contentUpdateDate>
+  <date>1443000755000</date>
+  <contentUpdateDate>1443000127000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -146,7 +146,6 @@ $(function(){
   var formattedData = '';
   var savedContent = '';
   var insertTagsOriginal = function(){return true};
-
   // Change current editor and page if there is a hash
   var hashURL = window.location.hash.substring(1).split('&amp;!!');
   if(hashURL.size() == 4){
@@ -975,7 +974,7 @@ $(function(){
   //addFolder()
   //addPage()
   //addExistingPage()
-  function reloadHierarchy(loadContent) {
+  function reloadHierarchy(loadWikiContent) {
     $.ajax({
       url: wikiGetURL+"WebIDECode/ApplicationHierarchy?xpage=plain",
       type: "GET",
@@ -983,9 +982,10 @@ $(function(){
       data : "action="+XWiki.contextaction+"&amp;editor="+currentEditor+"&amp;masterPage="+masterSpace+"."+masterName+"&amp;remotePage="+currentSpaceEscaped+"."+currentPageEscaped+"&amp;hiddenSpaces="+encodeURIComponent(hiddenSpaces)+"&amp;hiddenPages="+encodeURIComponent(hiddenPages),
       contentType: "text/html",
     }).success(function(data){
+      //Update the hierarchy content (list of documents only)
       var result = $('&lt;div /&gt;').append(data).find('#hierarchyContent').html();
       $('#hierarchyContent').html(result);
-      if(loadContent) {
+      if(loadWikiContent) {
         $(textEditor).val($('&lt;div /&gt;').html(formattedData).text());
         if(syntaxHighlighting) {
           codeMirrors[0].getDoc().setValue($(textEditor).val());
@@ -1671,144 +1671,27 @@ $(function(){
       <use>always</use>
     </property>
   </object>
-  <object>
-    <class>
-      <name>XWiki.WikiMacroClass</name>
-      <customClass/>
-      <customMapping/>
-      <defaultViewSheet/>
-      <defaultEditSheet/>
-      <defaultWeb/>
-      <nameField/>
-      <validationScript/>
-      <code>
-        <disabled>0</disabled>
-        <name>code</name>
-        <number>9</number>
-        <prettyName>Macro code</prettyName>
-        <rows>20</rows>
-        <size>40</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
-      </code>
-      <contentDescription>
-        <disabled>0</disabled>
-        <name>contentDescription</name>
-        <number>8</number>
-        <prettyName>Content description (Not applicable for "No content" type)</prettyName>
-        <rows>5</rows>
-        <size>40</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
-      </contentDescription>
-      <contentType>
-        <cache>0</cache>
-        <disabled>0</disabled>
-        <displayType>select</displayType>
-        <multiSelect>0</multiSelect>
-        <name>contentType</name>
-        <number>7</number>
-        <prettyName>Macro content type</prettyName>
-        <relationalStorage>0</relationalStorage>
-        <separator>|</separator>
-        <separators>|</separators>
-        <size>1</size>
-        <unmodifiable>0</unmodifiable>
-        <values>Optional|Mandatory|No content</values>
-        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
-      </contentType>
-      <defaultCategory>
-        <disabled>0</disabled>
-        <name>defaultCategory</name>
-        <number>4</number>
-        <prettyName>Default category</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </defaultCategory>
-      <description>
-        <disabled>0</disabled>
-        <name>description</name>
-        <number>3</number>
-        <prettyName>Macro description</prettyName>
-        <rows>5</rows>
-        <size>40</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
-      </description>
-      <id>
-        <disabled>0</disabled>
-        <name>id</name>
-        <number>1</number>
-        <prettyName>Macro id</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </id>
-      <name>
-        <disabled>0</disabled>
-        <name>name</name>
-        <number>2</number>
-        <prettyName>Macro name</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </name>
-      <supportsInlineMode>
-        <disabled>0</disabled>
-        <displayFormType>select</displayFormType>
-        <displayType>yesno</displayType>
-        <name>supportsInlineMode</name>
-        <number>5</number>
-        <prettyName>Supports inline mode</prettyName>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
-      </supportsInlineMode>
-      <visibility>
-        <cache>0</cache>
-        <disabled>0</disabled>
-        <displayType>select</displayType>
-        <multiSelect>0</multiSelect>
-        <name>visibility</name>
-        <number>6</number>
-        <prettyName>Macro visibility</prettyName>
-        <relationalStorage>0</relationalStorage>
-        <separator>|</separator>
-        <separators>|</separators>
-        <size>1</size>
-        <unmodifiable>0</unmodifiable>
-        <values>Current User|Current Wiki|Global</values>
-        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
-      </visibility>
-    </class>
-    <name>WebIDECode.ApplicationHierarchy</name>
-    <number>0</number>
-    <className>XWiki.WikiMacroClass</className>
-    <guid>9d820c7a-33c4-436d-82c4-2a86e8095709</guid>
-    <property>
-      <code>{{velocity}}
-#set($discard = $xwiki.jsx.use("WebIDECode.ApplicationHierarchy"))
-#set($discard = $xwiki.ssx.use("WebIDECode.ApplicationHierarchy"))
+  <content>{{velocity}}
 #set($masterDoc = 'Main.WebHome')
-#if($xwiki.exists($xcontext.macro.params.masterPage))
-  #set($masterDoc = $xwiki.getDocument($xcontext.macro.params.masterPage))
-#elseif($xwiki.exists($util.decodeURI($xcontext.macro.params.masterPage)))
-  #set($masterDoc = $xwiki.getDocument($util.decodeURI($xcontext.macro.params.masterPage)))
+#if($xwiki.exists(${request.masterPage}))
+  #set($masterDoc = $xwiki.getDocument(${request.masterPage}))
+#elseif($xwiki.exists($util.decodeURI(${request.masterPage})))
+  #set($masterDoc = $xwiki.getDocument($util.decodeURI(${request.masterPage})))
 #end
-#if($xwiki.exists($xcontext.macro.params.remotePage))
-  #set($currentDoc = $xwiki.getDocument($xcontext.macro.params.remotePage))
-#elseif($xwiki.exists($util.decodeURI($xcontext.macro.params.remotePage)))
-  #set($currentDoc = $xwiki.getDocument($util.decodeURI($xcontext.macro.params.remotePage)))
+#if($xwiki.exists(${request.remotePage}))
+  #set($currentDoc = $xwiki.getDocument(${request.remotePage}))
+#elseif($xwiki.exists($util.decodeURI(${request.remotePage})))
+  #set($currentDoc = $xwiki.getDocument($util.decodeURI(${request.remotePage})))
 #else
   #set($currentDoc = $doc)
 #end
-#set($currentEditor = $!{xcontext.macro.params.editor})
-#if("$!{xcontext.macro.params.hiddenSpaces}" != "")
-  #set($hiddenSpacesString = $!{xcontext.macro.params.hiddenSpaces})
+#set($currentEditor = $!request.editor)
+#if("$!{request.hiddenSpaces}" != "")
+  #set($hiddenSpacesString = $!{request.hiddenSpaces})
 #end
 #set($hiddenSpaces = $!hiddenSpacesString.split("[,]"))
-#if("$!{xcontext.macro.params.hiddenPages}" != "")
-  #set($hiddenPagesString = $!{xcontext.macro.params.hiddenPages})
+#if("$!{request.hiddenPages}" != "")
+  #set($hiddenPagesString = $!{request.hiddenPages})
 #end
 #set($hiddenPages = $!hiddenPagesString.split("[,]"))
 (% class="hierarchy-hidden" id="hierarchyOpenBlock" %)(((
@@ -1830,7 +1713,7 @@ $(function(){
 (% class="hierarchy-right" id="hierarchyCloseBlock" %)(((
 [[image:icon:control_start_blue||title="Hide hierarchy" id="hierarchyClose" class="hierarchy-right"]]
 )))
-**Project :** $masterDoc.projectName
+**Project :** $masterDoc.display('projectName', 'view')
 {{html clean=false wiki=true}}&lt;form method="post" action="$masterDoc.getURL('view')" class="masterExportForm"&gt;&lt;input type="hidden" name="export" value="1" /&gt;&lt;a&gt;image:icon:bullet_disk &lt;input class="hierarchy-export" type="submit" value="Export the project (XAR)" title="Export the project"&gt; &lt;/input&gt;&lt;/a&gt;&lt;/form&gt;{{/html}}
 (% class="hierarchy-list hierarchy-no-padding" id="hierarchyMainList" %)
 #if($masterDoc.hasAccessLevel('edit'))
@@ -1885,7 +1768,7 @@ $(function(){
     #end
     #set($pageEscaped = $util.encodeURI($page).replace("+", "%20"))
     #set($pageEscapedBackslash = $util.encodeURI($page.replace('\', '\\').replace('.', '\.')).replace("+", "%20"))
-    #if($currentEditor == "view" &amp;&amp; "$!{xcontext.macro.params.action}" != "edit")
+    #if($currentEditor == "view" &amp;&amp; "$!request.action" != "edit")
       #set($displayedIcon = 'page')
     #elseif($currentEditor == "object")
       #set($displayedIcon = 'application_edit')
@@ -1937,7 +1820,7 @@ $(function(){
     #elseif($xwiki.getDocument($pageFullName).hasAccessLevel('view'))
       ** (% data-pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((([[image:icon:$iconBulletToggle||class="hierarchyDisplayPageIcon"]][[image:icon:$displayedIcon||class="hierarchyContextActionIcon"]]$pageName $!addRemoveButton
       (% id='hierarchyPageDetails_$spaceEscapedBackslash.$pageEscapedBackslash' class='hierarchy-list${pageClassHidden}' %)
-      #if($xcontext.action != "edit" &amp;&amp; "$!{xcontext.macro.params.action}" != "edit" &amp;&amp; $pageFullName == $currentDoc.fullName)
+      #if($xcontext.action != "edit" &amp;&amp; "$!request.action" != "edit" &amp;&amp; $pageFullName == $currentDoc.fullName)
         *** image:icon:page {{html clean=false}}&lt;span class='hierarchyCurrentSpacePageAction'&gt;View&lt;/span&gt;{{/html}}
       #else
         *** [[image:icon:page View&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')]]
@@ -2034,432 +1917,5 @@ $(function(){
 
 {{/html}}
 
-{{/velocity}}</code>
-    </property>
-    <property>
-      <contentDescription/>
-    </property>
-    <property>
-      <contentType>No content</contentType>
-    </property>
-    <property>
-      <defaultCategory/>
-    </property>
-    <property>
-      <description>A macro which displays the hierarchy of the current project in the IDE application.</description>
-    </property>
-    <property>
-      <id>displayHierarchy</id>
-    </property>
-    <property>
-      <name>Display Project Hierarchy</name>
-    </property>
-    <property>
-      <supportsInlineMode/>
-    </property>
-    <property>
-      <visibility>Current Wiki</visibility>
-    </property>
-  </object>
-  <object>
-    <class>
-      <name>XWiki.WikiMacroParameterClass</name>
-      <customClass/>
-      <customMapping/>
-      <defaultViewSheet/>
-      <defaultEditSheet/>
-      <defaultWeb/>
-      <nameField/>
-      <validationScript/>
-      <defaultValue>
-        <disabled>0</disabled>
-        <name>defaultValue</name>
-        <number>4</number>
-        <prettyName>Parameter default value</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </defaultValue>
-      <description>
-        <disabled>0</disabled>
-        <name>description</name>
-        <number>2</number>
-        <prettyName>Parameter description</prettyName>
-        <rows>5</rows>
-        <size>40</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
-      </description>
-      <mandatory>
-        <disabled>0</disabled>
-        <displayFormType>select</displayFormType>
-        <displayType>yesno</displayType>
-        <name>mandatory</name>
-        <number>3</number>
-        <prettyName>Parameter mandatory</prettyName>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
-      </mandatory>
-      <name>
-        <disabled>0</disabled>
-        <name>name</name>
-        <number>1</number>
-        <prettyName>Parameter name</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </name>
-    </class>
-    <name>WebIDECode.ApplicationHierarchy</name>
-    <number>0</number>
-    <className>XWiki.WikiMacroParameterClass</className>
-    <guid>bc1ca3e7-c410-4a30-abda-2f8201f61fa1</guid>
-    <property>
-      <defaultValue/>
-    </property>
-    <property>
-      <description>The master page of the project you are working on.</description>
-    </property>
-    <property>
-      <mandatory>1</mandatory>
-    </property>
-    <property>
-      <name>masterPage</name>
-    </property>
-  </object>
-  <object>
-    <class>
-      <name>XWiki.WikiMacroParameterClass</name>
-      <customClass/>
-      <customMapping/>
-      <defaultViewSheet/>
-      <defaultEditSheet/>
-      <defaultWeb/>
-      <nameField/>
-      <validationScript/>
-      <defaultValue>
-        <disabled>0</disabled>
-        <name>defaultValue</name>
-        <number>4</number>
-        <prettyName>Parameter default value</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </defaultValue>
-      <description>
-        <disabled>0</disabled>
-        <name>description</name>
-        <number>2</number>
-        <prettyName>Parameter description</prettyName>
-        <rows>5</rows>
-        <size>40</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
-      </description>
-      <mandatory>
-        <disabled>0</disabled>
-        <displayFormType>select</displayFormType>
-        <displayType>yesno</displayType>
-        <name>mandatory</name>
-        <number>3</number>
-        <prettyName>Parameter mandatory</prettyName>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
-      </mandatory>
-      <name>
-        <disabled>0</disabled>
-        <name>name</name>
-        <number>1</number>
-        <prettyName>Parameter name</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </name>
-    </class>
-    <name>WebIDECode.ApplicationHierarchy</name>
-    <number>1</number>
-    <className>XWiki.WikiMacroParameterClass</className>
-    <guid>595fefaf-7e55-48ac-9a5e-0c5a9fad22f6</guid>
-    <property>
-      <defaultValue/>
-    </property>
-    <property>
-      <description>The action needed for the hierarchy "panel" : "edit", "view", etc...</description>
-    </property>
-    <property>
-      <mandatory>0</mandatory>
-    </property>
-    <property>
-      <name>action</name>
-    </property>
-  </object>
-  <object>
-    <class>
-      <name>XWiki.WikiMacroParameterClass</name>
-      <customClass/>
-      <customMapping/>
-      <defaultViewSheet/>
-      <defaultEditSheet/>
-      <defaultWeb/>
-      <nameField/>
-      <validationScript/>
-      <defaultValue>
-        <disabled>0</disabled>
-        <name>defaultValue</name>
-        <number>4</number>
-        <prettyName>Parameter default value</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </defaultValue>
-      <description>
-        <disabled>0</disabled>
-        <name>description</name>
-        <number>2</number>
-        <prettyName>Parameter description</prettyName>
-        <rows>5</rows>
-        <size>40</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
-      </description>
-      <mandatory>
-        <disabled>0</disabled>
-        <displayFormType>select</displayFormType>
-        <displayType>yesno</displayType>
-        <name>mandatory</name>
-        <number>3</number>
-        <prettyName>Parameter mandatory</prettyName>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
-      </mandatory>
-      <name>
-        <disabled>0</disabled>
-        <name>name</name>
-        <number>1</number>
-        <prettyName>Parameter name</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </name>
-    </class>
-    <name>WebIDECode.ApplicationHierarchy</name>
-    <number>2</number>
-    <className>XWiki.WikiMacroParameterClass</className>
-    <guid>288afa70-9c0c-45b3-b740-97692198c48f</guid>
-    <property>
-      <defaultValue/>
-    </property>
-    <property>
-      <description>The full-name of the page where the hierarchy must be displayed</description>
-    </property>
-    <property>
-      <mandatory>0</mandatory>
-    </property>
-    <property>
-      <name>remotePage</name>
-    </property>
-  </object>
-  <object>
-    <class>
-      <name>XWiki.WikiMacroParameterClass</name>
-      <customClass/>
-      <customMapping/>
-      <defaultViewSheet/>
-      <defaultEditSheet/>
-      <defaultWeb/>
-      <nameField/>
-      <validationScript/>
-      <defaultValue>
-        <disabled>0</disabled>
-        <name>defaultValue</name>
-        <number>4</number>
-        <prettyName>Parameter default value</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </defaultValue>
-      <description>
-        <disabled>0</disabled>
-        <name>description</name>
-        <number>2</number>
-        <prettyName>Parameter description</prettyName>
-        <rows>5</rows>
-        <size>40</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
-      </description>
-      <mandatory>
-        <disabled>0</disabled>
-        <displayFormType>select</displayFormType>
-        <displayType>yesno</displayType>
-        <name>mandatory</name>
-        <number>3</number>
-        <prettyName>Parameter mandatory</prettyName>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
-      </mandatory>
-      <name>
-        <disabled>0</disabled>
-        <name>name</name>
-        <number>1</number>
-        <prettyName>Parameter name</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </name>
-    </class>
-    <name>WebIDECode.ApplicationHierarchy</name>
-    <number>3</number>
-    <className>XWiki.WikiMacroParameterClass</className>
-    <guid>f214d5b0-880a-4f3d-97bc-90daa3fc4d5a</guid>
-    <property>
-      <defaultValue/>
-    </property>
-    <property>
-      <description>List of spaces which were hidden by the user in the hierarchy</description>
-    </property>
-    <property>
-      <mandatory>0</mandatory>
-    </property>
-    <property>
-      <name>hiddenSpaces</name>
-    </property>
-  </object>
-  <object>
-    <class>
-      <name>XWiki.WikiMacroParameterClass</name>
-      <customClass/>
-      <customMapping/>
-      <defaultViewSheet/>
-      <defaultEditSheet/>
-      <defaultWeb/>
-      <nameField/>
-      <validationScript/>
-      <defaultValue>
-        <disabled>0</disabled>
-        <name>defaultValue</name>
-        <number>4</number>
-        <prettyName>Parameter default value</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </defaultValue>
-      <description>
-        <disabled>0</disabled>
-        <name>description</name>
-        <number>2</number>
-        <prettyName>Parameter description</prettyName>
-        <rows>5</rows>
-        <size>40</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
-      </description>
-      <mandatory>
-        <disabled>0</disabled>
-        <displayFormType>select</displayFormType>
-        <displayType>yesno</displayType>
-        <name>mandatory</name>
-        <number>3</number>
-        <prettyName>Parameter mandatory</prettyName>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
-      </mandatory>
-      <name>
-        <disabled>0</disabled>
-        <name>name</name>
-        <number>1</number>
-        <prettyName>Parameter name</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </name>
-    </class>
-    <name>WebIDECode.ApplicationHierarchy</name>
-    <number>4</number>
-    <className>XWiki.WikiMacroParameterClass</className>
-    <guid>df7cb2f4-bb44-40ee-96f8-3fb59a0d9ede</guid>
-    <property>
-      <defaultValue/>
-    </property>
-    <property>
-      <description>Select the editor to use in the links of the hierarchy panel.</description>
-    </property>
-    <property>
-      <mandatory>0</mandatory>
-    </property>
-    <property>
-      <name>editor</name>
-    </property>
-  </object>
-  <object>
-    <class>
-      <name>XWiki.WikiMacroParameterClass</name>
-      <customClass/>
-      <customMapping/>
-      <defaultViewSheet/>
-      <defaultEditSheet/>
-      <defaultWeb/>
-      <nameField/>
-      <validationScript/>
-      <defaultValue>
-        <disabled>0</disabled>
-        <name>defaultValue</name>
-        <number>4</number>
-        <prettyName>Parameter default value</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </defaultValue>
-      <description>
-        <disabled>0</disabled>
-        <name>description</name>
-        <number>2</number>
-        <prettyName>Parameter description</prettyName>
-        <rows>5</rows>
-        <size>40</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
-      </description>
-      <mandatory>
-        <disabled>0</disabled>
-        <displayFormType>select</displayFormType>
-        <displayType>yesno</displayType>
-        <name>mandatory</name>
-        <number>3</number>
-        <prettyName>Parameter mandatory</prettyName>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
-      </mandatory>
-      <name>
-        <disabled>0</disabled>
-        <name>name</name>
-        <number>1</number>
-        <prettyName>Parameter name</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </name>
-    </class>
-    <name>WebIDECode.ApplicationHierarchy</name>
-    <number>5</number>
-    <className>XWiki.WikiMacroParameterClass</className>
-    <guid>4393300f-918a-4ab8-9c32-b9ead664f975</guid>
-    <property>
-      <defaultValue/>
-    </property>
-    <property>
-      <description>List of pages which were hidden by the user in the hierarchy</description>
-    </property>
-    <property>
-      <mandatory>0</mandatory>
-    </property>
-    <property>
-      <name>hiddenPages</name>
-    </property>
-  </object>
-  <content>{{velocity}}
-#if($request.masterPage)
-  {{displayHierarchy masterPage="$util.encodeURI(${request.masterPage}).replace("+", "%20")" action="$!request.action" remotePage="$util.encodeURI(${request.remotePage}).replace("+", "%20")" hiddenSpaces="$!{request.hiddenSpaces}" hiddenPages="$!{request.hiddenPages}"  editor="$!request.editor" /}}
-#end
 {{/velocity}}</content>
 </xwikidoc>

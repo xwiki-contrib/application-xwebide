@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1441808511000</date>
-  <contentUpdateDate>1441808511000</contentUpdateDate>
+  <date>1443000804000</date>
+  <contentUpdateDate>1443000804000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -260,6 +260,127 @@ fj1mA2Ya6cfHqeXLJRn/xRf0FuZ66MEOM430QG0t5ehIffUVbdx//jk1bx516JBa9urXY5ZgBpKe
 LBGa9C4nq/FHL3qZJeJysvr/Az8fQ5PMwBdGAAAAAElFTkSuQmCC
 </content>
   </attachment>
+  <object>
+    <class>
+      <name>XWiki.JavaScriptExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage|onDemand|always</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <name>WebIDECode.ApplicationSheet</name>
+    <number>0</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>d3099e12-b5bc-40c1-a0b5-c57dc3d00065</guid>
+    <property>
+      <cache>default</cache>
+    </property>
+    <property>
+      <code>require(['jquery', 'xwiki-meta'], function ($, xm) {
+$(function(){
+  var hiddenSpaces = getCookieHierarchy('hiddenSpaces').split(',');
+  var hiddenPages = getCookieHierarchy('hiddenPages').split(',');
+  function loadHierarchy() {
+    $.ajax({
+      url: wikiGetURL+"WebIDECode/ApplicationHierarchy?xpage=plain",
+      type: "GET",
+      datatype : "html",
+      data : "action=view&amp;editor=view&amp;masterPage="+XWiki.currentSpace+"."+XWiki.currentPage+"&amp;remotePage="+XWiki.currentSpace+"."+XWiki.currentPage+"&amp;hiddenSpaces="+encodeURIComponent(hiddenSpaces)+"&amp;hiddenPages="+encodeURIComponent(hiddenPages),
+      contentType: "text/html",
+    }).success(function(data){
+      $('#hierarchyBlock').html(data);
+      $('head').append('&lt;script type="text/javascript" src="/xwiki/bin/jsx/WebIDECode/ApplicationHierarchy" defer="defer"&gt;&lt;/script&gt;');
+    });
+  }
+  function getCookieHierarchy(cname) {
+    var name = XWiki.currentPage+"-"+cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i&lt;ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0)==' ') c = c.substring(1);
+      if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
+    }
+    return "";
+  }
+  loadHierarchy();
+
+});
+});</code>
+    </property>
+    <property>
+      <name/>
+    </property>
+    <property>
+      <parse/>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
   <object>
     <class>
       <name>XWiki.StyleSheetExtension</name>
@@ -560,6 +681,7 @@ box-sizing: border-box;         /* Opera/IE 8+ */
   #set($showLeftPanels = 0)
   #set($discard = $xwiki.jsx.use("WebIDECode.ApplicationSheet"))
   #set($discard = $xwiki.ssx.use("WebIDECode.ApplicationSheet"))
+  #set($discard = $xwiki.ssx.use("WebIDECode.ApplicationHierarchy"))
   ## Check the version of Syntax Highlighting installed, and load the custom JS if version &gt; 2.1
   #if($xwiki.exists('SyntaxHighlighting.ConfigurationClass'))
     #set($discard = $xwiki.jsx.use("WebIDECode.SyntaxHighlighting"))
@@ -573,7 +695,6 @@ box-sizing: border-box;         /* Opera/IE 8+ */
   (((
   (% id="hierarchyBlock" %)
   (((
-    {{displayHierarchy masterPage="$doc.fullName.replace('"', '%22')" editor="view" hiddenSpaces="$!request.getCookie("${doc.name}-hiddenSpaces").value" hiddenPages="$!request.getCookie("${doc.name}-hiddenPages").value"/}}
   )))
   (% id="displayBlock" class="editorElement editorViewElement" %)
   (((
