@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1443000755000</date>
-  <contentUpdateDate>1443000127000</contentUpdateDate>
+  <date>1443015723000</date>
+  <contentUpdateDate>1443014249000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -126,11 +126,17 @@
 
 $(function(){
 
-  // Variables
+  /**
+   *  Variables
+   */
   var masterSpace = XWiki.currentSpace;
   var masterName = XWiki.currentPage;
+  // currentPage and currentSpace are used in REST queries
   var currentPage = encodeURIComponent(XWiki.currentPage);
   var currentSpace = encodeURIComponent(XWiki.currentSpace);
+  // currentPageEscaped and currentSpaceEscaped are used in ajax queries with XWiki pages
+  var currentPageEscaped = encodeURIComponent(currentPage.replace(/\\/g, '\\').replace(/\./g, '\.'));
+  var currentSpaceEscaped = encodeURIComponent(currentSpace.replace(/\\/g, '\\').replace(/\./g, '\.'));
   var currentEditor = 'view';
   var nextEditor = '';
   var syntaxHighlighting = (typeof(codeMirrors) !== 'undefined');
@@ -156,8 +162,6 @@ $(function(){
     $('#hierarchyNextDocSpace').val(currentSpace);
     $('#hierarchyNextDocName').val(currentPage);
   }
-  var currentPageEscaped = encodeURIComponent(currentPage.replace(/\\/g, '\\').replace(/\./g, '\.'));
-  var currentSpaceEscaped = encodeURIComponent(currentSpace.replace(/\\/g, '\\').replace(/\./g, '\.'));
 
   // Update the hierarchy background-color to be the same as the default wiki editor top bar
   $("#hierarchyBlock").css({"backgroundColor" : $('div.leftmenu2').css('backgroundColor')});
@@ -592,8 +596,8 @@ $(function(){
       $('#hierarchyLoadingState').html('&lt;strong class="red"&gt;Loading...&lt;/strong&gt;').show();
       currentSpace = $('#hierarchyNextDocSpace').val();
       currentPage = $('#hierarchyNextDocName').val();
-      currentPageEscaped = currentPage.replace(/\\/g, '%5C%5C').replace(/\./g, '%5C.');
-      currentSpaceEscaped = currentSpace.replace(/\\/g, '%5C%5C').replace(/\./g, '%5C.');
+      currentPageEscaped = currentPage.replace('%5C', '%5C%5C').replace(/\\/g, '%5C%5C').replace(/\./g, '%5C.');
+      currentSpaceEscaped = currentSpace.replace('%5C', '%5C%5C').replace(/\\/g, '%5C%5C').replace(/\./g, '%5C.');
       $.ajax({
         url: wikiViewURL+currentSpace+"/"+currentPage+"?xpage=plain&amp;raw=1&amp;language=default",
         type: "GET",
@@ -674,16 +678,16 @@ $(function(){
       $('#hierarchyLoadingState').html('&lt;strong&gt;Loading...&lt;/strong&gt;').show();
       currentSpace = $('#hierarchyNextDocSpace').val();
       currentPage = $('#hierarchyNextDocName').val();
-      currentPageEscaped = currentPage.replace(/\\/g, '%5C%5C').replace(/\./g, '%5C.');
-      currentSpaceEscaped = currentSpace.replace(/\\/g, '%5C%5C').replace(/\./g, '%5C.');
+      currentPageEscaped = currentPage.replace('%5C', '%5C%5C').replace(/\\/g, '%5C%5C').replace(/\./g, '%5C.');
+      currentSpaceEscaped = currentSpace.replace('%5C', '%5C%5C').replace(/\\/g, '%5C%5C').replace(/\./g, '%5C.');
       $.ajax({
-        url: '/xwiki/rest/wikis/'+XWiki.currentWiki+'/spaces/'+currentSpaceEscaped+'/pages/'+currentPageEscaped+'/objects',
+        url: '/xwiki/rest/wikis/'+XWiki.currentWiki+'/spaces/'+currentSpace+'/pages/'+currentPage+'/objects',
         //url: '/xwiki/rest/wikis/xwiki/spaces/WebIDECode/pages/ApplicationHierarchy/objects',
         type: "GET",
         contentType: "application/xml",
       }).success(function(dataContent){
         var form_token = xm ? xm.form_token : $('meta[name="form_token"]').attr('content');
-        var dataHTML = '&lt;form method="post" action="/xwiki/bin/save/'+currentSpaceEscaped+'/'+currentPageEscaped+'" id="objectIDEform"&gt;&lt;input type="hidden" name="form_token" value="'+form_token+'" /&gt;&lt;div class="hierarchy-hidden"&gt;';
+        var dataHTML = '&lt;form method="post" action="/xwiki/bin/save/'+currentSpace+'/'+currentPage+'" id="objectIDEform"&gt;&lt;input type="hidden" name="form_token" value="'+form_token+'" /&gt;&lt;div class="hierarchy-hidden"&gt;';
         var menuHTML = '&lt;div id="editorObjectMenu"&gt;&lt;span id="editorObjectMenuTitle"&gt;Quick Access&lt;/span&gt;&lt;div id="editorObjectMenuContent"&gt;';
         var addObjectHTML = '&lt;div id="addObjectBlock"&gt;';
         $('#hierarchyNewFolderName').val('');
@@ -883,7 +887,7 @@ $(function(){
       $('#hierarchySavingState').html('&lt;strong&gt;Deleting...&lt;/strong&gt;').show();
       saving = true;
       $.ajax({
-        url: '/xwiki/rest/wikis/'+XWiki.currentWiki+'/spaces/'+currentSpaceEscaped+'/pages/'+currentPageEscaped+'/objects/'+className+'/'+number,
+        url: '/xwiki/rest/wikis/'+XWiki.currentWiki+'/spaces/'+currentSpace+'/pages/'+currentPage+'/objects/'+className+'/'+number,
         type: "DELETE",
       }).success(function(dataContent){
         var divSelectorInternal = 'div[id="editorObject-'+className+'-'+number+'"]';
@@ -1005,7 +1009,7 @@ $(function(){
     }).success(function(res){
       var oldSpaces = $(res).find('value').text();
       var spaceArray = oldSpaces.split('|');
-      var indexSpace = $.inArray(folder, spaceArray)
+      var indexSpace = $.inArray(decodeURIComponent(folder), spaceArray)
       if(indexSpace &gt;= 0) {
         spaceArray.splice(indexSpace, 1);
         $.ajax({
@@ -1026,6 +1030,9 @@ $(function(){
             n();
           });
         });
+      }
+      else {
+        console.log("Folder "+folder+" not found in the list of folders in this project.");
       }
     });
   }
