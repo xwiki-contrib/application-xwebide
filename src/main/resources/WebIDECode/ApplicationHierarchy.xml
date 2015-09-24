@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1443085501000</date>
-  <contentUpdateDate>1443085501000</contentUpdateDate>
+  <date>1443106601000</date>
+  <contentUpdateDate>1443106580000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -149,10 +149,8 @@ $(function(){
   var textEditor = '#content';
   var mainBlockContainer = '#editorBlock';
   var titleBlock = '#titleBlock';
-  var formattedData = '';
   var savedContent = '';
-  var insertTagsOriginal = function(){return true};
-    // Get the "get" and "view" url structure for ajax queries
+  // Get the "get" and "view" url structure for ajax queries
   var wikiGetURL = '/xwiki/bin/get/';
   if(window.docgeturl.indexOf('/get/') &gt;= 0) {
     wikiGetURL = window.docgeturl.substring(0,window.docgeturl.indexOf('/get/')+5);
@@ -398,11 +396,6 @@ $(function(){
       $('#hierarchyPageFolder').html(unescape($(this).attr('data-space')));
       if(!bootstrap()) {
         openModalNoBootstrap('#hierarchyPageModal');
-        /*var newPageNoBootstrap = prompt("Name of the new page:", "");
-        if(newPageNoBootstrap != null) {
-          $('#hierarchyNewPageName').val(newPageNoBootstrap);
-          addPage();
-        }*/
       }
     });
     // Add a folder (if no bootstrap)
@@ -410,11 +403,6 @@ $(function(){
       e.preventDefault();
       if(!bootstrap()) {
         openModalNoBootstrap('#hierarchyFolderModal');
-        /*var newFodlerNoBootstrap = prompt("Name of the folder:", "");
-        if(newFodlerNoBootstrap != null) {
-          $('#hierarchyNewFolderName').val(newFodlerNoBootstrap);
-          addFolder();
-        }*/
       }
     });
     // Add an existing page (if no bootstrap)
@@ -422,11 +410,6 @@ $(function(){
       e.preventDefault();
       if(!bootstrap()) {
         openModalNoBootstrap('#hierarchyExistingPageModal');
-        /*var newExistingPageNoBootstrap = prompt("Name of the existing page:", "");
-        if(newExistingPageNoBootstrap != null) {
-          $('#hierarchyExistingPageName').val(newExistingPageNoBootstrap);
-          addExistingPage();
-        }*/
       }
     });
 
@@ -437,6 +420,66 @@ $(function(){
     // Remove a page by clicking on the cross
     $('.hierarchy-remove-page').click(function(){
       removePage(decodeURI($(this).attr('data-pageid')));
+    });
+    // Rename a folder by clicking on the pencil
+    $('.hierarchy-rename-folder').click(function(){
+      var selector = document.getElementById('renameFolder_'+$(this).attr('data-space'));
+      var selector2 = document.getElementById('hierarchyDisplaySpace_'+$(this).attr('data-space'));
+      $(selector).show();
+      $(selector).val(decodeURIComponent($(this).attr('data-space')));
+      var renameFrom = $(selector).val();
+      $(selector2).parent().hide();
+      $(selector).focus();
+      $(selector).focusout(function() {
+        $(selector).hide();
+        $(selector).val(renameFrom);
+        $(selector2).parent().show();
+        shortcut.remove("Esc");
+        shortcut.remove("Enter");
+      });
+      shortcut.add("Esc", function() {
+        $(selector).hide();
+        $(selector).val(renameFrom);
+        $(selector2).parent().show();
+        shortcut.remove("Esc");
+        shortcut.remove("Enter");
+      });
+      shortcut.add("Enter", function() {
+        var renameTo = $(selector).val();
+        renameHierarchyElement('space', renameFrom, renameTo);
+        shortcut.remove("Esc");
+        shortcut.remove("Enter");
+      });
+    });
+    // Rename a page by clicking on the pencil
+    $('.hierarchy-rename-page').click(function(){
+      var selector = document.getElementById('renamePage_'+$(this).attr('data-pageid'));
+      var selector2 = document.getElementById('hierarchyDisplayPage_'+$(this).attr('data-pageid'));
+      $(selector).show();
+      $(selector).val(decodeURIComponent($(this).attr('data-pageid')));
+      var renameFrom = $(selector).val();
+      $(selector2).hide();
+      $(selector).focus();
+      $(selector).focusout(function() {
+        $(selector).hide();
+        $(selector).val(renameFrom);
+        $(selector2).show();
+        shortcut.remove("Esc");
+        shortcut.remove("Enter");
+      });
+      shortcut.add("Esc", function() {
+        $(selector).hide();
+        $(selector).val(renameFrom);
+        $(selector2).show();
+        shortcut.remove("Esc");
+        shortcut.remove("Enter");
+      });
+      shortcut.add("Enter", function() {
+        var renameTo = $(selector).val();
+        renameHierarchyElement('page', renameFrom, renameTo);
+        shortcut.remove("Esc");
+        shortcut.remove("Enter");
+      });
     });
     if(currentEditor == "wiki") {
       $(".hierarchy-remove").css({
@@ -601,9 +644,9 @@ $(function(){
         type: "GET",
         contentType: "plain/text",
       }).success(function(dataContent){
-        formattedData = dataContent.replace(/^&lt;pre&gt;/, '').replace(/&lt;\/pre&gt;$/, '');
+        var formattedData = dataContent.replace(/^&lt;pre&gt;/, '').replace(/&lt;\/pre&gt;$/, '');
         $('#hierarchyNewFolderName').val('');
-        reloadHierarchy(true);
+        reloadHierarchy(true, formattedData);
         loading = false;
         $('#hierarchyLoadingState').html('&lt;strong class="green"&gt;Loaded&lt;/strong&gt;').show().delay(2500).queue(function(n) {
           $(this).hide().html('');
@@ -756,7 +799,7 @@ $(function(){
     if(syntaxHighlighting) {
       initCodeMirrorInternals();
     }
-    reloadHierarchy(false);
+    reloadHierarchy();
     savedContent = '';
     var arrayVal = getObjectInputFields();
     arrayVal.each(function(elemt, index) {
@@ -976,7 +1019,7 @@ $(function(){
   //addFolder()
   //addPage()
   //addExistingPage()
-  function reloadHierarchy(loadWikiContent) {
+  function reloadHierarchy(loadWikiContent, formattedData) {
     $.ajax({
       url: wikiGetURL+"WebIDECode/ApplicationHierarchy?xpage=plain",
       type: "GET",
@@ -1021,7 +1064,7 @@ $(function(){
             $(this).hide().html('');
             n();
           });
-          reloadHierarchy(false);
+          reloadHierarchy();
         }).error(function(xhr){
           $('#hierarchySavingState').attr('class', 'red').html('&lt;strong&gt;'+xhr.statusText+'&lt;/strong&gt;').show().delay(4000).queue(function(n) {
             $(this).hide().removeAttr('class').html('');
@@ -1057,7 +1100,7 @@ $(function(){
             $(this).hide().html('');
             n();
           });
-          reloadHierarchy(false);
+          reloadHierarchy();
         }).error(function(xhr){
           $('#hierarchySavingState').attr('class', 'red').html('&lt;strong&gt;'+xhr.statusText+'&lt;/strong&gt;').show().delay(4000).queue(function(n) {
             $(this).hide().removeAttr('class').html('');
@@ -1065,6 +1108,25 @@ $(function(){
           });
         });
       }
+    });
+  }
+
+  function renameHierarchyElement(type, renameFrom, renameTo) {
+    $.ajax({
+      url: wikiGetURL+"WebIDECode/ApplicationRename",
+      type: "POST",
+      data: "outputSyntax=plain&amp;"+type+"=1&amp;masterPage="+masterSpace+"."+masterName+"&amp;renameFrom="+renameFrom+"&amp;renameTo="+renameTo,
+    }).success(function(data) {
+      $('#hierarchySavingState').html('&lt;strong&gt;Renaming performed&lt;/strong&gt;').show().delay(2500).queue(function(n) {
+        $(this).hide().html('');
+        n();
+      });
+      reloadHierarchy();
+    }).error(function(xhr) {
+      $('#hierarchySavingState').attr('class', 'red').html('&lt;strong&gt;'+xhr.statusText+'&lt;/strong&gt;').show().delay(4000).queue(function(n) {
+        $(this).hide().removeAttr('class').html('');
+        n();
+      });
     });
   }
 
@@ -1104,7 +1166,7 @@ $(function(){
             $(this).hide().html('');
             n();
           });
-          reloadHierarchy(false);
+          reloadHierarchy();
         }).error(function(xhr){
           $('#hierarchyNewFolderName').val('');
           if(bootstrap()) {
@@ -1159,7 +1221,7 @@ $(function(){
           $(this).hide().html('');
           n();
         });
-        reloadHierarchy(false);
+        reloadHierarchy();
       }).error(function(xhr){
         $('#hierarchyNewPageName').val('');
         if(bootstrap()) {
@@ -1224,7 +1286,7 @@ $(function(){
               $(this).hide().html('');
               n();
             });
-            reloadHierarchy(false);
+            reloadHierarchy();
           }).error(function(xhr){
             $('#hierarchyExistingPageName').val('');
             if(bootstrap()) {
@@ -1254,7 +1316,6 @@ $(function(){
     $('.editorEditElement').css({"display" : "inline-block"});
     $('.editorWikiElement').css({"display" : "inline-block"});
     if(syntaxHighlighting) {
-      insertTagsOriginal = insertTags;
       var insertTags = function(){return true};
       // Add the CodeMirror editor
       initCodeMirrorInternals();
@@ -1559,6 +1620,13 @@ $(function(){
   top: 0px;
   padding: 1px;
 }
+.hierarchy-rename {
+  position: absolute;
+  background-color: $theme.fieldGradientColor;
+  right: 16px;
+  top: 0px;
+  padding: 1px;
+}
 #hierarchyOpenBlock {
   cursor: pointer;
   padding-top: 5px;
@@ -1728,9 +1796,9 @@ $(function(){
   * image:icon:add {{html clean=false}}&lt;a href="#!XWebIDE" class="newExistingPage" data-toggle="modal" data-target="#hierarchyExistingPageModal"&gt;Add existing page&lt;/a&gt;{{/html}}
 #end
 #foreach($space in $spacesList)
-  #set($spaceComplete = $spacesListInit.contains($space))
-  #set($spaceEscaped = $util.encodeURI($space).replace("+", "%20"))
-  #set($spaceEscapedBackslash = $util.encodeURI($space.replace('\', '\\').replace('.', '\.')).replace("+", "%20")) ## '
+  #set($spaceInList = $spacesListInit.contains($space))
+  #set($spaceEscaped = $escapetool.url($space).replace("+", "%20"))
+  #set($spaceEscapedBackslash = $escapetool.url($space.replace('\', '\\').replace('.', '\.')).replace("+", "%20")) ## '
   #if($hiddenSpaces.contains($spaceEscapedBackslash) &amp;&amp; $space != $currentDoc.space)
     #set($contentDisplay = " hierarchy-hidden")
     #set($folderIcon = "bullet_toggle_plus")
@@ -1743,12 +1811,16 @@ $(function(){
     #set($displayCurrentSpace = ' class="hierarchyCurrentSpacePageAction"')
   #end
   #set($addRemoveButton = "")
-  #if($spacesListInit.contains($space) &amp;&amp; $masterDoc.hasAccessLevel('edit'))
+  #set($addRenameButton = "")
+  #if($spaceInList &amp;&amp; $masterDoc.hasAccessLevel('edit'))
     #set($addRemoveButton = "[[image:icon:cross||title='Remove folder $spaceEscaped' data-space='$spaceEscaped' class='hierarchy-right hierarchy-remove hierarchy-remove-folder']]")
   #end
-  #if($spacesListInit.contains($space))
-    #set($xwql = "select doc.name from Document doc where doc.space='$space' order by doc.name asc")
-    #set($spacePageList = $services.query.xwql($xwql).execute())
+  #if($spaceInList &amp;&amp; $masterDoc.hasAccessLevel('edit') &amp;&amp; $xwiki.hasAccessLevel('edit', "$spaceEscaped.$reservedDocumentName"))
+    #set($addRenameButton = "{{html clean=false}}&lt;input type='text' id='renameFolder_$spaceEscaped' style='display:none;'/&gt;{{/html}}[[image:icon:pencil||title='Rename folder $spaceEscaped' data-space='$spaceEscaped' class='hierarchy-right hierarchy-rename hierarchy-rename-folder']]")
+  #end
+  #if($spaceInList)
+    #set($xwql = "select doc.name from Document doc where doc.space=:space order by doc.name asc")
+    #set($spacePageList = $services.query.xwql($xwql).bindValue('space', $space).execute())
   #else
     #set($spacePageList = [])
     #foreach($page in $pagesList)
@@ -1759,24 +1831,24 @@ $(function(){
     #end
     #set($spacePageList = $sorttool.sort($spacePageList))
   #end
-  * (% class="hierarchy-toggleFolder" data-space="$spaceEscapedBackslash" %)((([[image:icon:$folderIcon||id="hierarchyFolderIcon_$spaceEscapedBackslash"]][[image:icon:folder]] {{html clean=false}}&lt;span$!{displayCurrentSpace}&gt;$space ($spacePageList.size())&lt;/span&gt; {{/html}}))) $!addRemoveButton
+  * (% class="hierarchy-toggleFolder" data-space="$spaceEscapedBackslash" %)((([[image:icon:$folderIcon||id="hierarchyFolderIcon_$spaceEscapedBackslash"]][[image:icon:folder]] {{html clean=false}}&lt;span$!{displayCurrentSpace}&gt;&lt;span id="hierarchyDisplaySpace_$spaceEscaped"&gt;$space&lt;/span&gt; ($spacePageList.size())&lt;/span&gt; {{/html}}))) $!addRenameButton$!addRemoveButton
   (% id="hierarchySpace_$spaceEscapedBackslash" class="hierarchy-list${contentDisplay}" %)
-  #if($xwiki.hasAccessLevel('edit', "$spaceEscaped.$reservedDocumentName") &amp;&amp; $spaceComplete) ## Check if the user can create a page in that space and if the space is in the folder list
+  #if($xwiki.hasAccessLevel('edit', "$spaceEscaped.$reservedDocumentName") &amp;&amp; $spaceInList) ## Check if the user can create a page in that space and if the space is in the folder list
     ** image:icon:add {{html clean=false}}&lt;a href="#!XWebIDE" data-space="$spaceEscaped" class="newPage" data-toggle="modal" data-target="#hierarchyPageModal"&gt;Add new page&lt;/a&gt;{{/html}}
   #end
   #set($pageCount = 0)
   #foreach($page in $spacePageList)
     #set($pageFullName = "${space.replace('\', '\\').replace('.', '\.')}.${page.replace('\', '\\').replace('.', '\.')}")
-    #set($pageFullNameEscaped = $util.encodeURI($pageFullName).replace("+", "%20"))
-    #set($pageRawTitleEscaped = $util.encodeURI($xwiki.getDocument($pageFullName).title).replace("+", "%20"))
+    #set($pageFullNameEscaped = $escapetool.url($pageFullName).replace("+", "%20"))
+    #set($pageRawTitleEscaped = $escapetool.url($xwiki.getDocument($pageFullName).title).replace("+", "%20"))
     #set($pageClassHidden = "")
     #set($iconBulletToggle = "bullet_toggle_minus")
     #if($hiddenPages.contains($pageFullNameEscaped) &amp;&amp; $pageFullName != $currentDoc.fullName)
       #set($pageClassHidden = " hierarchy-hidden")
       #set($iconBulletToggle = "bullet_toggle_plus")
     #end
-    #set($pageEscaped = $util.encodeURI($page).replace("+", "%20"))
-    #set($pageEscapedBackslash = $util.encodeURI($page.replace('\', '\\').replace('.', '\.')).replace("+", "%20")) ## '
+    #set($pageEscaped = $escapetool.url($page).replace("+", "%20"))
+    #set($pageEscapedBackslash = $escapetool.url($page.replace('\', '\\').replace('.', '\.')).replace("+", "%20")) ## '
     #if($currentEditor == "view" &amp;&amp; "$!request.action" != "edit")
       #set($displayedIcon = 'page')
     #elseif($currentEditor == "object")
@@ -1787,20 +1859,24 @@ $(function(){
       #set($displayedIcon = 'page_edit')
     #end
     #if($pageFullName == $currentDoc.fullName)
-      #set($pageName = "{{html clean=false}}&lt;span class='hierarchyCurrentSpacePageAction'&gt;$page&lt;/span&gt;{{/html}})))")
+      #set($pageName = "{{html clean=false}}&lt;span id='hierarchyDisplayPage_$pageFullNameEscaped' class='hierarchyCurrentSpacePageAction'&gt;$page&lt;/span&gt;{{/html}})))")
     #else
-      #set($pageName = "{{html clean=false}}&lt;span&gt;$page&lt;/span&gt;{{/html}})))")
+      #set($pageName = "{{html clean=false}}&lt;span id='hierarchyDisplayPage_$pageFullNameEscaped'&gt;$page&lt;/span&gt;{{/html}})))")
     #end
     #set($addRemoveButton = "")
+    #set($addRenameButton = "")
     #if($pagesList.contains($pageFullName) &amp;&amp; $masterDoc.hasAccessLevel('edit'))
       #set($addRemoveButton = "[[image:icon:cross||title='Remove page $pageFullNameEscaped' data-pageid='$pageFullNameEscaped' class='hierarchy-right hierarchy-remove hierarchy-remove-page']]")
+    #end
+    #if($pagesList.contains($pageFullName) &amp;&amp; $masterDoc.hasAccessLevel('edit') &amp;&amp; $currentDoc.hasAccessLevel('edit'))
+      #set($addRenameButton = "{{html clean=false}}&lt;input type='text' id='renamePage_$pageFullNameEscaped' style='display:none;' value='$pageFullName'/&gt;{{/html}}[[image:icon:pencil||title='Rename page $pageFullNameEscaped' data-pageid='$pageFullNameEscaped' class='hierarchy-right hierarchy-rename hierarchy-rename-page']]")
     #end
     #set($attachmentCount = $xwiki.getDocument($pageFullName).getAttachmentList().size())
     #if($xwiki.getDocument($pageFullName).hasAccessLevel('edit'))
       #set($pageCount = $pageCount + 1)
       #set($objectCount = $services.query.xwql("select count(obj.className) from BaseObject as obj, Document as doc where obj.name  = doc.fullName and doc.fullName = :pageFullName and doc.translation=0").bindValue('pageFullName', $pageFullName).execute()[0])
       #set($classCount = $xwiki.getClass($pageFullName).properties.size())
-      ** (% data-pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((([[image:icon:$iconBulletToggle||class="hierarchyDisplayPageIcon"]][[image:icon:$displayedIcon||class="hierarchyContextActionIcon"]]$pageName $!addRemoveButton
+      ** (% data-pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((([[image:icon:$iconBulletToggle||class="hierarchyDisplayPageIcon"]][[image:icon:$displayedIcon||class="hierarchyContextActionIcon"]]$pageName $!addRenameButton$!addRemoveButton
       (% id='hierarchyPageDetails_$spaceEscapedBackslash.$pageEscapedBackslash' class='hierarchy-list${pageClassHidden}' %)
       #if($currentEditor == "view" &amp;&amp; $pageFullName == $currentDoc.fullName)
         *** image:icon:page {{html clean=false}}&lt;span class='hierarchyCurrentSpacePageAction'&gt;View&lt;/span&gt;{{/html}}
