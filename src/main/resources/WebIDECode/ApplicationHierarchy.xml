@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1443015723000</date>
-  <contentUpdateDate>1443014249000</contentUpdateDate>
+  <date>1443085501000</date>
+  <contentUpdateDate>1443085501000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -152,6 +152,19 @@ $(function(){
   var formattedData = '';
   var savedContent = '';
   var insertTagsOriginal = function(){return true};
+    // Get the "get" and "view" url structure for ajax queries
+  var wikiGetURL = '/xwiki/bin/get/';
+  if(window.docgeturl.indexOf('/get/') &gt;= 0) {
+    wikiGetURL = window.docgeturl.substring(0,window.docgeturl.indexOf('/get/')+5);
+  }
+  var wikiViewURL = '/xwiki/bin/view/';
+  if(window.docviewurl.indexOf('/'+XWiki.currentSpace+'/') &gt;= 0) {
+    wikiViewURL = window.docviewurl.substring(0,window.docviewurl.indexOf('/'+XWiki.currentSpace+'/')+1);
+  }
+  // Determine if bootstrap is enabled or not for modals
+  var bootstrap = function() {
+    return (typeof($.fn.modal) !== 'undefined');
+  }
   // Change current editor and page if there is a hash
   var hashURL = window.location.hash.substring(1).split('&amp;!!');
   if(hashURL.size() == 4){
@@ -165,21 +178,6 @@ $(function(){
 
   // Update the hierarchy background-color to be the same as the default wiki editor top bar
   $("#hierarchyBlock").css({"backgroundColor" : $('div.leftmenu2').css('backgroundColor')});
-
-  // Get the "get" and "view" url structure for ajax queries
-  var wikiGetURL = '/xwiki/bin/get/';
-  if(window.docgeturl.indexOf('/get/') &gt;= 0) {
-    wikiGetURL = window.docgeturl.substring(0,window.docgeturl.indexOf('/get/')+5);
-  }
-  var wikiViewURL = '/xwiki/bin/view/';
-  if(window.docviewurl.indexOf('/'+XWiki.currentSpace+'/') &gt;= 0) {
-    wikiViewURL = window.docviewurl.substring(0,window.docviewurl.indexOf('/'+XWiki.currentSpace+'/')+1);
-  }
-
-  // Determine if bootstrap is enabled or not for modals
-  var bootstrap = function() {
-    return (typeof($.fn.modal) !== 'undefined');
-  }
 
   // If Bootstrap is disabled (Colibri skin), create custom modals. Let a delay before testing bootstrap in case it is loaded after the Web IDE.
   window.setTimeout(function () {
@@ -1721,7 +1719,9 @@ $(function(){
 [[image:icon:control_start_blue||title="Hide hierarchy" id="hierarchyClose" class="hierarchy-right"]]
 )))
 **Project :** $masterDoc.display('projectName', 'view')
-{{html clean=false wiki=true}}&lt;form method="post" action="$masterDoc.getURL('view')" class="masterExportForm"&gt;&lt;input type="hidden" name="export" value="1" /&gt;&lt;a&gt;image:icon:bullet_disk &lt;input class="hierarchy-export" type="submit" value="Export the project (XAR)" title="Export the project"&gt; &lt;/input&gt;&lt;/a&gt;&lt;/form&gt;{{/html}}
+#if($masterDoc.hasAccessLevel('edit'))
+  {{html clean=false wiki=true}}&lt;form method="post" action="$masterDoc.getURL('view')" class="masterExportForm"&gt;&lt;input type="hidden" name="export" value="1" /&gt;&lt;a&gt;image:icon:bullet_disk &lt;input class="hierarchy-export" type="submit" value="Export the project (XAR)" title="Export the project"&gt; &lt;/input&gt;&lt;/a&gt;&lt;/form&gt;{{/html}}
+#end
 (% class="hierarchy-list hierarchy-no-padding" id="hierarchyMainList" %)
 #if($masterDoc.hasAccessLevel('edit'))
   * image:icon:add {{html clean=false}}&lt;a href="#!XWebIDE" class="newFolder" data-toggle="modal" data-target="#hierarchyFolderModal"&gt;Add new/existing folder&lt;/a&gt;{{/html}}
@@ -1730,7 +1730,7 @@ $(function(){
 #foreach($space in $spacesList)
   #set($spaceComplete = $spacesListInit.contains($space))
   #set($spaceEscaped = $util.encodeURI($space).replace("+", "%20"))
-  #set($spaceEscapedBackslash = $util.encodeURI($space.replace('\', '\\').replace('.', '\.')).replace("+", "%20"))
+  #set($spaceEscapedBackslash = $util.encodeURI($space.replace('\', '\\').replace('.', '\.')).replace("+", "%20")) ## '
   #if($hiddenSpaces.contains($spaceEscapedBackslash) &amp;&amp; $space != $currentDoc.space)
     #set($contentDisplay = " hierarchy-hidden")
     #set($folderIcon = "bullet_toggle_plus")
@@ -1743,16 +1743,12 @@ $(function(){
     #set($displayCurrentSpace = ' class="hierarchyCurrentSpacePageAction"')
   #end
   #set($addRemoveButton = "")
-  #if($spacesListInit.contains($space))
+  #if($spacesListInit.contains($space) &amp;&amp; $masterDoc.hasAccessLevel('edit'))
     #set($addRemoveButton = "[[image:icon:cross||title='Remove folder $spaceEscaped' data-space='$spaceEscaped' class='hierarchy-right hierarchy-remove hierarchy-remove-folder']]")
-  #end 
-  * (% class="hierarchy-toggleFolder" data-space="$spaceEscapedBackslash" %)((([[image:icon:$folderIcon||id="hierarchyFolderIcon_$spaceEscapedBackslash"]][[image:icon:folder]] {{html clean=false}}&lt;span$!{displayCurrentSpace}&gt;$space&lt;/span&gt; {{/html}}))) $!addRemoveButton
-  (% id="hierarchySpace_$spaceEscapedBackslash" class="hierarchy-list${contentDisplay}" %)
-  #if($xwiki.hasAccessLevel('edit', "$spaceEscaped.$reservedDocumentName") &amp;&amp; $spaceComplete) ## Check if the user can create a page in that space and if the space is in the folder list
-    ** image:icon:add {{html clean=false}}&lt;a href="#!XWebIDE" data-space="$spaceEscaped" class="newPage" data-toggle="modal" data-target="#hierarchyPageModal"&gt;Add new page&lt;/a&gt;{{/html}}
   #end
   #if($spacesListInit.contains($space))
-    #set($spacePageList = $xwiki.getSpaceDocsName($space))
+    #set($xwql = "select doc.name from Document doc where doc.space='$space' order by doc.name asc")
+    #set($spacePageList = $services.query.xwql($xwql).execute())
   #else
     #set($spacePageList = [])
     #foreach($page in $pagesList)
@@ -1763,6 +1759,12 @@ $(function(){
     #end
     #set($spacePageList = $sorttool.sort($spacePageList))
   #end
+  * (% class="hierarchy-toggleFolder" data-space="$spaceEscapedBackslash" %)((([[image:icon:$folderIcon||id="hierarchyFolderIcon_$spaceEscapedBackslash"]][[image:icon:folder]] {{html clean=false}}&lt;span$!{displayCurrentSpace}&gt;$space ($spacePageList.size())&lt;/span&gt; {{/html}}))) $!addRemoveButton
+  (% id="hierarchySpace_$spaceEscapedBackslash" class="hierarchy-list${contentDisplay}" %)
+  #if($xwiki.hasAccessLevel('edit', "$spaceEscaped.$reservedDocumentName") &amp;&amp; $spaceComplete) ## Check if the user can create a page in that space and if the space is in the folder list
+    ** image:icon:add {{html clean=false}}&lt;a href="#!XWebIDE" data-space="$spaceEscaped" class="newPage" data-toggle="modal" data-target="#hierarchyPageModal"&gt;Add new page&lt;/a&gt;{{/html}}
+  #end
+  #set($pageCount = 0)
   #foreach($page in $spacePageList)
     #set($pageFullName = "${space.replace('\', '\\').replace('.', '\.')}.${page.replace('\', '\\').replace('.', '\.')}")
     #set($pageFullNameEscaped = $util.encodeURI($pageFullName).replace("+", "%20"))
@@ -1774,7 +1776,7 @@ $(function(){
       #set($iconBulletToggle = "bullet_toggle_plus")
     #end
     #set($pageEscaped = $util.encodeURI($page).replace("+", "%20"))
-    #set($pageEscapedBackslash = $util.encodeURI($page.replace('\', '\\').replace('.', '\.')).replace("+", "%20"))
+    #set($pageEscapedBackslash = $util.encodeURI($page.replace('\', '\\').replace('.', '\.')).replace("+", "%20")) ## '
     #if($currentEditor == "view" &amp;&amp; "$!request.action" != "edit")
       #set($displayedIcon = 'page')
     #elseif($currentEditor == "object")
@@ -1790,11 +1792,12 @@ $(function(){
       #set($pageName = "{{html clean=false}}&lt;span&gt;$page&lt;/span&gt;{{/html}})))")
     #end
     #set($addRemoveButton = "")
-    #if($pagesList.contains($pageFullName))
+    #if($pagesList.contains($pageFullName) &amp;&amp; $masterDoc.hasAccessLevel('edit'))
       #set($addRemoveButton = "[[image:icon:cross||title='Remove page $pageFullNameEscaped' data-pageid='$pageFullNameEscaped' class='hierarchy-right hierarchy-remove hierarchy-remove-page']]")
     #end
     #set($attachmentCount = $xwiki.getDocument($pageFullName).getAttachmentList().size())
     #if($xwiki.getDocument($pageFullName).hasAccessLevel('edit'))
+      #set($pageCount = $pageCount + 1)
       #set($objectCount = $services.query.xwql("select count(obj.className) from BaseObject as obj, Document as doc where obj.name  = doc.fullName and doc.fullName = :pageFullName and doc.translation=0").bindValue('pageFullName', $pageFullName).execute()[0])
       #set($classCount = $xwiki.getClass($pageFullName).properties.size())
       ** (% data-pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((([[image:icon:$iconBulletToggle||class="hierarchyDisplayPageIcon"]][[image:icon:$displayedIcon||class="hierarchyContextActionIcon"]]$pageName $!addRemoveButton
@@ -1825,6 +1828,7 @@ $(function(){
       #end
       *** [[image:icon:attach Attachments ($attachmentCount)&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')#Attachments]]
     #elseif($xwiki.getDocument($pageFullName).hasAccessLevel('view'))
+      #set($pageCount = $pageCount + 1)
       ** (% data-pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((([[image:icon:$iconBulletToggle||class="hierarchyDisplayPageIcon"]][[image:icon:$displayedIcon||class="hierarchyContextActionIcon"]]$pageName $!addRemoveButton
       (% id='hierarchyPageDetails_$spaceEscapedBackslash.$pageEscapedBackslash' class='hierarchy-list${pageClassHidden}' %)
       #if($xcontext.action != "edit" &amp;&amp; "$!request.action" != "edit" &amp;&amp; $pageFullName == $currentDoc.fullName)
@@ -1834,6 +1838,11 @@ $(function(){
       #end
       *** [[image:icon:attach Attachments ($attachmentCount)&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')#Attachments]]
     #end
+  #end
+  #if($pageCount == 0 &amp;&amp; $spacePageList.size() != 0) ##Space not empty but user doesn't have the right to view any page
+    ** //Unauthorized//
+  #elseif($pageCount == 0 &amp;&amp; $spacePageList.size() == 0)
+    ** //Empty//
   #end
 #end
 {{html clean=false}}&lt;input type="hidden" id="hierarchyDocTitle" value="$escapetool.url($currentDoc.title).replace("+", "%20")" /&gt;{{/html}}

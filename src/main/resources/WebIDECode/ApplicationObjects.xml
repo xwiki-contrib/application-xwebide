@@ -31,9 +31,9 @@
   <author>xwiki:XWiki.Admin</author>
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
-  <creationDate>1435234589000</creationDate>
-  <date>1439454423000</date>
-  <contentUpdateDate>1439454423000</contentUpdateDate>
+  <creationDate>1435238189000</creationDate>
+  <date>1443014659000</date>
+  <contentUpdateDate>1443014659000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationObjects</title>
   <defaultTemplate/>
@@ -43,7 +43,7 @@
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
   <content>{{velocity}}
-#if($request.docFullName &amp;&amp; $request.className &amp;&amp; $request.number)
+#if($request.docFullName &amp;&amp; $xwiki.exists($request.docFullName) &amp;&amp; $request.className &amp;&amp; $request.number)
 #set($Integer = 0)
 #set($requestedObj = $xwiki.getDocument($request.docFullName).getObject($request.className, $Integer.parseInt($request.number)))
 #set($requestedClassProperties = $xwiki.getClass($request.className).properties)

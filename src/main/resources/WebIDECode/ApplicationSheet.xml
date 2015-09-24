@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1443000804000</date>
-  <contentUpdateDate>1443000804000</contentUpdateDate>
+  <date>1443085456000</date>
+  <contentUpdateDate>1443085456000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -344,9 +344,13 @@ LBGa9C4nq/FHL3qZJeJysvr/Az8fQ5PMwBdGAAAAAElFTkSuQmCC
 $(function(){
   var hiddenSpaces = getCookieHierarchy('hiddenSpaces').split(',');
   var hiddenPages = getCookieHierarchy('hiddenPages').split(',');
+  var wikiGetURL = '/xwiki/bin/get/';
+  if(window.docgeturl.indexOf('/get/') &gt;= 0) {
+    wikiGetURL = window.docgeturl.substring(0,window.docgeturl.indexOf('/get/')+5);
+  }
   function loadHierarchy() {
     $.ajax({
-      url: wikiGetURL+"WebIDECode/ApplicationHierarchy?xpage=plain",
+      url: wikiGetURL+"WebIDECode/ApplicationHierarchy",
       type: "GET",
       datatype : "html",
       data : "action=view&amp;editor=view&amp;masterPage="+XWiki.currentSpace+"."+XWiki.currentPage+"&amp;remotePage="+XWiki.currentSpace+"."+XWiki.currentPage+"&amp;hiddenSpaces="+encodeURIComponent(hiddenSpaces)+"&amp;hiddenPages="+encodeURIComponent(hiddenPages),
@@ -643,7 +647,7 @@ box-sizing: border-box;         /* Opera/IE 8+ */
   </object>
   <content>{{velocity}}
 ## Export all the pages in a project for which the user has at least "view" access
-#if($request.export)
+#if($request.export &amp;&amp; $doc.hasAccessLevel('edit'))
   #set($masterObjXar = $doc.getObject('WebIDECode.ApplicationClass'))
   #set($xarNumber = $masterObjXar.getProperty('xarVersion').value)
   #if("$!xarNumber" == "")

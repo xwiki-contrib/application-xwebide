@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1435138565000</creationDate>
-  <date>1441293501000</date>
-  <contentUpdateDate>1441293093000</contentUpdateDate>
+  <date>1443022501000</date>
+  <contentUpdateDate>1443022501000</contentUpdateDate>
   <version>1.1</version>
   <title>WebHome</title>
   <defaultTemplate/>
@@ -281,7 +281,7 @@ require(['jquery'], function ($) {
 });</code>
     </property>
     <property>
-      <name/>
+      <name>webide-createProject</name>
     </property>
     <property>
       <parse>1</parse>
@@ -392,6 +392,7 @@ icon=icon:folder</parameters>
   #set($discard = $newDoc.save())
   $response.sendRedirect($newDoc.getURL('view'))
 #else
+#if(!$isGuest)
 {{html clean=false}}
 &lt;div align="center"&gt;&lt;input type="button" id="openCreationBlock" class="btn btn-success" value="Add a project"&gt;&lt;/div&gt;
 
@@ -442,6 +443,7 @@ icon=icon:folder</parameters>
 &lt;/div&gt;
 &lt;div id="backgroundModalNoBootstrap"&gt;&lt;/div&gt;
 {{/html}}
+#end
 #set ($columnsProperties = {
   'projectName': {"displayName":"Project Name", "type":"text","size":10,"link":"view"},
   'doc.date': {"type":"text","size":10},
