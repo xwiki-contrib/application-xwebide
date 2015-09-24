@@ -32,7 +32,7 @@
   <groupId>org.xwiki.contrib</groupId>
   <artifactId>application-webide</artifactId>
   <name>XWebIDE Application</name>
-  <version>0.6.2-SNAPSHOT</version>
+  <version>0.7-SNAPSHOT</version>
   <packaging>xar</packaging>
   <description>An IDE which allows user to create projects in XWiki.</description>
   <scm>
