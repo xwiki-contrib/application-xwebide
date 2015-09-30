@@ -20,7 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<xwikidoc>
+<xwikidoc reference="WebIDECode.ApplicationSheet" locale="">
   <web>WebIDECode</web>
   <name>ApplicationSheet</name>
   <language/>
@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1443085456000</date>
-  <contentUpdateDate>1443085456000</contentUpdateDate>
+  <date>1443625965000</date>
+  <contentUpdateDate>1443625904000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -46,7 +46,7 @@
     <filename>XWebIDE.png</filename>
     <filesize>11895</filesize>
     <author>XWiki.Admin</author>
-    <date>1441202862000</date>
+    <date>1443170830000</date>
     <version>1.1</version>
     <comment/>
     <content>iVBORw0KGgoAAAANSUhEUgAAAPwAAACBCAIAAABrdUAvAAAAAXNSR0IArs4c6QAAAARnQU1BAACx
@@ -280,7 +280,7 @@ LBGa9C4nq/FHL3qZJeJysvr/Az8fQ5PMwBdGAAAAAElFTkSuQmCC
         <prettyName>Caching policy</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators> ,|</separators>
+        <separators>|, </separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>long|short|default|forbid</values>
@@ -325,7 +325,7 @@ LBGa9C4nq/FHL3qZJeJysvr/Az8fQ5PMwBdGAAAAAElFTkSuQmCC
         <prettyName>Use this extension</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators> ,|</separators>
+        <separators>|, </separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>currentPage|onDemand|always</values>
@@ -342,8 +342,8 @@ LBGa9C4nq/FHL3qZJeJysvr/Az8fQ5PMwBdGAAAAAElFTkSuQmCC
     <property>
       <code>require(['jquery', 'xwiki-meta'], function ($, xm) {
 $(function(){
-  var hiddenSpaces = getCookieHierarchy('hiddenSpaces').split(',');
-  var hiddenPages = getCookieHierarchy('hiddenPages').split(',');
+  var visibleSpaces = getCookieHierarchy('visibleSpaces').split(',');
+  var visiblePages = getCookieHierarchy('visiblePages').split(',');
   var wikiGetURL = '/xwiki/bin/get/';
   if(window.docgeturl.indexOf('/get/') &gt;= 0) {
     wikiGetURL = window.docgeturl.substring(0,window.docgeturl.indexOf('/get/')+5);
@@ -353,7 +353,7 @@ $(function(){
       url: wikiGetURL+"WebIDECode/ApplicationHierarchy",
       type: "GET",
       datatype : "html",
-      data : "action=view&amp;editor=view&amp;masterPage="+XWiki.currentSpace+"."+XWiki.currentPage+"&amp;remotePage="+XWiki.currentSpace+"."+XWiki.currentPage+"&amp;hiddenSpaces="+encodeURIComponent(hiddenSpaces)+"&amp;hiddenPages="+encodeURIComponent(hiddenPages),
+      data : "action=view&amp;editor=view&amp;masterPage="+XWiki.currentSpace+"."+XWiki.currentPage+"&amp;remotePage="+XWiki.currentSpace+"."+XWiki.currentPage+"&amp;visibleSpaces="+encodeURIComponent(visibleSpaces)+"&amp;visiblePages="+encodeURIComponent(visiblePages),
       contentType: "text/html",
     }).success(function(data){
       $('#hierarchyBlock').html(data);
@@ -405,7 +405,7 @@ $(function(){
         <prettyName>Caching policy</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators> ,|</separators>
+        <separators>|, </separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>long|short|default|forbid</values>
@@ -431,7 +431,7 @@ $(function(){
         <prettyName>Content Type</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators> ,|</separators>
+        <separators>|, </separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>CSS|LESS</values>
@@ -466,7 +466,7 @@ $(function(){
         <prettyName>Use this extension</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators> ,|</separators>
+        <separators>|, </separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>currentPage|onDemand|always</values>
@@ -499,22 +499,26 @@ $(function(){
   height: 650px;
   min-height: 650px;
   resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
 }
 #displayBlock {
-  width: 83%;
+  width: auto;
   height: 100%;
-  padding: 10px;
+  padding: 10px !important;
+  overflow: auto;
 }
 #contentMainBlock {
-  width: 83%;
-  bottom: 0px;
-  top: 33px;
-  right: 0px;
-  position: absolute;
+  height: 95%;
+  height: calc(100% - 33px);
+  width: auto;
   background-color: #DDDDDD;
+  overflow-x:hidden;
+  overflow-y:auto;
 }
 #objectMainBlock {
-  width: 83%;
+  /*width: 83%;*/
+  width : auto;
   height: 100%;
   overflow: auto;
   padding: 10px;
@@ -528,6 +532,7 @@ $(function(){
 
 #titleBlock {
   width: 60%;
+  height: 30px;
 }
 #xwikidoctitleinput {
   width: 80%;
@@ -553,16 +558,14 @@ $(function(){
   border: 0px !important;
 }
 .CodeMirror-scroll {
-  position: static !important;
+  /*position: static !important;*/
 }
 #editorWikiButtonBar {
-  position: relative;
   border: 1px solid #DDDDDD;
-  width: 83%;
   height: 33px;
   -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
--moz-box-sizing: border-box;    /* Firefox, other Gecko */
-box-sizing: border-box;         /* Opera/IE 8+ */
+  -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+  box-sizing: border-box;         /* Opera/IE 8+ */
 }
 .editorElement {
   display: none;
@@ -581,6 +584,9 @@ box-sizing: border-box;         /* Opera/IE 8+ */
   background-color: #EEEEEE;
   padding: 10px;
   z-index: 50;
+}
+#xwikidoctitleinput {
+  display: none;
 }
 #editorObjectMenuTitle {
   text-transform: uppercase;
@@ -660,8 +666,41 @@ box-sizing: border-box;         /* Opera/IE 8+ */
   #set($pagesList = $masterObj.getProperty('pages').value)
   #set($spacesList = $masterObj.getProperty('spaces').value)
   #set($projectName = $masterObj.getProperty('projectName').value)
+  #**
+   * 1/ Get the list of spaces (check for potential subspaces first)
+   * 2/ Merge all the pages from these spaces to the list of additional pages
+   * 3/ Add all the pages from that merged list to the XAR
+   *#
+  ## 1/ Check for subspaces
+  #set($nestedSpaces = !$xwiki.getVersion().matches('^([1-6]\..*|7\.[01].*)'))
+  #set($spacesListNested = $sorttool.sort($spacesList))
+  #if($nestedSpaces)
+    #foreach($space in $spacesList)
+      #set($xwql = "select space.reference from XWikiSpace as space where space.parent=:space order by space.name")
+      #set($spacePageList = $services.query.xwql($xwql).bindValue('space', $space).execute())
+      #foreach($i in [0..1000])
+        #if($i &gt;= $spacePageList.size())
+          #break
+        #end
+        #set($addToList =[])
+        #set($discard = $finalList.add($spacePageList[$i]))
+        #set($xwql = "select space.reference from XWikiSpace as space where space.parent=:space order by space.name")
+        #set($addToList = $services.query.xwql($xwql).bindValue('space', $spacePageList[$i]).execute())
+        #foreach($item in $addToList)
+          #set($discard = $spacePageList.add($item))
+        #end
+      #end
+      #foreach($spaceElement in $spacePageList)
+        #if(!$spacesListNested.contains($spaceElement))
+          #set($discard = $spacesListNested.add($spaceElement))
+        #end
+      #end
+    #end
+    #set($spacesListNested = $sorttool.sort($spacesListNested))
+  #end
+  ## 2/ Merge pages from 'spaces' property and additionnal pages from 'pages' property
   #set($spacesListAdd = [])
-  #foreach($space in $spacesList)
+  #foreach($space in $spacesListNested)
     #foreach($page in $xwiki.getSpaceDocsName($space))
       #set($document = $xwiki.getDocument("$space.$page"))
       #if(!$pagesList.contains($document.fullName) &amp;&amp; $document.hasAccessLevel('view'))
@@ -670,6 +709,7 @@ box-sizing: border-box;         /* Opera/IE 8+ */
     #end
   #end
   #set($pagesList = $sorttool.sort($pagesList))
+  ## 3/ Create the .xar
   #set($export = $xwiki.package)
   #set($discard = $export.setWithVersions(false))
   #set($discard = $export.setLicence("LGPL"))
@@ -692,8 +732,9 @@ box-sizing: border-box;         /* Opera/IE 8+ */
     #set($discard = $xwiki.ssx.use("WebIDECode.SyntaxHighlighting"))
   #end
   {{html clean=false}}
-  &lt;div id="titleBlock" class="editorElement editorWikiElement"&gt;&lt;strong&gt;Title&lt;/strong&gt; &lt;input type="text" id="xwikidoctitleinput"&gt;&lt;/div&gt;
+  &lt;div id="titleBlock"&gt;&lt;strong&gt;Title:&lt;/strong&gt; &lt;input type="text" id="xwikidoctitleinput"&gt;&lt;span id="editorObjectTitle"&gt;${doc.name}&lt;/span&gt;&lt;/div&gt;
   {{/html}}
+
 
   (% id="editorBlock" %)
   (((
@@ -766,9 +807,9 @@ To learn about other features of the XWiki WebIDE, see the [[Online Documentatio
   (% id="hierarchyBottomActionsBar" class="editorElement editorEditElement" %)
   (((
   {{html clean=false}}
-  &lt;input type="button" id="hierarchySaveButtonIDE" class="btn btn-primary" value="Save &amp; Continue" title="Save the page and continue editing" /&gt; 
-  &lt;input type="button" id="hierarchySaveViewButtonIDE" class="btn btn-success" value="Save &amp; View" title="Save the page and view it" /&gt; 
-  &lt;input type="button" id="hierarchyDiscardViewButtonIDE" class="btn btn-default" value="Discard &amp; View" title="View the page without saving" /&gt; 
+  &lt;input type="button" id="hierarchySaveButtonIDE" class="btn btn-primary" value="Save &amp; Continue" title="Save the page and continue editing" /&gt;
+  &lt;input type="button" id="hierarchySaveViewButtonIDE" class="btn btn-success" value="Save &amp; View" title="Save the page and view it" /&gt;
+  &lt;input type="button" id="hierarchyDiscardViewButtonIDE" class="btn btn-default" value="Discard &amp; View" title="View the page without saving" /&gt;
   {{/html}}
   )))
   (% id="hierarchyStateBlock" %)(((

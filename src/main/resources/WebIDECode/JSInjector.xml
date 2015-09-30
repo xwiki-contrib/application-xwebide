@@ -20,7 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<xwikidoc>
+<xwikidoc reference="WebIDECode.JSInjector" locale="">
   <web>WebIDECode</web>
   <name>JSInjector</name>
   <language/>
@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434954547000</creationDate>
-  <date>1439470775000</date>
-  <contentUpdateDate>1439470651000</contentUpdateDate>
+  <date>1443620000000</date>
+  <contentUpdateDate>1443170830000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -62,7 +62,7 @@
         <prettyName>Caching policy</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators> ,|</separators>
+        <separators>|, </separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>long|short|default|forbid</values>
@@ -107,7 +107,7 @@
         <prettyName>Use this extension</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
-        <separators> ,|</separators>
+        <separators>|, </separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
         <values>currentPage|onDemand|always</values>
@@ -124,10 +124,11 @@
     <property>
       <code>require(['jquery'], function ($) {
 $(function(){
+  var NESTED_SPACES = checkNestedSpaces();
   var currentPage = encodeURIComponent(XWiki.currentPage);
   var currentSpace = encodeURIComponent(XWiki.currentSpace);
   var currentPageEscaped = encodeURIComponent(XWiki.currentPage.replace(/\\/g, '\\\\').replace(/\./g, '\\\.'));
-  var currentSpaceEscaped = encodeURIComponent(XWiki.currentSpace.replace(/\\/g, '\\\\').replace(/\./g, '\\\.'));
+  var currentSpaceEscaped = encodeURIComponent(getSpacesEscaped(XWiki.currentSpace));
   var wikiViewURL = '/xwiki/bin/view/';
   var bootstrap = (typeof($.fn.modal) !== 'undefined'); // Modal won't work without bootstrap
   if(window.docviewurl.indexOf('/'+XWiki.currentSpace+'/') &gt;= 0) {
@@ -195,24 +196,24 @@ $(function(){
 
     function loadMasterPage(checkType) {
       if(checkType == 1 &amp;&amp; data.size == "1") {
-        window.location.href = wikiViewURL+encodeURIComponent(unescape(data.projectData[0].masterSpace))+'/'+encodeURIComponent(unescape(data.projectData[0].masterName))+'#!XWebIDE&amp;!!wiki&amp;!!'+currentPage+'&amp;!!'+currentSpace;
+        window.location.href = wikiViewURL+encodeURI(getURLSpacesString(unescape(data.projectData[0].masterSpace)))+'/'+encodeURIComponent(unescape(data.projectData[0].masterName))+'#!XWebIDE&amp;!!wiki&amp;!!'+currentPage+'&amp;!!'+currentSpace;
       }
       else if(checkType == 2 &amp;&amp; data.sheetSize == "1") {
-        window.location.href = wikiViewURL+encodeURIComponent(unescape(data.sheet[0].sheetProjectData[0].sheetMasterSpace))+'/'+encodeURIComponent(unescape(data.sheet[0].sheetProjectData[0].sheetMasterName))+'#!XWebIDE&amp;!!wiki&amp;!!'+encodeURIComponent(unescape(data.sheet[0].sheetDocumentName))+'&amp;!!'+encodeURIComponent(unescape(data.sheet[0].sheetDocumentSpace))+'';
+        window.location.href = wikiViewURL+encodeURI(getURLSpacesString(unescape(data.sheet[0].sheetProjectData[0].sheetMasterSpace)))+'/'+encodeURIComponent(unescape(data.sheet[0].sheetProjectData[0].sheetMasterName))+'#!XWebIDE&amp;!!wiki&amp;!!'+encodeURIComponent(unescape(data.sheet[0].sheetDocumentName))+'&amp;!!'+encodeURIComponent(unescape(data.sheet[0].sheetDocumentSpace))+'';
       }
       else if(parseInt(data.size) &gt; 1 || parseInt(data.sheetSize) &gt; 1){
         var message = 'That page is in several projects. Which one do you want to edit?';
         var projectURLList = '';
         if(checkType == 1) {
           $.each(data.projectData, function(key, value) {
-            projectURLList += '&lt;a href="'+wikiViewURL+value.masterSpace+'/'+value.masterName+'#!XWebIDE&amp;!!wiki&amp;!!'+currentPage+'&amp;!!'+currentSpace+'" id="tmEditWebIDE" class="tmEditXWebIDE" title="Edit '+data.documentName+' in XWebIDE as part of '+value.project+'"&gt;Edit &lt;strong&gt;'+data.documentName+'&lt;/strong&gt; in project &lt;strong&gt;'+value.project+'&lt;/strong&gt;&lt;/a&gt;&lt;br /&gt;';
+            projectURLList += '&lt;a href="'+wikiViewURL+getURLSpacesString(value.masterSpace)+'/'+value.masterName+'#!XWebIDE&amp;!!wiki&amp;!!'+currentPage+'&amp;!!'+currentSpace+'" id="tmEditWebIDE" class="tmEditXWebIDE" title="Edit '+data.documentName+' in XWebIDE as part of '+value.project+'"&gt;Edit &lt;strong&gt;'+data.documentName+'&lt;/strong&gt; in project &lt;strong&gt;'+value.project+'&lt;/strong&gt;&lt;/a&gt;&lt;br /&gt;';
           });
         }
         else if(checkType == 2) {
           message = 'That page uses sheets from several projects. Which project do you want to edit?';
           $.each(data.sheet, function(keySheet, valueSheet) {
             $.each(valueSheet.sheetProjectData, function(key, value) {
-              projectURLList += '&lt;a href="'+wikiViewURL+value.sheetMasterSpace+'/'+value.sheetMasterName+'#!XWebIDE&amp;!!wiki&amp;!!'+valueSheet.sheetDocumentName+'&amp;!!'+valueSheet.sheetDocumentSpace+'" id="tmEditWebIDE" class="tmEditXWebIDE" title="Edit '+valueSheet.sheetDocumentName+' in XWebIDE as part of '+value.sheetProject+'"&gt;Edit &lt;strong&gt;'+valueSheet.sheetDocumentName+'&lt;/strong&gt; in project &lt;strong&gt;'+value.sheetProject+'&lt;/strong&gt;&lt;/a&gt;&lt;br /&gt;';
+              projectURLList += '&lt;a href="'+wikiViewURL+getURLSpacesString(value.sheetMasterSpace)+'/'+value.sheetMasterName+'#!XWebIDE&amp;!!wiki&amp;!!'+valueSheet.sheetDocumentName+'&amp;!!'+valueSheet.sheetDocumentSpace+'" id="tmEditWebIDE" class="tmEditXWebIDE" title="Edit '+valueSheet.sheetDocumentName+' in XWebIDE as part of '+value.sheetProject+'"&gt;Edit &lt;strong&gt;'+valueSheet.sheetDocumentName+'&lt;/strong&gt; in project &lt;strong&gt;'+value.sheetProject+'&lt;/strong&gt;&lt;/a&gt;&lt;br /&gt;';
             });
           });
         }
@@ -250,14 +251,12 @@ $(function(){
 
   });
 
-
-  // TODO: supprimer la suite quand object et class editors seront finis
   var hierarchyStatus = false;
   function displayHierarchy(masterSpace, masterName) {
     if(!hierarchyStatus &amp;&amp; !document.getElementById('hierarchyBlock')) {
       hierarchyStatus = true;
-      var hiddenSpaces = getCookieHierarchy(escape(masterName), 'hiddenSpaces');
-      var hiddenPages = getCookieHierarchy(escape(masterName), 'hiddenPages');
+      var visibleSpaces = getCookieHierarchy(escape(masterName), 'visibleSpaces');
+      var visiblePages = getCookieHierarchy(escape(masterName), 'visiblePages');
       var wikiGetURL = '/xwiki/bin/get/';
       var remotePageName = currentPageEscaped;
       var remoteSpaceName = currentSpaceEscaped;
@@ -270,61 +269,20 @@ $(function(){
       }
       if(window.docgeturl.indexOf('/get/') != 0) wikiGetURL = window.docgeturl.substring(0,window.docgeturl.indexOf('/get/')+5);
       $.ajax({
-        url: wikiGetURL+"WebIDECode/ApplicationHierarchy?xpage=plain&amp;action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+encodeURI(masterSpace)+"."+encodeURI(masterName)+"&amp;remotePage="+remoteSpaceName+"."+remotePageName+"&amp;hiddenSpaces="+encodeURIComponent(hiddenSpaces)+"&amp;hiddenPages="+encodeURIComponent(hiddenPages),
+        url: wikiGetURL+"WebIDECode/ApplicationHierarchy?xpage=plain&amp;action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+encodeURI(masterSpace)+"."+encodeURI(masterName)+"&amp;remotePage="+remoteSpaceName+"."+remotePageName+"&amp;visibleSpaces="+encodeURIComponent(visibleSpaces)+"&amp;visiblePages="+encodeURIComponent(visiblePages),
         type: "GET",
         contentType: "text/plain",
       }).success(function(data){
         var mainBlock = '';
         if(XWiki.editor == "class"){
           mainBlock = '#propupdate';
-        }
-        $(mainBlock).before('&lt;div id="hierarchyBlock" &gt;'+data+'&lt;/div&gt;');
-        $('head').append('&lt;link rel="stylesheet" type="text/css" href="/xwiki/bin/ssx/WebIDECode/ApplicationHierarchy"/&gt;');
-        $('head').append('&lt;script type="text/javascript" src="/xwiki/bin/jsx/WebIDECode/ApplicationHierarchy" defer="defer"&gt;&lt;/script&gt;');
-        $(mainBlock).css({
-          "width" : "83%",
-          "maxWidth" : "83%",
-          "resize" : "none"
-        });
-        $("#hierarchyBlock").css({
-          "width" : "17%",
-          "maxWidth" : "17%",
-          "resize" : "none",
-        });
-        if(XWiki.editor == "class"){
-          $("#hierarchyBlock").css({
-            "display" : "inline-block",
-            "maxHeight" : ($(window).height())+"px"
-          });
+          $(mainBlock).before('&lt;div id="hierarchyBlock" &gt;'+data+'&lt;/div&gt;');
+          $('head').append('&lt;link rel="stylesheet" type="text/css" href="/xwiki/bin/ssx/WebIDECode/ApplicationHierarchy"/&gt;');
+          $('head').append('&lt;script type="text/javascript" src="/xwiki/bin/jsx/WebIDECode/ApplicationHierarchy" defer="defer"&gt;&lt;/script&gt;');
           $(mainBlock).css({
-            "display" : "inline-block",
-            "float" : "right",
-            "minHeight" : ($("#hierarchyBlock").height())+"px"
-          });
-          $("#xwikieditcontent").css({
-            "padding" : "10px",
-            "resize" : "vertical"
-          });
-          $('.bottombuttons').css({
-            "paddingLeft" : "20px",
-          });
-          $('#xwikiobjects textarea').attr('spellcheck','false');
-          // Fix the position of the hierarchy when the page contains lots of objects
-          $(window).resize(function() {$("#hierarchyBlock").css({"maxHeight" : ($(window).height())+"px"});});
-          var hierarchyTop = $('#hierarchyBlock').offset().top; // returns number
-          var hierarchyLeft = $('#hierarchyBlock').offset().left; // returns number
-          $(window).scroll(function(){ // scroll event
-          var footerTop = $('#footerglobal').offset().top; // returns number 
-            var windowTop = $(window).scrollTop(); // returns number 
-            if (hierarchyTop &lt; windowTop &amp;&amp; (windowTop+$('#hierarchyBlock').height()) &lt; footerTop){
-              $('#hierarchyBlock').css({ position: 'fixed', top : 0, left : hierarchyLeft, width: '17%'});
-            }
-            else if(hierarchyTop &lt; windowTop &amp;&amp; (windowTop+$('#hierarchyBlock').height()) &gt; footerTop) {
-              $('#hierarchyBlock').css({ position: 'fixed', top: -(windowTop +$(window).height()-footerTop), left : hierarchyLeft, width: '17%'});
-            }
-            else {
-              $('#hierarchyBlock').css('position','static');
-            }
+            "overflow" : "auto",
+            "display" : "block",
+            "padding" : "20px"
           });
         }
       });
@@ -342,6 +300,61 @@ $(function(){
     return "";
   }
 
+  /**
+   * Check if Nested spaces are available if that version of XWiki
+   * @return boolean
+   */
+  function checkNestedSpaces() {
+    if(XWiki.EntityReferenceTreeNode)
+      return true;
+    else
+      return false;
+  }
+
+  /**
+   * @param spaces The string describing spaces with XWiki classic format 'A.B'
+   * @return The string describing spaces with XWiki REST format 'spaces/A/spaces/B'
+   */
+  function getRestSpacesString(spaces) {
+    if(NESTED_SPACES) {
+      var spacesEnc = spaces.replace(/%5C\./g, '%5C%2E').replace(/\\\./g, '%5C%2E');
+      var spacesList = spacesEnc.split('.');
+      var restFormat = '';
+      for(var i=0; i&lt;spacesList.length; i++) {
+        restFormat += 'spaces/'+spacesList[i].replace('%5C%2E', '\.')+'/';
+      }
+      return restFormat.substring(0, restFormat.length - 1);
+    }
+    else return 'spaces/'+spaces+'';
+  }
+
+  /**
+   * @param spaces The string describing spaces with XWiki classic format 'A.B'
+   * @return The string describing spaces with XWiki URL format 'A/B'
+   */
+  function getURLSpacesString(spaces) {
+    if(NESTED_SPACES) {
+      var spacesEsc = spaces.replace(/%5C\./g, '%5C%2E').replace(/\\\./g, '%5C%2E');
+      var spacesList = spacesEsc.split('.');
+      var restFormat = '';
+      for(var i=0; i&lt;spacesList.length; i++) {
+        restFormat += spacesList[i].replace('%5C%2E', '\.')+'/';
+      }
+      return restFormat.substring(0, restFormat.length - 1);
+    }
+    else return spaces;
+  }
+
+  /**
+   * @param spaces The string describing a space with XWiki classic format 'A.B' (without nested space)
+   * @return The string describing escaped space name 'A\.B'
+   */
+  function getSpacesEscaped(spaces) {
+    if(NESTED_SPACES) {
+      return spaces;
+    }
+    else return spaces.replace('%5C', '%5C%5C').replace(/\\/g, '%5C%5C').replace(/\./g, '%5C.');
+  }
 });
 });</code>
     </property>
