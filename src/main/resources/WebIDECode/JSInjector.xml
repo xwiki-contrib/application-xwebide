@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434954547000</creationDate>
-  <date>1443620000000</date>
+  <date>1443791431000</date>
   <contentUpdateDate>1443170830000</contentUpdateDate>
   <version>1.1</version>
   <title/>
@@ -154,7 +154,7 @@ $(function(){
           });
         }
         else { //Flamingo
-          $('#tmEdit .dropdown-menu .divider').before('&lt;li class=""&gt;&lt;a href="#" id="tmEditWebIDE" class="tmEditXWebIDE" title="Edit '+data.documentName+' in XWebIDE"&gt;&lt;span class="glyphicon  glyphicon-folder-open"&gt;&lt;/span&gt; XWebIDE&lt;/a&gt;&lt;/li&gt;');
+          $('#tmEdit .dropdown-menu .divider:first').before('&lt;li class=""&gt;&lt;a href="#" id="tmEditWebIDE" class="tmEditXWebIDE" title="Edit '+data.documentName+' in XWebIDE"&gt;&lt;span class="glyphicon  glyphicon-folder-open"&gt;&lt;/span&gt; XWebIDE&lt;/a&gt;&lt;/li&gt;');
         }
         $('.tmEditXWebIDE').click(function(e) {
           e.preventDefault();
