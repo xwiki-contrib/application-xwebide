@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1435238189000</creationDate>
-  <date>1443170830000</date>
-  <contentUpdateDate>1443170830000</contentUpdateDate>
+  <date>1444826525000</date>
+  <contentUpdateDate>1444826525000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationObjects</title>
   <defaultTemplate/>
@@ -89,6 +89,9 @@ Add an object: &lt;select id="addClassList"&gt;
   $requestedObj.display($prop.name, 'edit')
 #end
 )))
+#elseif($request.updateToken)
+#set($requestedDoc = $xwiki.getDocument($request.docFullName))
+(% id="currentToken" %)((($services.csrf.getToken())))
 #end
 {{/velocity}}</content>
 </xwikidoc>

@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1444748974000</date>
+  <date>1444830128000</date>
   <contentUpdateDate>1444727420000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -513,7 +513,6 @@ $(function(){
         if(changeSavedContent) {
           setSavedContent(tabNumberId);
         }
-        //$('#hierarchyStar').hide(); TODO
         setStar(false, tabNumberId);
         setSavingState(false, 'Saved', 2500);
         if(continueEditing) return true;
@@ -573,7 +572,7 @@ $(function(){
    * @input XML dataContent : data from XWiki Rest API
    */
   function startDisplayObjects(jQueryTabId, dataContent) {
-    var form_token = xm ? xm.form_token : $('meta[name="form_token"]').attr('content');
+    var form_token = getDocumentReferenceData('form_token');
     var currentTabNumber = getTabNumber(jQueryTabId);
     var urlSpaces = getCurrentSpace(false, true);
     var file = getCurrentPage(false);
@@ -842,9 +841,9 @@ $(function(){
    * @input String folder: The folder where is located the document to save
    * @input String file: The file whose objects have to be saved
    */
-  function saveObjects(continueEdit, changePage, folder, file) {
+  function saveObjects(continueEdit, changePage, folder, file, tokenUpToDate) {
     if(!saving) {
-      setSavingState(true);
+      setSavingState(true, 'Saving...', null, 'green');
       var jQueryTabId = '#'+getTabId('object', folder, file);
       var tabNumberId = getTabNumber(jQueryTabId);
       if(syntaxHighlighting) {
@@ -865,6 +864,12 @@ $(function(){
           }
           setStar(false, tabNumberId);
           setSavingState(false, 'Saved', 2500);
+        },
+        error: function(xhr) {
+          setSavingState(false, xhr.statusText, 5000, 'red');
+          if(xhr.status == 401 &amp;&amp; !tokenUpToDate){
+            getUpdatedToken(saveObjects, [continueEdit, changePage, folder, file]);
+          }
         }
       });
     }
@@ -1177,6 +1182,7 @@ $(function(){
    * Get data from about the current document (i.e. the master page) from XWiki API
    */
   function getDocumentReferenceData(dataType) {
+    var restURL = xm ? xm.restURL : $('meta[name="restURL"]').attr('content');
     switch(dataType) {
       case 'wiki':
         return xm ? xm.wiki : $('meta[name="wiki"]').attr('content');
@@ -1194,7 +1200,7 @@ $(function(){
         return xm ? xm.form_token : $('meta[name="form_token"]').attr('content');
         break;
       case 'restURL':
-        return xm ? xm.restURL : $('meta[name="restURL"]').attr('content');
+        return (typeof restURL != 'undefined') ? restURL : '/xwiki/rest/wikis/xwiki/'+getRestSpacesString(getDocumentReferenceData('space'))+'/pages/'+getDocumentReferenceData('page');
         break;
       default:
         return xm ? (xm.documentReference ? xm.documentReference : xm.wiki+':'+xm.space+'.'+xm.page) : $('meta[name="wiki"]').attr('content')+':'+$('meta[name="space"]').attr('content')+'.'+$('meta[name="page"]').attr('content');
@@ -1218,6 +1224,42 @@ $(function(){
     }
   }
 
+  /**
+   * Update the CSRF token for the current user (the token can be wrong if the wiki has been restarted)
+   * @input (opt) Function callback : the function to call when the token is updated
+   * @input (opt) Array args : the arguments to apply to the callback function when it is called
+   */
+  function getUpdatedToken(callback, args) {
+    if(!loading) {
+      setLoadingState(true, 'Updating CSRF token...');
+      $.ajax({
+        url: wikiViewURL+"WebIDECode/ApplicationObjects?xpage=plain&amp;updateToken",
+        type: "GET",
+        dataType: "html"
+      }).success(function(dataContent) {
+        var newToken = $('&lt;div /&gt;').append(dataContent).find('#currentToken p').html();
+        if(newToken !== getDocumentReferenceData('form_token')) {
+          if(xm) {
+            xm.form_token = newToken;
+          }
+          else {
+            $('meta[name="form_token"]').attr('content', newToken);
+          }
+          $('input[name="form_token"]').val(newToken);
+          setLoadingState(false, 'CSRF token updated!', 2500);
+          if(callback &amp;&amp; args) {
+            args.push(true);
+            callback.apply(null, args);
+          }
+        }
+        else {
+          setLoadingState(false, 'Token already up-to-date', 1000);
+        }
+      }).error(function(xhr) {
+        setLoadingState(false, xhr.statusText, 4000, 'red');
+      });
+    }
+  }
 
   /*
    * Title tools
