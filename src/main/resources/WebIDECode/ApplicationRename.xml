@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1443101215000</creationDate>
-  <date>1443432392000</date>
-  <contentUpdateDate>1443432392000</contentUpdateDate>
+  <date>1444919084000</date>
+  <contentUpdateDate>1444919084000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationRename</title>
   <defaultTemplate/>
@@ -46,25 +46,22 @@
 #if($request.page &amp;&amp; $xwiki.exists($request.renameFrom) &amp;&amp; $xwiki.getDocument($request.renameFrom).hasAccessLevel('edit') &amp;&amp; $request.renameTo &amp;&amp; $request.masterPage)
   #if("$!request.renameTo" != "")
     #set($ok = $xwiki.getDocument($request.renameFrom).rename($request.renameTo))
-    #set($masterDoc = $xwiki.getDocument($request.masterPage))
-    #set($masterObj = $masterDoc.getObject('WebIDECode.ApplicationClass'))
-    #set($pagesList = $masterObj.getProperty('pages').value)
-    #set($newList = [])
-    #foreach($page in $pagesList)
-      #if($page != $request.renameFrom)
-        #set($discard = $newList.add($page))
+    #if($request.updateList == "true")
+      #set($masterDoc = $xwiki.getDocument($request.masterPage))
+      #set($masterObj = $masterDoc.getObject('WebIDECode.ApplicationClass'))
+      #set($pagesList = $masterObj.getProperty('pages').value)
+      #set($newList = [])
+      #foreach($page in $pagesList)
+        #if($page != $request.renameFrom)
+          #set($discard = $newList.add($page))
+        #end
       #end
+      #set($discard = $newList.add($request.renameTo))
+      #set($discard = $masterObj.set('pages', $newList))
+      #set($discard = $masterDoc.save())
     #end
-    #set($discard = $newList.add($request.renameTo))
-    #set($discard = $masterObj.set('pages', $newList))
-    #set($discard = $masterDoc.save())
   #end
 #elseif($request.space &amp;&amp; $xwiki.hasAccessLevel('edit', "${request.renameFrom}.$reservedDocumentName") &amp;&amp; $request.renameTo &amp;&amp; $request.masterPage)
-#*
-#set ($source = $services.model.resolveSpace('Path.To.Source'))
-$services.refactoring.rename($source, 'NewName').join()
-*#
-
   #if("$!request.renameTo" != "")
     #set($nestedSpaces = !$xwiki.getVersion().matches('^([1-6]\..*|7\.[01].*)'))
     #if($nestedSpaces)

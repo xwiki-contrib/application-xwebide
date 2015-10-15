@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1444915213000</date>
-  <contentUpdateDate>1444727420000</contentUpdateDate>
+  <date>1444920784000</date>
+  <contentUpdateDate>1444920777000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -396,11 +396,10 @@ $(function(){
     // Rename a folder by clicking on the pencil
     $('.hierarchy-rename-folder').click(function(){
       var selector = document.getElementById('renameFolder_'+$(this).attr('data-space'));
-      var selector_old = document.getElementById('renameFolder_old_'+$(this).attr('data-space'));
       var selector2 = document.getElementById('hierarchyDisplaySpace_'+$(this).attr('data-space'));
       $(selector).show();
       $(selector).val(decodeURIComponent($(this).attr('data-subspace')));
-      var renameFrom = $(selector_old).val();
+      var renameFrom = $(this).attr('data-space');
       $(selector2).parent().hide();
       $(selector).focus();
       $(selector).focusout(function() {
@@ -428,6 +427,7 @@ $(function(){
     $('.hierarchy-rename-page').click(function(){
       var selector = document.getElementById('renamePage_'+$(this).attr('data-pageid'));
       var selector2 = document.getElementById('hierarchyDisplayPage_'+$(this).attr('data-pageid'));
+      var updatePageList = $(selector).attr('data-pageinlist');
       $(selector).show();
       $(selector).val(decodeURIComponent($(this).attr('data-pageid')));
       var renameFrom = $(selector).val();
@@ -449,7 +449,7 @@ $(function(){
       });
       shortcut.add("Enter", function() {
         var renameTo = $(selector).val();
-        renameHierarchyElement('page', renameFrom, renameTo);
+        renameHierarchyElement('page', renameFrom, renameTo, updatePageList);
         shortcut.remove("Esc");
         shortcut.remove("Enter");
       });
@@ -1898,13 +1898,14 @@ $(function(){
    * @input String renameFrom : the name to change
    * @input String renameTo : the new name
   */
-  function renameHierarchyElement(type, renameFrom, renameTo) {
+  function renameHierarchyElement(type, renameFrom, renameTo, updateList) {
     if(!saving) {
       setSavingState(true, 'Renaming in progress...');
+      var addUpdateList = '&amp;updateList='+updateList;
       $.ajax({
         url: wikiGetURL+"WebIDECode/ApplicationRename",
         type: "POST",
-        data: "outputSyntax=plain&amp;"+type+"=1&amp;masterPage="+masterSpace+"."+masterPage+"&amp;renameFrom="+renameFrom+"&amp;renameTo="+renameTo,
+        data: "outputSyntax=plain&amp;"+type+"=1&amp;masterPage="+masterSpace+"."+masterPage+"&amp;renameFrom="+renameFrom+"&amp;renameTo="+renameTo+addUpdateList,
       }).success(function(data) {
         setSavingState(false, 'Renaming performed', 2500);
         reloadHierarchy();
@@ -2591,7 +2592,7 @@ $(function(){
     #set($addRemoveButton = "[[image:icon:cross||title='Remove folder $spaceEscaped' data-space='$spaceEscaped' class='hierarchy-remove-folder']]")
   #end
   #if($spaceInListNested &amp;&amp; $masterDoc.hasAccessLevel('edit') &amp;&amp; $xwiki.hasAccessLevel('edit', "$spaceEscaped.$reservedDocumentName"))
-    #set($addRenameForm = "{{html clean=false}}&lt;input type='hidden' id='renameFolder_old_$spaceEscaped' style='display:none;' value='$spaceEscaped'/&gt;&lt;input type='text' id='renameFolder_$spaceEscaped' style='display:none;'/&gt;{{/html}}")
+    #set($addRenameForm = "{{html clean=false}}&lt;input type='text' id='renameFolder_$spaceEscaped' style='display:none;'/&gt;{{/html}}")
     #set($addRenameButton = "[[image:icon:pencil||title='Rename folder $subspaceNameEscaped' data-subspace='$subspaceNameEscaped' data-space='$spaceEscaped' class='hierarchy-rename-folder']]")
   #end
   #if(($spaceInListNested || $spaceInListInit) &amp;&amp; $masterDoc.hasAccessLevel('edit'))
@@ -2660,16 +2661,15 @@ $(function(){
       #set($displayedIcon = 'page_edit')
     #end
     #set($pageName = "(% id='hierarchyDisplayPage_$pageFullNameEscaped' class='$!addPageActive' %)$page)))")
-    #set($addSpanClass = "")
+    #set($addSpanClass = '(% class="hierarchy-right" %)')
     #set($addRemoveButton = "")
     #set($addRenameButton = "")
     #set($addRenameForm = "")
     #if($pageInPagesList &amp;&amp; $masterDoc.hasAccessLevel('edit'))
-      #set($addSpanClass = '(% class="hierarchy-right" %)')
       #set($addRemoveButton = "[[image:icon:cross||title='Remove page $pageFullNameEscaped' data-pageid='$pageFullNameEscaped' class='hierarchy-remove-page']]")
     #end
-    #if($pageInPagesList &amp;&amp; $masterDoc.hasAccessLevel('edit') &amp;&amp; $currentDoc.hasAccessLevel('edit'))
-      #set($addRenameForm = "{{html clean=false}}&lt;input type='text' id='renamePage_$pageFullNameEscaped' style='display:none;' value='$pageFullName'/&gt;{{/html}}")
+    #if($masterDoc.hasAccessLevel('edit') &amp;&amp; $currentDoc.hasAccessLevel('edit'))
+      #set($addRenameForm = "{{html clean=false}}&lt;input type='text' data-pageinlist='$pageInPagesList' id='renamePage_$pageFullNameEscaped' style='display:none;' value='$pageFullName'/&gt;{{/html}}")
       #set($addRenameButton = "[[image:icon:pencil||title='Rename page $pageFullNameEscaped' data-pageid='$pageFullNameEscaped' class='hierarchy-rename-page']]")
     #end
     #set($attachmentCount = $xwiki.getDocument($pageFullName).getAttachmentList().size())
