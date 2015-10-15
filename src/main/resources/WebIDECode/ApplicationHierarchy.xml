@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1444830128000</date>
+  <date>1444915213000</date>
   <contentUpdateDate>1444727420000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -166,11 +166,15 @@ $(function(){
   if($('#syntaxHState').val() === 'old') {
     initCodeMirrorInternals();
   }
+  var savedContent = [];
   var saving = false;
   var loading = false;
   var nextTabToClose = null;
-  var insertTags = function(){return true}; // Prevent issues with Syntax Highligthing extension
   var tabNumber = 0;
+  var saveAllList = [];
+  var savedAll = -1;
+  var savedAllError = [];
+  var insertTags = function(){return true}; // Prevent issues with Syntax Highligthing extension
   var bootstrap = function() { // Determine if bootstrap is enabled or not for modals
     return (typeof($.fn.modal) !== 'undefined');
   }
@@ -180,7 +184,6 @@ $(function(){
   var TITLE_VIEW = '#editorObjectTitle';
   var visibleSpaces = getCookieHierarchy('visibleSpaces').split(',');
   var visiblePages = getCookieHierarchy('visiblePages').split(',');
-  var savedContent = [];
   // Get the "get" and "view" url structure for ajax queries
   var wikiGetURL = '/xwiki/bin/get/';
   if(window.docgeturl.indexOf('/get/') &gt;= 0) {
@@ -227,14 +230,29 @@ $(function(){
     location.reload();
   });
 
+  // Display a warning message when the user try to close/reload the tab/window and he has unsaved content
+  window.onbeforeunload = function() {
+    var unsaved = false;
+    $('.editorTabButton').each(function(index, elt) {
+      var tabNumberId = $(elt).attr('data-tabnumber');
+      if(savedContent[tabNumberId] != getCurrentContent(tabNumberId)) {
+        unsaved = true;
+      }
+    });
+    if(unsaved) {
+      return "You have unsaved content! Are you sure you want to close the page?";
+    }
+  };
+
   // Change CodeMirror default parameters when an instance of the editor is created
   $('body').on('DOMNodeInserted', function(e) {
     if ($(e.target).is('.CodeMirror')) {
       window.setTimeout(function() {
         var cmInstance = $(e.target)[0].CodeMirror;
         cmInstance.setOption('lineWrapping', true);
-        if(currentEditor == 'wiki') {$(e.target).addClass('editorWikiCodeMirror');}
-        else if(currentEditor == 'object') {$(e.target).addClass('editorObjectCodeMirror');}
+        var parentTab = $(e.target).closest('.editorTab');
+        if(parentTab.hasClass('editorWikiTab')) {$(e.target).addClass('editorWikiCodeMirror');}
+        else if(parentTab.hasClass('editorObjectTab')) {$(e.target).addClass('editorObjectCodeMirror');}
       }, 50);
     }
   });
@@ -283,13 +301,13 @@ $(function(){
       }
       if(selectedTabEditor === "wiki") {
         if($(this).attr('id') === 'hierarchySaveAndCloseModal') {
-          savePage(folder, file, getCurrentContent(tabNumberId), rawTitle, false, true);
+          savePage(folder, file, false, true, false);
         }
         removeTab(closedTab, tabNumberId);
       }
       else if (selectedTabEditor === "object") {
         if($(this).attr('id') === 'hierarchySaveAndCloseModal') {
-          saveObjects(true, true, folder, file);
+          saveObjects(folder, file, true, true, false);
         }
         removeTab(closedTab, tabNumberId);
       }
@@ -465,8 +483,8 @@ $(function(){
   //---------- Wiki Editor API ----------
   //-------------------------------------
   /**
-   * loadPage() TODO améliorer texte ici
-   * savePage(string space, string page, string newContent, string newTitle, boolean changeSavedContent, boolean continueEditing)
+   * loadPage()
+   * savePage(string space, string page, boolean changeSavedContent, boolean continueEditing)
    * cancelAndViewIDE()
    */
   function loadPage() {
@@ -475,14 +493,14 @@ $(function(){
       var urlSpaces = getCurrentSpace(false, true);
       var urlPage = getCurrentPage(false);
       $.ajax({
-        url: wikiViewURL+urlSpaces+"/"+urlPage+"?xpage=plain&amp;raw=1&amp;language=default",
+        url: wikiViewURL+urlSpaces+"/"+urlPage+"?xpage=plain&amp;raw=2&amp;language=default",
         type: "GET",
         contentType: "plain/text",
       }).success(function(dataContent){
         var tabId = getTabId('wiki', getCurrentSpace(false), getCurrentPage(false));
         var jQueryTabId = '#'+tabId;
         var tabNumberId = getTabNumber(jQueryTabId);
-        $(jQueryTabId+' &gt; textarea').val($('&lt;div /&gt;').html(dataContent.replace(/^&lt;pre&gt;/, '').replace(/&lt;\/pre&gt;$/, '')).text());
+        $(jQueryTabId+' &gt; textarea').val(dataContent);
         if(syntaxHighlighting) {
           // Add the CodeMirror editor
           initCodeMirrorsCustom('wiki', tabId);
@@ -493,36 +511,49 @@ $(function(){
     }
   }
 
-  function savePage(space, page, newContent, newTitle, changeSavedContent, continueEditing) {
-    if(!saving) {
-      setSavingState(true);
+  function savePage(space, page, changeSavedContent, continueEditing, saveAll) {
+    if(!saving || saveAll) {
+      if(!saveAll) {
+        setSavingState(true);
+      }
       var restSpaces = getRestSpacesString(space);
+      var jQueryTabId = '#'+getTabId('wiki', space, page);
+      var tabNumberId = getTabNumber(jQueryTabId);
+      var fileTitle = $('input[data-space="'+encodeURIComponent(space)+'"][data-page="'+encodeURIComponent(page)+'"]').val();
+      var fileContent = getCurrentContent(tabNumberId);
       $.ajax({
         url: "/xwiki/rest/wikis/"+getDocumentReferenceData('wiki')+"/"+restSpaces+"/pages/"+page,
         type: "PUT",
         contentType: "application/x-www-form-urlencoded",
         accept: "application/xml",
-        data: "title="+encodeURIComponent(newTitle)+"&amp;content="+encodeURIComponent(newContent),
+        data: "title="+encodeURIComponent(fileTitle)+"&amp;content="+encodeURIComponent(fileContent),
       }).error(function(xhr, errorStatus){
-        setSavingState(false, xhr.statusText, 4000, 'red');
-        return false;
+        if(!saveAll) {
+          setSavingState(false, xhr.statusText, 4000, 'red');
+          return false;
+        }
+        else {
+          continueSaveAll(false, xhr, space, page);
+        }
       }).success(function(data){
-        var tabId = getTabId('wiki', space, page);
-        var jQueryTabId = '#'+tabId;
-        var tabNumberId = getTabNumber(jQueryTabId);
         if(changeSavedContent) {
           setSavedContent(tabNumberId);
         }
         setStar(false, tabNumberId);
-        setSavingState(false, 'Saved', 2500);
-        if(continueEditing) return true;
-        else window.location.href = wikiViewURL+space+'/'+page;
+        if(!saveAll) {
+          setSavingState(false, 'Saved', 2500);
+          if(continueEditing) return true;
+          else window.location.href = wikiViewURL+space+'/'+page;
+        }
+        else {
+          continueSaveAll(true);
+        }
       });
     }
   }
 
   function cancelAndViewIDE() {
-    if(currentEditor == 'wiki' &amp;&amp; savedContent != getCurrentContent()) { //TODO améliorer le confirm? : modal pop quand on essaye de quitter la page complète?
+    if(currentEditor == 'wiki' &amp;&amp; savedContent != getCurrentContent()) {
       if(confirm("Are you sure?")) {
         window.location.href = wikiViewURL+currentSpace+'/'+currentPage;
       }
@@ -841,9 +872,11 @@ $(function(){
    * @input String folder: The folder where is located the document to save
    * @input String file: The file whose objects have to be saved
    */
-  function saveObjects(continueEdit, changePage, folder, file, tokenUpToDate) {
-    if(!saving) {
-      setSavingState(true, 'Saving...', null, 'green');
+  function saveObjects(folder, file, changeSavedContent, continueEditing, saveAll, tokenUpToDate) {
+    if(!saving || saveAll) {
+      if(!saveAll) {
+        setSavingState(true, 'Saving...', null, 'green');
+      }
       var jQueryTabId = '#'+getTabId('object', folder, file);
       var tabNumberId = getTabNumber(jQueryTabId);
       if(syntaxHighlighting) {
@@ -854,21 +887,28 @@ $(function(){
         type: $('#tab'+tabNumberId+'_objectIDEform').attr('method'),
         data: $('#tab'+tabNumberId+'_objectIDEform').serialize(),
         success: function() {
-          // If Save &amp; View button: go to view mode
-          if(!continueEdit) {
-            window.location.href = wikiViewURL+folder+'/'+file;
-          }
-          // Else if Save &amp; Continue, continue editing the same page: change the value of savedContent
-          else if(!changePage){
+          if(changeSavedContent) {
             setSavedContent(tabNumberId);
           }
           setStar(false, tabNumberId);
-          setSavingState(false, 'Saved', 2500);
+          if(!saveAll) {
+            setSavingState(false, 'Saved', 2500);
+            if(continueEditing) return true;
+            else window.location.href = wikiViewURL+space+'/'+page;
+          }
+          else {
+            continueSaveAll(true);
+          }
         },
         error: function(xhr) {
-          setSavingState(false, xhr.statusText, 5000, 'red');
+          if(!saveAll) {
+            setSavingState(false, xhr.statusText, 5000, 'red');
+          }
           if(xhr.status == 401 &amp;&amp; !tokenUpToDate){
-            getUpdatedToken(saveObjects, [continueEdit, changePage, folder, file]);
+            getUpdatedToken(saveObjects, [folder, file, changeSavedContent, continueEditing, saveAll]);
+          }
+          else {
+            continueSaveAll(false, xhr, folder, file);
           }
         }
       });
@@ -915,7 +955,7 @@ $(function(){
   function initEditor() {
     $('.editorViewElement').hide();
     $('.editorEditElement').css({"display" : "block"});
-    $('.editorWikiElement').css({"display" : "block"}); //TODO???
+    $('.editorWikiElement').css({"display" : "block"});
     $(TITLE_INPUT).css({"display" : "inline-block"});
     addSaveEvents(true);
   }
@@ -982,6 +1022,77 @@ $(function(){
     //Add the correct title in the title fields
     setTitleInForm($('input[data-space="'+encodeURIComponent(folder)+'"][data-page="'+encodeURIComponent(file)+'"]').val()); //Insert title of new page in the title element
   }
+
+  function saveAll() {
+    var tabNumberId;
+    var mode;
+    var folder;
+    var file;
+    var rawTitle;
+    if(saveAllList.length === 0) {
+      $('.editorTabButton').each(function(index, elmt) {
+        tabNumberId = $(elmt).attr('data-tabnumber');
+        mode = $(elmt).attr('data-editor');
+        folder = $(elmt).attr('data-space');
+        file = $(elmt).attr('data-page');
+        if(savedContent[tabNumberId] != getCurrentContent(tabNumberId)) {
+          saveAllList.push([mode, folder, file]);
+        }
+      });
+      if(saveAllList.length &gt; 0) {
+        setSavingState(true, "Saving all tabs...");
+        continueSaveAll(true);
+      }
+    }
+  }
+  function continueSaveAll(success, xhr, folder, file) {
+    savedAll = savedAll + 1;
+    var saveTotal = saveAllList.length;
+    if(!success) {
+      savedAllError.push([xhr.statusText, folder, file]);
+    }
+    if(savedAll === saveTotal) {
+      var msg = 'All tabs are saved!';
+      var cssClass = 'green';
+      var delay = 2500;
+      if(savedAllError.length &gt; 0) {
+        msg = 'Tabs saved. Error while saving:';
+        savedAllError.each(function(index, elt) {
+          msg += ' ['+elt[1]+'.'+elt[2]+' : '+elt[0]+']';
+        });
+        cssClass = 'red';
+        delay = 5000;
+      }
+      setSavingState(false, msg, delay, cssClass);
+      savedAll = -1;
+      saveAllList = [];
+      savedAllError = [];
+    }
+    else if(savedAll &lt; saveTotal) {
+      if(savedAll !== 0) {
+        var msg = savedAll+'/'+saveTotal+' tabs done...';
+        var cssClass = 'green';
+        if(savedAllError.length &gt; 0) {
+          msg += ' (Errors: '+savedAllError.length+')';
+          cssClass = 'red';
+        }
+        setSavingState(true, msg, null, cssClass);
+      }
+      var nextSave = saveAllList[savedAll];
+      var mode = nextSave[0];
+      var file = nextSave[2];
+      var folder = nextSave[1];
+      if(mode === 'wiki') {
+        var jQueryTabId = '#'+getTabId('wiki', folder, file);
+        var tabNumberId = getTabNumber(jQueryTabId);
+        var rawTitle = $('input[data-space="'+encodeURIComponent(folder)+'"][data-page="'+encodeURIComponent(file)+'"]').val();
+        savePage(folder, file, true, true, true);
+      }
+      else if(mode === 'object') {
+        saveObjects(folder, file, true, true, true);
+      }
+    }
+  }
   /**
    * addSaveEvents(addEvents)
    * Recreate the default shortcuts to save a page in XWiki in the Web IDE (Alt+S, Alt+Shift+S, Alt+C)
@@ -1021,8 +1132,8 @@ $(function(){
     if(syntaxHighlighting) {
       synchronizeCodeMirrorContent();
     }
-    if(currentEditor === 'wiki') {savePage(currentSpace, currentPage, getCurrentContent(), getCurrentTitle(), true, continueEdit);}
-    else {saveObjects(continueEdit, false, getCurrentSpace(true), getCurrentPage(true));}
+    if(currentEditor === 'wiki') {savePage(currentSpace, currentPage, true, continueEdit, false);}
+    else {saveObjects(getCurrentSpace(true), getCurrentPage(true), true, continueEdit, false);}
   }
 
   /**
@@ -1322,6 +1433,13 @@ $(function(){
     var iconModeId;
     var tabModeClass;
     var addTextareaWiki = '';
+    if(tabNumber == 1) { //first tab creation
+      var tabButton = $('&lt;span class="btn btn-success"&gt;Save all tabs&lt;/span&gt;').appendTo('#editorTabBar').on('click', function(e) {
+        e.preventDefault();
+        saveAll();
+        return false;
+      });
+    }
     if(mode === 'wiki') {
       prettyModeName = 'Wiki';
       iconModeId = '#editorWikiIcon p';
@@ -1333,7 +1451,7 @@ $(function(){
       iconModeId = '#editorObjectIcon p';
       tabModeClass = 'editorObjectTab';
     }
-    if(!$(jQueryId).length) { //TADA
+    if(!$(jQueryId).length) {
       $(TAB_MAIN_CONTAINER).append('&lt;div id="'+id+'" class="editorTab '+tabModeClass+'" data-tabnumber="'+tabNumber+'"&gt;'+addTextareaWiki+'&lt;/div&gt;');
       if(!$('input[data-space="'+encodeURIComponent(folder)+'"][data-page="'+encodeURIComponent(file)+'"]').length) {
         $(TAB_MAIN_CONTAINER).append('&lt;input class="editorHiddenTitle" data-space="'+encodeURIComponent(folder)+'" data-page="'+encodeURIComponent(file)+'" type="hidden" value="'+rawtitle+'"&gt;');

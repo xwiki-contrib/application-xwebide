@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1444731979000</date>
-  <contentUpdateDate>1444731979000</contentUpdateDate>
+  <date>1444902010000</date>
+  <contentUpdateDate>1444836684000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -575,8 +575,8 @@ $(function(){
   border: 0px !important;
 }
 .editorWikiCodeMirror {
-  width: 100%;
-  max-width: 100%;
+  width: 100% !important;
+  max-width: 100% !important;
   height: 100% !important;
 }
 .editorObjectCodeMirror {
@@ -589,15 +589,20 @@ $(function(){
   /*position: static !important;*/
 }
 #editorTabBar {
-  padding: 1px 0px 1px 0px;
+  padding: 0px 0px 0px 0px;
+}
+#editorTabBar .btn {
+  box-sizing: border-box;
+  margin: 0px;
+  vertical-align: top;
 }
 .editorTabButton{
   background-color: #EAEAEA;
-  padding: 5px 11px 5px 5px;
+  padding: 6px 11px 6px 6px;
   border: 1px solid #BBBBBB;
   border-radius: 5px 5px 0px 0px;
-  margin:-1px 0 0 -1px;
-  height: 30px;
+  margin: 0px;
+  height: 34px;
   box-sizing: border-box;
   cursor: pointer;
   position: relative;
