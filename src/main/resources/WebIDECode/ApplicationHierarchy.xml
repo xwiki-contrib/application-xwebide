@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1444920784000</date>
-  <contentUpdateDate>1444920777000</contentUpdateDate>
+  <date>1445249755000</date>
+  <contentUpdateDate>1445249631000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -1033,8 +1033,8 @@ $(function(){
       $('.editorTabButton').each(function(index, elmt) {
         tabNumberId = $(elmt).attr('data-tabnumber');
         mode = $(elmt).attr('data-editor');
-        folder = $(elmt).attr('data-space');
-        file = $(elmt).attr('data-page');
+        folder = decodeURIComponent($(elmt).attr('data-space'));
+        file = decodeURIComponent($(elmt).attr('data-page'));
         if(savedContent[tabNumberId] != getCurrentContent(tabNumberId)) {
           saveAllList.push([mode, folder, file]);
         }
@@ -1132,8 +1132,8 @@ $(function(){
     if(syntaxHighlighting) {
       synchronizeCodeMirrorContent();
     }
-    if(currentEditor === 'wiki') {savePage(currentSpace, currentPage, true, continueEdit, false);}
-    else {saveObjects(getCurrentSpace(true), getCurrentPage(true), true, continueEdit, false);}
+    if(currentEditor === 'wiki') {savePage(getCurrentSpace(false), getCurrentPage(false), true, continueEdit, false);}
+    else {saveObjects(getCurrentSpace(false), getCurrentPage(false), true, continueEdit, false);}
   }
 
   /**
@@ -1241,7 +1241,7 @@ $(function(){
     else {return currentSpace;}
   }
   function getEscapedValue(file) {
-    return file.replace('%5C', '%5C%5C').replace(/\\/g, '%5C%5C').replace(/\./g, '%5C.');
+    return file.replace(/%5C/g, '%5C%5C').replace(/\\/g, '%5C%5C').replace(/\./g, '%5C.');
   }
 
   /**
@@ -1556,7 +1556,7 @@ $(function(){
    * @input String file: name of the file for the document in the tab
    */
   function getTabId(mode, folder, file) {
-    return 'tab_'+mode+'_'+encodeURIComponent(folder).replace(/\./g, '2E').replace('%', '')+'_'+encodeURIComponent(file).replace(/\./g, '2E').replace('%', '');
+    return 'tab_'+mode+'_'+encodeURIComponent(folder).replace(/\./g, '2E').replace(/%/g, '')+'_'+encodeURIComponent(file).replace(/\./g, '2E').replace(/%/g, '');
   }
 
   /**
@@ -2669,7 +2669,7 @@ $(function(){
       #set($addRemoveButton = "[[image:icon:cross||title='Remove page $pageFullNameEscaped' data-pageid='$pageFullNameEscaped' class='hierarchy-remove-page']]")
     #end
     #if($masterDoc.hasAccessLevel('edit') &amp;&amp; $currentDoc.hasAccessLevel('edit'))
-      #set($addRenameForm = "{{html clean=false}}&lt;input type='text' data-pageinlist='$pageInPagesList' id='renamePage_$pageFullNameEscaped' style='display:none;' value='$pageFullName'/&gt;{{/html}}")
+      #set($addRenameForm = "{{html clean=false}}&lt;input type='text' data-pageinlist='$pageInPagesList' id='renamePage_$pageFullNameEscaped' style='display:none;'/&gt;{{/html}}")
       #set($addRenameButton = "[[image:icon:pencil||title='Rename page $pageFullNameEscaped' data-pageid='$pageFullNameEscaped' class='hierarchy-rename-page']]")
     #end
     #set($attachmentCount = $xwiki.getDocument($pageFullName).getAttachmentList().size())
