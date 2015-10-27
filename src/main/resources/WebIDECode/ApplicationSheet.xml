@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1445958651000</date>
+  <date>1445961964000</date>
   <contentUpdateDate>1445958651000</contentUpdateDate>
   <version>1.1</version>
   <title/>
@@ -345,6 +345,9 @@ $(function(){
   var insertTags = function(){return true}; // Prevent issues with Syntax Highligthing extnesion
   var visibleSpaces = getCookieHierarchy('visibleSpaces').split(',');
   var visiblePages = getCookieHierarchy('visiblePages').split(',');
+  if(XWiki.webapppath.substr(0,1) === '/') {
+    XWiki.webapppath = XWiki.webapppath.substr(1,(XWiki.webapppath.length-1));
+  }
   var wikiGetURL = '/'+XWiki.webapppath+''+XWiki.servletpath+'/get/';
   if(window.docgeturl.indexOf('/get/') &gt;= 0) {
     wikiGetURL = window.docgeturl.substring(0,window.docgeturl.indexOf('/get/')+5);

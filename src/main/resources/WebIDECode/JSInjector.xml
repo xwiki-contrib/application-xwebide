@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434954547000</creationDate>
-  <date>1445958048000</date>
+  <date>1445961972000</date>
   <contentUpdateDate>1443170830000</contentUpdateDate>
   <version>1.1</version>
   <title/>
@@ -129,6 +129,9 @@ $(function(){
   var currentSpace = encodeURIComponent(XWiki.currentSpace);
   var currentPageEscaped = encodeURIComponent(XWiki.currentPage.replace(/\\/g, '\\\\').replace(/\./g, '\\\.'));
   var currentSpaceEscaped = encodeURIComponent(getSpacesEscaped(XWiki.currentSpace));
+  if(XWiki.webapppath.substr(0,1) === '/') {
+    XWiki.webapppath = XWiki.webapppath.substr(1,(XWiki.webapppath.length-1));
+  }
   var wikiViewURL = '/'+XWiki.webapppath+''+XWiki.servletpath+'view/';
   var bootstrap = (typeof($.fn.modal) !== 'undefined'); // Modal won't work without bootstrap
   if(window.docviewurl.indexOf('/'+XWiki.currentSpace+'/') &gt;= 0) {
