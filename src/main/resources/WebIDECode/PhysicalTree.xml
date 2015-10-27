@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347276000</creationDate>
-  <date>1445867536000</date>
-  <contentUpdateDate>1445867536000</contentUpdateDate>
+  <date>1445952085000</date>
+  <contentUpdateDate>1445952085000</contentUpdateDate>
   <version>1.1</version>
   <title>PhysicalTree</title>
   <defaultTemplate/>
@@ -43,6 +43,7 @@
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>false</hidden>
   <content>{{velocity}}
+(% class="btn btn-primary" id="hierarchyChangeTree" %)(((Go to logical view)))
 #if($masterDoc.hasAccessLevel('edit'))
   {{html clean=false wiki=true}}&lt;form method="post" action="$masterDoc.getURL('view')" class="masterExportForm"&gt;&lt;input type="hidden" name="export" value="1" /&gt;&lt;a&gt;image:icon:bullet_disk &lt;input class="hierarchy-export" type="submit" value="Export the project (XAR)" title="Export the project"&gt; &lt;/input&gt;&lt;/a&gt;&lt;/form&gt;{{/html}}
   image:icon:add [[Add a space&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newFolder" data-toggle="modal" data-target="#hierarchyFolderModal"]]

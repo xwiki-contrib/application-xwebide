@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1445941463000</date>
-  <contentUpdateDate>1445940142000</contentUpdateDate>
+  <date>1445955660000</date>
+  <contentUpdateDate>1445954321000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -1878,6 +1878,7 @@ $(function(){
     }
     menuElement.addClass('hierarchy-page-active');
     menuElement.parents().siblings('.hierarchy-displayPage, .hierarchy-toggleFolder').addClass('hierarchy-page-active');
+    menuElement.parents('ul.hierarchy-list').show();
   }
 
   /**
@@ -2041,33 +2042,39 @@ $(function(){
       e.preventDefault();
       var folder = $('#hierarchyPageFolder').val();
       var file = encodeURIComponent($('#hierarchyNewPageName').val());
-      // Check if it is a page, a class, a sheet or a template :
-      var type = 'page';
-      if($('#hierarchyAddPage').attr('data-type')) {
-        type = $('#hierarchyAddPage').attr('data-type');
+      if(folder.trim() &amp;&amp; file.trim()) {
+        // Check if it is a page, a class, a sheet or a template :
+        var type = 'page';
+        if($('#hierarchyAddPage').attr('data-type')) {
+          type = $('#hierarchyAddPage').attr('data-type');
+        }
+        // Check if item page
+        var itemvalue;
+        if(type === 'page' &amp;&amp; $('input[type=radio][name=hierarchyAddPageType]:checked').val() === 'item') {
+          type = 'item';
+          itemvalue = $('#hierarchyAddPageItem').val();
+        }
+        // Check if if is a translation
+        if(type === 'language') {
+          itemvalue = $('#hierarchyAddPageLocale').val();
+        }
+        // Create the page :
+        addPage(folder, file, type, itemvalue);
       }
-      // Check if item page
-      var itemvalue;
-      if(type === 'page' &amp;&amp; $('input[type=radio][name=hierarchyAddPageType]:checked').val() === 'item') {
-        type = 'item';
-        itemvalue = $('#hierarchyAddPageItem').val();
-      }
-      // Check if if is a translation
-      if(type === 'language') {
-        itemvalue = $('#hierarchyAddPageLocale').val();
-      }
-      // Create the page :
-      addPage(folder, file, type, itemvalue);
     });
     $('#hierarchyAddFolder').click(function(e){
       $('body').removeClass('modal-open');
       e.preventDefault();
-      addFolder($('#hierarchyNewFolderName').val());
+      if($('#hierarchyNewFolderName').val().trim()) {
+        addFolder($('#hierarchyNewFolderName').val());
+      }
     });
     $('#hierarchyAddExistingPage').click(function(e){
       $('body').removeClass('modal-open');
       e.preventDefault();
-      addExistingPage($('#hierarchyExistingPageName').val());
+      if($('#hierarchyExistingPageName').val().trim()) {
+        addExistingPage($('#hierarchyExistingPageName').val());
+      }
     });
     $('#hierarchyAddObject').click(function(e){
       $('body').removeClass('modal-open');
@@ -2075,8 +2082,10 @@ $(function(){
       var folder = $('#hierarchyObjectSpace').html();
       var file = !$('#hierarchyObjectPage').is(':empty') ? $('#hierarchyObjectPage').html() : ($('#hierarchyObjectPageInput').val() !== '' ?  $('#hierarchyObjectPageInput').val() : $('#hierarchyObjectPageInputDefault').val());
       var className = $('#hierarchyObjectClassName').val();
-      var global = ($('#hierarchyObjectPageInputDefault').val() !== '');
-      addObject(null, className, true, folder, file, global, true);
+      if(folder.trim() &amp;&amp; file.trim() &amp;&amp; v.trim()) {
+        var global = ($('#hierarchyObjectPageInputDefault').val() !== '');
+        addObject(null, className, true, folder, file, global, true);
+      }
     });
     $('#editorDeleteObjectConfirmed').click(function(e){
       $('body').removeClass('modal-open');
@@ -2288,11 +2297,9 @@ $(function(){
     $('#hierarchyChangeTree').off('click', changeTreeView);
     if(currentTree == 'physical') {
       currentTree = 'logical';
-      $('#hierarchyChangeTree p').html('Go to the physical view');
     }
     else {
       currentTree = 'physical';
-      $('#hierarchyChangeTree p').html('Go to the logical view');
     }
     setCookieHierarchy('currentTree', currentTree, 365);
     reloadHierarchy();
@@ -2852,15 +2859,15 @@ $(function(){
 .hierarchyContextActionIcon {
   margin-right: 5px;
 }
-.masterExportForm {
-  display: inline-block;
-}
 .hierarchy-export {
   background: none !important;
   border: none;
   padding: 0 !important;
   font: inherit;
   cursor: pointer;
+}
+.masterExportForm {
+  display: inline-block;
 }
 #hierarchyElementToAdd {
   background: white;
@@ -2941,9 +2948,12 @@ $(function(){
 [[image:icon:control_end_blue||title="Open menu"]]
 )))
 (% id="hierarchyCloseBlock" %)(((
-**Project :** $masterDoc.display('projectName', 'view') [[image:icon:arrow_refresh||title="Refresh the menu" id="hierarchyRefresh"]] [[image:icon:control_start_blue||title="Hide menu" id="hierarchyClose"]]
+**Project :** $masterDoc.display('projectName', 'view') [[image:icon:control_start_blue||title="Hide menu" id="hierarchyClose"]] [[image:icon:arrow_refresh||title="Refresh the menu" id="hierarchyRefresh"]]
 )))
-#set($nestedSpaces = !$xwiki.getVersion().matches('^([1-6]\..*|7\.[01].*)'))
+#set($nestedSpaces = false)
+#if($services.model.createDocumentReference("wiki", ["A", "B"], "page") == 'wiki:A.B.page')
+  #set($nestedSpaces = true)
+#end
 #set($masterObj = $masterDoc.getObject('WebIDECode.ApplicationClass'))
 #set($spacesListInit = $masterObj.getProperty('spaces').value)## The value of 'spaces' in the object (before checking for nested spaces)
 #set($spacesListNested = $sorttool.sort($spacesListInit))## Same as $spacesListInit if nested spaces don't exist, or add all the subspaces if they exist
@@ -2994,11 +3004,6 @@ $(function(){
 #else
   #set($spaceParentList = [$currentDoc.space])
 #end
-#set($nextTree = 'physical')
-#if($currentTree == 'physical')
-  #set($nextTree = 'logical')
-#end
-(% class="btn btn-primary" id="hierarchyChangeTree" %)(((Go to $nextTree view)))
 (% id="hierarchyContent" %) (((
 #if($currentTree == 'physical')
   {{include reference="WebIDECode.PhysicalTree" /}}

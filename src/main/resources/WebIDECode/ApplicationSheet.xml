@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1445938451000</date>
-  <contentUpdateDate>1444990179000</contentUpdateDate>
+  <date>1445944708000</date>
+  <contentUpdateDate>1445944708000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -757,6 +757,19 @@ $(function(){
   $export.export()
 #end
 #if($xcontext.action == "view")
+  #set($codeSpace = $doc.codeSpace)
+  #if("$!codeSpace" == "")
+    #set($spacesList = [])
+    #set($ok = $spacesList.addAll($doc.spaces))
+      #foreach($space in $spacesList)
+        $space
+      #end
+    #if(!$spacesList.contains("${doc.name}Code"))
+      #set($ok = $spacesList.add("${doc.name}Code"))
+      #set($ok = $doc.getObject('WebIDECode.ApplicationClass').set('spaces', $spacesList))
+      #set($ok = $doc.save())
+    #end
+  #end
   #set($showRightPanels = 0)
   #set($showLeftPanels = 0)
   #set($discard = $xwiki.jsx.use("WebIDECode.ApplicationSheet"))
@@ -784,6 +797,14 @@ $(function(){
 image:WebIDECode.ApplicationSheet@XWebIDE.png
 Welcome to the XWiki WebIDE, you can use it to create, edit and export XWiki Applications. This is the Master Page of the project, it contains meta-data such as the list of Folders and Pages which are part of the project.
 
+#if("$!codeSpace" == "")
+
+{{error}}
+**Your code space is not defined**. It is the space where the global elements (JS, CSS, TRanslations, Macros...) will be placed when created from the logical view. You should choose your code space as soon as posible. Without code space specified, the pages will be placed in the space **${doc.name}Code** (that space has been added to your project)
+[[Change the code space&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$escapetool.url($doc.space).replace('+', '%20')' data-page='$escapetool.url($doc.name).replace('+', '%20')' data-rawtitle="$escapetool.url($doc.title).replace('+', '%20')" class='editObject']]
+{{/error}}
+
+#end
 __Get started__:
 * **Edit a page** in your project by clicking on one of the edit buttons in the lefthand panel - you can edit the page in different modes for editing the content and metadata
 * **Add a new folder** (also known as a Space) clicking the "add folder" button on the left
