@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1445957993000</date>
-  <contentUpdateDate>1445957548000</contentUpdateDate>
+  <date>1445958651000</date>
+  <contentUpdateDate>1445958651000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -708,7 +708,10 @@ $(function(){
    * 3/ Add all the pages from that merged list to the XAR
    *#
   ## 1/ Check for subspaces
-  #set($nestedSpaces = !$xwiki.getVersion().matches('^([1-6]\..*|7\.[01].*)'))
+  #set($nestedSpaces = false)
+  #if($services.model.createDocumentReference("wiki", ["A", "B"], "page") == 'wiki:A.B.page')
+    #set($nestedSpaces = true)
+  #end
   #set($spacesListNested = $sorttool.sort($spacesList))
   #if($nestedSpaces)
     #foreach($space in $spacesList)

@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1445958130000</date>
-  <contentUpdateDate>1445954321000</contentUpdateDate>
+  <date>1445958699000</date>
+  <contentUpdateDate>1445958669000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -2168,9 +2168,8 @@ $(function(){
    * @return boolean
    */
   function checkNestedSpaces() {
-    var xwikiVersion = $('#xwikiVersion').val();
-    var baseVersion = xwikiVersion.match(/([0-9.]+).*/);
-    return (parseFloat(baseVersion)&gt;=7.2);
+    var xwikiNested = $('#xwikiNested').val();
+    return (xwikiNested === "true");
   }
 
   /**
@@ -3137,7 +3136,7 @@ $(function(){
       &lt;/div&gt;
     &lt;/div&gt;
   &lt;/div&gt;
-  &lt;div class="hierarchy-hidden"&gt;&lt;input type="hidden" id="hierarchyMasterDocName" value="$escapetool.url($masterDoc.name)" /&gt;&lt;input type="hidden" id="hierarchyMasterDocSpace" value="$escapetool.url($masterDoc.space)" /&gt;&lt;input type="hidden" id="xwikiVersion" value="$xwiki.version" /&gt;&lt;input type="hidden" id="hierarchyMainLanguage" value="$xwiki.getLanguagePreference()" /&gt;&lt;/div&gt;
+  &lt;div class="hierarchy-hidden"&gt;&lt;input type="hidden" id="hierarchyMasterDocName" value="$escapetool.url($masterDoc.name)" /&gt;&lt;input type="hidden" id="hierarchyMasterDocSpace" value="$escapetool.url($masterDoc.space)" /&gt;&lt;input type="hidden" id="xwikiNested" value="$nestedSpaces" /&gt;&lt;input type="hidden" id="hierarchyMainLanguage" value="$xwiki.getLanguagePreference()" /&gt;&lt;/div&gt;
 
 &lt;div id="backgroundModalNoBootstrap"&gt;&lt;/div&gt;
 
