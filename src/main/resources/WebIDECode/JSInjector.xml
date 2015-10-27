@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434954547000</creationDate>
-  <date>1443791431000</date>
+  <date>1445525508000</date>
   <contentUpdateDate>1443170830000</contentUpdateDate>
   <version>1.1</version>
   <title/>
@@ -255,11 +255,12 @@ $(function(){
   function displayHierarchy(masterSpace, masterName) {
     if(!hierarchyStatus &amp;&amp; !document.getElementById('hierarchyBlock')) {
       hierarchyStatus = true;
-      var visibleSpaces = getCookieHierarchy(escape(masterName), 'visibleSpaces');
-      var visiblePages = getCookieHierarchy(escape(masterName), 'visiblePages');
+      var visibleSpaces = getCookieHierarchy(encodeURIComponent(masterName), 'visibleSpaces');
+      var visiblePages = getCookieHierarchy(encodeURIComponent(masterName), 'visiblePages');
       var wikiGetURL = '/xwiki/bin/get/';
       var remotePageName = currentPageEscaped;
       var remoteSpaceName = currentSpaceEscaped;
+      var currentTree = getCookieHierarchy(encodeURIComponent(masterName), 'currentTree') || 'logical';
       if(hashURL.size() == 3) {
         var sourcePage = hashURL[1];
         var sourceSpace = hashURL[2];
@@ -269,7 +270,7 @@ $(function(){
       }
       if(window.docgeturl.indexOf('/get/') != 0) wikiGetURL = window.docgeturl.substring(0,window.docgeturl.indexOf('/get/')+5);
       $.ajax({
-        url: wikiGetURL+"WebIDECode/ApplicationHierarchy?xpage=plain&amp;action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+encodeURI(masterSpace)+"."+encodeURI(masterName)+"&amp;remotePage="+remoteSpaceName+"."+remotePageName+"&amp;visibleSpaces="+encodeURIComponent(visibleSpaces)+"&amp;visiblePages="+encodeURIComponent(visiblePages),
+        url: wikiGetURL+"WebIDECode/ApplicationHierarchy?xpage=plain&amp;action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+encodeURI(masterSpace)+"."+encodeURI(masterName)+"&amp;remotePage="+remoteSpaceName+"."+remotePageName+"&amp;visibleSpaces="+encodeURIComponent(visibleSpaces)+"&amp;visiblePages="+encodeURIComponent(visiblePages)+"&amp;treeview="+currentTree,
         type: "GET",
         contentType: "text/plain",
       }).success(function(data){

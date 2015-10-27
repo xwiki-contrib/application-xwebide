@@ -20,7 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<xwikidoc>
+<xwikidoc reference="WebIDECode.ApplicationClass" locale="">
   <web>WebIDECode</web>
   <name>ApplicationClass</name>
   <language/>
@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434697726000</creationDate>
-  <date>1441016411000</date>
-  <contentUpdateDate>1441016411000</contentUpdateDate>
+  <date>1445526144000</date>
+  <contentUpdateDate>1445526144000</contentUpdateDate>
   <version>1.1</version>
   <title>Application Class</title>
   <defaultTemplate/>
@@ -51,6 +51,19 @@
     <defaultWeb/>
     <nameField/>
     <validationScript/>
+    <codeSpace>
+      <customDisplay/>
+      <disabled>0</disabled>
+      <name>codeSpace</name>
+      <number>5</number>
+      <picker>0</picker>
+      <prettyName>codeSpace</prettyName>
+      <size>30</size>
+      <unmodifiable>0</unmodifiable>
+      <validationMessage/>
+      <validationRegExp/>
+      <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+    </codeSpace>
     <pages>
       <cache>0</cache>
       <classname/>
@@ -194,7 +207,7 @@
 ## Replace the default space with the space where you want your documents to be created.
 ## Replace the default parent with the one of your choice and save the document.
 ##
-#set($defaultSpace = $doc.space)
-#set($defaultParent = $doc.fullName)
+#set($defaultSpace = 'WebIDE')
+#set($defaultParent = 'WebIDE.WebHome')
 {{/velocity}}</content>
 </xwikidoc>

@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc reference="WebIDECode.PhysicalTree" locale="">
+  <web>WebIDECode</web>
+  <name>PhysicalTree</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <parent>Test.Test2</parent>
+  <creator>xwiki:XWiki.Admin</creator>
+  <author>xwiki:XWiki.Admin</author>
+  <customClass/>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <creationDate>1445347276000</creationDate>
+  <date>1445867536000</date>
+  <contentUpdateDate>1445867536000</contentUpdateDate>
+  <version>1.1</version>
+  <title>PhysicalTree</title>
+  <defaultTemplate/>
+  <validationScript/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>false</hidden>
+  <content>{{velocity}}
+#if($masterDoc.hasAccessLevel('edit'))
+  {{html clean=false wiki=true}}&lt;form method="post" action="$masterDoc.getURL('view')" class="masterExportForm"&gt;&lt;input type="hidden" name="export" value="1" /&gt;&lt;a&gt;image:icon:bullet_disk &lt;input class="hierarchy-export" type="submit" value="Export the project (XAR)" title="Export the project"&gt; &lt;/input&gt;&lt;/a&gt;&lt;/form&gt;{{/html}}
+  image:icon:add [[Add a space&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newFolder" data-toggle="modal" data-target="#hierarchyFolderModal"]]
+  image:icon:add [[Add existing page&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newExistingPage" data-toggle="modal" data-target="#hierarchyExistingPageModal"]]
+#end
+(% class="hierarchy-list hierarchy-no-padding" id="hierarchyMainList" %)
+#foreach($space in $spacesList)
+  #set($spaceInListInit = $spacesListInit.contains($space)) ##Spaces in the 'spaces' object property
+  #set($spaceInListNested = $spacesListNested.contains($space)) ##Spaces to displays
+  #set($spaceEscaped = $escapetool.url($space).replace("+", "%20"))
+  ## Determine the level of depth of the space to know the number of starrs (level of sublist)
+  #set($depthLevel = -1)
+  #set($tlist = $space.replace("\.", "%5C%2E").split('\.'))
+  #set($spacePath = "")
+  #set($Integer = 0)
+  #foreach($item in $tlist)
+    #set($spacePath = "${spacePath}$item.replace('%5C%2E', '\.')")
+    #if($spacesListNested.contains($spacePath))
+      #set($depthLevel = $depthLevel+1)
+    #end
+    #set($spacePath = "${spacePath}.")
+  #end
+  #set($addStars = $stringtool.repeat('*', $depthLevel))
+  ##Determine the name of the subspace (without its parents), use when renaming the folder
+  #set($subspaceNameIndex = $tlist.size() - 1)
+  #set($subspaceName = $tlist.get($subspaceNameIndex).replace('%5C%2E', '.'))
+  #set($subspaceNameEscaped = $escapetool.url($subspaceName).replace("+", "%20"))
+  #if($nestedSpaces)
+    #set($spaceEscapedBackslash = $escapetool.url($space).replace("+", "%20"))
+  #else
+    #set($spaceEscapedBackslash = $escapetool.url($space.replace('\', '\\').replace('.', '\.')).replace("+", "%20"))
+  #end
+  #if($visibleSpaces.contains($spaceEscapedBackslash) || $spaceParentList.contains($space))
+    #set($contentDisplay = "")
+    #set($folderIcon = "bullet_toggle_minus")
+  #else
+    #set($contentDisplay = " hierarchy-hidden")
+    #set($folderIcon = "bullet_toggle_plus")
+  #end
+  #set($displayCurrentSpace = '')
+  #if($spaceParentList.contains($space))
+    #set($displayCurrentSpace = 'hierarchy-page-active')
+  #end
+  #set($addRemoveButton = "")
+  #set($addRenameButton = "")
+  #set($addRenameForm = "")
+  #set($addSpanClass = "")
+  #if($spaceInListInit &amp;&amp; $masterDoc.hasAccessLevel('edit'))
+    #set($addRemoveButton = "[[image:icon:cross||title='Remove folder $spaceEscaped' data-space='$spaceEscaped' class='hierarchy-remove-folder']]")
+  #end
+  #if($spaceInListNested &amp;&amp; $masterDoc.hasAccessLevel('edit') &amp;&amp; $xwiki.hasAccessLevel('edit', "$spaceEscaped.$reservedDocumentName"))
+    #set($addRenameForm = "{{html clean=false}}&lt;input type='text' id='renameFolder_$spaceEscaped' style='display:none;'/&gt;{{/html}}")
+    #set($addRenameButton = "[[image:icon:pencil||title='Rename folder $subspaceNameEscaped' data-subspace='$subspaceNameEscaped' data-space='$spaceEscaped' class='hierarchy-rename-folder']]")
+  #end
+  #if(($spaceInListNested || $spaceInListInit) &amp;&amp; $masterDoc.hasAccessLevel('edit'))
+    #set($addSpanClass = '(% class="hierarchy-right" %)')
+  #end
+  #if($spaceInListNested)
+    #set($spacePageList = [])
+    #set($xwql = "select distinct doc.name, doc.space from Document doc where doc.space=:space order by doc.name asc")
+    #set($spacePageListTmp = $services.query.xwql($xwql).bindValue('space', $space).execute())
+    #foreach($element in $spacePageListTmp)
+      #set($localeList = $xwiki.getDocument("$element[1].$element[0]").getTranslationList())
+      #set($localeList = $sorttool.sort($localeList))
+      #if($localeList.size() &gt; 0)
+        #set($ok = $localeList.add(0, $xwiki.getDocument("$element[1].$element[0]").defaultLanguage))
+      #end
+      #if(!$spacePageList.contains(["$element[0]", $localeList]))
+        #set($ok = $spacePageList.add(["$element[0]", $localeList]))
+      #end
+    #end
+  #else
+    #set($spacePageList = [])
+    #foreach($page in $pagesList)
+      #set($document = $xwiki.getDocument($page))
+      #set($localeList = $document.getTranslationList())
+      #set($localeList = $sorttool.sort($localeList))
+      #if($localeList.size() &gt; 0)
+        #set($ok = $localeList.add(0, $document.defaultLanguage))
+      #end
+      #if($space == $document.space &amp;&amp; !$spacePageList.contains([$document.name, $localeList]))
+        #set($discard = $spacePageList.add([$document.name, $localeList]))
+      #end
+    #end
+    #set($ok = $sorttool.sort($spacePageList))
+  #end
+  $addStars* (% class="hierarchy-toggleFolder $!{displayCurrentSpace}" data-space="$spaceEscapedBackslash" %)((([[image:icon:$folderIcon||id="hierarchyFolderIcon_$spaceEscapedBackslash"]][[image:icon:folder]] (% id="hierarchyDisplaySpace_$spaceEscaped" %)$subspaceName(%%) ($spacePageList.size()) )))$!addRenameForm $!addSpanClass$!addRenameButton$!addRemoveButton
+  (% id="hierarchySpace_$spaceEscapedBackslash" class="hierarchy-list${contentDisplay}" %)
+  #if($spaceInListNested)
+    $addStars** image:icon:add [[Create a page&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newPage" data-space="$spaceEscaped" data-toggle="modal" data-target="#hierarchyPageModal"]]
+  #end
+  #set($pageCount = 0)
+  #foreach($pageData in $spacePageList)
+    #set($page = $pageData[0])
+    #set($pageLocaleList = $pageData[1])
+    #set($pageEscaped = $escapetool.url($page).replace("+", "%20"))
+    #if($nestedSpaces)
+      #set($pageFullName = "${space}.${page.replace('\', '\\').replace('.', '\.')}") ##'"
+      #set($pageEscapedBackslash = $escapetool.url($page).replace("+", "%20"))
+    #else
+      #set($pageFullName = "${space.replace('\', '\\').replace('.', '\.')}.${page.replace('\', '\\').replace('.', '\.')}") ##'"
+      #set($pageEscapedBackslash = $escapetool.url($page.replace('\', '\\').replace('.', '\.')).replace("+", "%20")) ##'"
+    #end
+    #set($pageDoc = $xwiki.getDocument($pageFullName))
+    #set($pageInPagesList = $pagesList.contains($pageFullName))
+    #set($pageFullNameEscaped = $escapetool.url($pageFullName).replace("+", "%20"))
+    #set($pageRawTitleEscaped = $escapetool.url($pageDoc.title).replace("+", "%20"))
+    #set($pageClassHidden = " hierarchy-hidden")
+    #set($iconBulletToggle = "bullet_toggle_plus")
+    #set($isPageActive = false)
+    #set($addPageActiveViewClass = '')
+    #set($addPageActiveWikiClass = '')
+    #set($addPageActiveObjectClass = '')
+    #set($addPageActive = '')
+    #if($pageFullName == $currentDoc.fullName)
+      #set($isPageActive = true)
+      #set($addPageActive = 'hierarchy-page-active')
+      #if($currentEditor == 'view')
+        #set($addPageActiveViewClass = 'hierarchy-page-active')
+      #elseif($currentEditor == 'wiki')
+        #set($addPageActiveWikiClass = 'hierarchy-page-active')
+      #elseif($currentEditor == 'object')
+        #set($addPageActiveObjectClass = 'hierarchy-page-active')
+      #end
+    #end
+    #if($visiblePages.contains($pageFullNameEscaped) || $isPageActive)
+      #set($pageClassHidden = "")
+      #set($iconBulletToggle = "bullet_toggle_minus")
+    #end
+    #set($pageName = "(% id='hierarchyDisplayPage_$pageFullNameEscaped' class='$!addPageActive' %)$page)))")
+    #set($addSpanClass = '(% class="hierarchy-right" %)')
+    #set($addRemoveButton = "")
+    #set($addRenameButton = "")
+    #set($addRenameForm = "")
+    #if($pageInPagesList &amp;&amp; $masterDoc.hasAccessLevel('edit'))
+      #set($addRemoveButton = "[[image:icon:cross||title='Remove page $pageFullNameEscaped' data-pageid='$pageFullNameEscaped' class='hierarchy-remove-page']]")
+    #end
+    #if($masterDoc.hasAccessLevel('edit') &amp;&amp; $currentDoc.hasAccessLevel('edit'))
+      #set($addRenameForm = "{{html clean=false}}&lt;input type='text' data-pageinlist='$pageInPagesList' id='renamePage_$pageFullNameEscaped' style='display:none;' value='$pageFullName'/&gt;{{/html}}")
+      #set($addRenameButton = "[[image:icon:pencil||title='Rename page $pageFullNameEscaped' data-pageid='$pageFullNameEscaped' class='hierarchy-rename-page']]")
+    #end
+    #set($attachmentCount = $pageDoc.getAttachmentList().size())
+    #if($pageDoc.hasAccessLevel('edit'))
+      #set($pageCount = $pageCount + 1)
+      #set($objectCount = $services.query.xwql("select count(obj.className) from BaseObject as obj, Document as doc where obj.name = doc.fullName and doc.fullName = :pageFullName and doc.translation=0").bindValue('pageFullName', $pageFullName).execute()[0])
+      #set($classCount = $xwiki.getClass($pageFullName).properties.size())
+      $addStars** (% data-pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage $!addPageActive" %)((([[image:icon:$iconBulletToggle||class="hierarchyDisplayPageIcon"]][[image:icon:page||class="hierarchyContextActionIcon"]]$pageName $!addRenameForm $!addSpanClass$!addRenameButton$!addRemoveButton
+      (% id='hierarchyPageDetails_$spaceEscapedBackslash.$pageEscapedBackslash' class='hierarchy-list${pageClassHidden}' %)
+      $addStars*** [[image:icon:page View&gt;&gt;path:$pageDoc.getURL('view', "language=default")||class="hierarchy-viewElement" data-page='$pageEscaped' data-space='$spaceEscaped']]
+      #if($pageLocaleList.size() == 0)
+        #set($ok = $pageLocaleList.add('default'))
+      #end
+      #foreach($pageLocale in $pageLocaleList)
+        #set($pageLocaleDisplay = "")
+        #if($pageLocale != "default" &amp;&amp; "$!pageLocale" != "")
+          #set($pageLocaleDisplay = " ($pageLocale)")
+        #end
+        #if($velocityCount == 1)
+          #set($pageLocale = 'default')
+        #end
+        $addStars*** image:icon:page_edit [[Edit content$!pageLocaleDisplay&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="$pageLocale" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" class='editPage $!addPageActiveWikiClass']]
+      #end
+      $addStars*** image:icon:application_edit [[Objects ($objectCount)&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" class='editObject $!addPageActiveObjectClass']]
+      $addStars*** [[image:icon:monitor_edit Class ($classCount)&gt;&gt;path:$pageDoc.getURL('edit', 'editor=class#!XWebIDE')||class="editClass" data-page='$pageEscaped' data-space='$spaceEscaped']]
+      $addStars*** [[image:icon:attach Attachments ($attachmentCount)&gt;&gt;path:$pageDoc.getURL('view')#Attachments]]
+    #elseif($pageDoc.hasAccessLevel('view'))
+      #set($pageCount = $pageCount + 1)
+      $addStars** (% data-pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((([[image:icon:$iconBulletToggle||class="hierarchyDisplayPageIcon"]][[image:icon:page||class="hierarchyContextActionIcon"]]$pageName $!addRemoveButton
+      (% id='hierarchyPageDetails_$spaceEscapedBackslash.$pageEscapedBackslash' class='hierarchy-list${pageClassHidden}' %)
+      #if($xcontext.action != "edit" &amp;&amp; "$!request.action" != "edit" &amp;&amp; $isPageActive)
+        $addStars*** image:icon:page {{html clean=false}}&lt;span class='hierarchyCurrentSpacePageAction'&gt;View&lt;/span&gt;{{/html}}
+      #else
+        $addStars*** [[image:icon:page View&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')]]
+      #end
+      $addStars*** [[image:icon:attach Attachments ($attachmentCount)&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')#Attachments]]
+    #end
+  #end
+  #if($pageCount == 0 &amp;&amp; $spacePageList.size() != 0) ##Space not empty but user doesn't have the right to view any page
+    $addStars** //Unauthorized//
+  #elseif($pageCount == 0 &amp;&amp; $spacePageList.size() == 0)
+    $addStars** //Empty//
+  #end
+#end
+{{/velocity}}</content>
+</xwikidoc>

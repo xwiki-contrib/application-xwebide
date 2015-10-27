@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1444902010000</date>
-  <contentUpdateDate>1444836684000</contentUpdateDate>
+  <date>1445938451000</date>
+  <contentUpdateDate>1444990179000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -352,21 +352,17 @@ $(function(){
   var currentEditor = 'view';
   var currentPage = encodeURIComponent(XWiki.currentPage);
   var currentSpace = encodeURIComponent(XWiki.currentSpace);
-  // Change editor and page if there is a hash
+  var currentTree = getCookieHierarchy('currentTree') || 'logical';
   var hashURL = window.location.hash.substring(1).split('&amp;!!');
-  if(hashURL.size() == 4){
-    currentEditor = hashURL[1];
-    currentPage = encodeURIComponent(hashURL[2]);
-    currentSpace = encodeURIComponent(hashURL[3]);
-    $('#hierarchyNextDocSpace').val(currentSpace);
-    $('#hierarchyNextDocName').val(currentPage);
+  if(hashURL.size() &gt; 3 &amp;&amp; hashURL[2] == 'physical') {
+    currentTree = 'physical';
   }
   function loadHierarchy() {
     $.ajax({
       url: wikiGetURL+"WebIDECode/ApplicationHierarchy",
       type: "GET",
       datatype : "html",
-      data : "action=view&amp;editor="+currentEditor+"&amp;masterPage="+XWiki.currentSpace+"."+XWiki.currentPage+"&amp;remotePage="+currentSpace+"."+currentPage+"&amp;visibleSpaces="+encodeURIComponent(visibleSpaces)+"&amp;visiblePages="+encodeURIComponent(visiblePages),
+      data : "action=view&amp;editor="+currentEditor+"&amp;masterPage="+XWiki.currentSpace+"."+XWiki.currentPage+"&amp;remotePage="+currentSpace+"."+currentPage+"&amp;visibleSpaces="+encodeURIComponent(visibleSpaces)+"&amp;visiblePages="+encodeURIComponent(visiblePages)+"&amp;treeview="+currentTree,
       contentType: "text/html",
     }).success(function(data){
       $('#hierarchyBlock').html(data);
@@ -374,7 +370,7 @@ $(function(){
     });
   }
   function getCookieHierarchy(cname) {
-    var name = XWiki.currentPage+"-"+cname + "=";
+    var name = XWiki.currentPage+"-"+cname+"=";
     var ca = document.cookie.split(';');
     for(var i=0; i&lt;ca.length; i++) {
       var c = ca[i];
@@ -509,9 +505,7 @@ $(function(){
   position: relative;
   overflow: hidden;
   border: 1px solid #DDDDDD;
-  /*height: 650px;*/
   min-height: 650px;
-  resize: vertical;
   width: 100%;
   box-sizing: border-box;
 }
@@ -521,19 +515,11 @@ $(function(){
   padding: 10px !important;
   overflow: auto;
 }
-.editorWikiTab {
-  min-height: 650px;
-  height: 650px;
-  width: auto;
-  resize: vertical;
-  background-color: #DDDDDD;
-  overflow:hidden;
-}
-.editorObjectTab {
-  width : auto;
+.editorTab {
   height: 100%;
+  width: auto;
   overflow: auto;
-  padding: 10px;
+  padding: 5px 10px;
   box-sizing: border-box;
 }
 #hierarchyBlock {
@@ -561,32 +547,20 @@ $(function(){
 
 /* Editor content */
 
-.editorWikiTab textarea {
-  height: 100%;
-  width: 100%;
-  resize: none;
-  box-sizing: border-box;
-  display: block;
-}
-.CoreMirror {
-  height: 100% !important;
-}
-.editorWikiTab .CodeMirror {
-  border: 0px !important;
-}
-.editorWikiCodeMirror {
-  width: 100% !important;
-  max-width: 100% !important;
-  height: 100% !important;
-}
-.editorObjectCodeMirror {
+.editorTab textarea {
   width: 100%;
   max-width: 100%;
   resize: both;
-  overflow: hidden;
+  min-height: 350px;
+  box-sizing: border-box;
+  display: block;
 }
-.CodeMirror-scroll {
-  /*position: static !important;*/
+.editorTab .CodeMirror {
+  width: auto;
+  max-width: 100%;
+  min-height: 350px;
+  resize: both;
+  display: block;
 }
 #editorTabBar {
   padding: 0px 0px 0px 0px;
@@ -596,7 +570,7 @@ $(function(){
   margin: 0px;
   vertical-align: top;
 }
-.editorTabButton{
+.editorTabButton {
   background-color: #EAEAEA;
   padding: 6px 11px 6px 6px;
   border: 1px solid #BBBBBB;
@@ -612,7 +586,7 @@ $(function(){
   -ms-user-select: none;
   user-select: none;
 }
-.editorTabButton span{
+.editorTabButton span {
   position: absolute;
   right: 0px;
   top: 0px;
@@ -630,11 +604,6 @@ $(function(){
 .editorElement {
   display: none;
   box-sizing: border-box;
-}
-.editorObjectTab textarea{
-  width: 100%;
-  max-width: 100%;
-  resize: both;
 }
 .editorObjectMenu {
   position: relative;
@@ -668,9 +637,6 @@ $(function(){
 .editorPropertyLabel p {
   margin: 0px;
 }
-.editorDisplayedObject {
-  padding-left: 10px;
-}
 .editorObjectDetails {
   padding-left: 10px;
   display: none;
@@ -695,6 +661,14 @@ $(function(){
   right: 0px;
   top: 0px;
   cursor: pointer;
+}
+.editorOtherFieldsBlock {
+  float: right;
+  width: 400px;
+  display: none;
+  border: 1px solid #DDDDDD;
+  padding: 10px;
+  box-sizing: border-box;
 }
 #hierarchyCloseTabModalInfo {
   font-style: italic;
@@ -830,10 +804,7 @@ By installing the additional extensions you can improve the user interface of th
 To learn about other features of the XWiki WebIDE, see the [[Online Documentation&gt;&gt;http://extensions.xwiki.org/xwiki/bin/view/Extension/XWebIDE+Application]] on xwiki.org.
   )))
   (% id='editorTabBar' class='leftmenu2 editorElement editorEditElement' %)((()))
-  (% id="objectMainBlock" class="editorElement editorObjectElement" %)
-  (((
-  )))
-  (% id="contentMainBlock" class="editorElement editorWikiElement" %)
+  (% id="contentMainBlock" class="editorElement editorEditElement" %)
   (((
   )))
   (% id="hierarchyBottomActionsBar" class="editorElement editorEditElement" %)

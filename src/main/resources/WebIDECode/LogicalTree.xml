@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc reference="WebIDECode.LogicalTree" locale="">
+  <web>WebIDECode</web>
+  <name>LogicalTree</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <parent>Test.Test2</parent>
+  <creator>xwiki:XWiki.Admin</creator>
+  <author>xwiki:XWiki.Admin</author>
+  <customClass/>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <creationDate>1445347285000</creationDate>
+  <date>1445941223000</date>
+  <contentUpdateDate>1445941223000</contentUpdateDate>
+  <version>1.1</version>
+  <title>LogicalTree</title>
+  <defaultTemplate/>
+  <validationScript/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>false</hidden>
+  <content>{{velocity}}
+#if($masterDoc.hasAccessLevel('edit'))
+  {{html clean=false wiki=true}}&lt;form method="post" action="$masterDoc.getURL('view')" class="masterExportForm"&gt;&lt;input type="hidden" name="export" value="1" /&gt;&lt;a&gt;image:icon:bullet_disk &lt;input class="hierarchy-export" type="submit" value="Export the project (XAR)" title="Export the project"&gt; &lt;/input&gt;&lt;/a&gt;&lt;/form&gt;{{/html}}
+#end
+#set($allPagesList = [])
+#set($allJSList = [])
+#set($allCSSList = [])
+#set($allMacrosList = [])
+#set($allTranslationsList = [])
+## Get a list of all the pages in the project
+#set($spacesList = $sorttool.sort($spacesList))
+#foreach($space in $spacesList)
+  #set($spaceInListNested = $spacesListNested.contains($space))
+  #if($spaceInListNested)
+    #set($xwql = "select distinct doc.name, doc.space from Document doc where doc.space=:space order by doc.name asc")
+    #set($spacePageList = $services.query.xwql($xwql).bindValue('space', $space).execute())
+    #foreach($element in $spacePageList)
+      #set($localeList = $xwiki.getDocument("$element[1].$element[0]").getTranslationList())
+      #set($localeList = $sorttool.sort($localeList))
+      #if($localeList.size() &gt; 0)
+        #set($ok = $localeList.add(0, $xwiki.getDocument("$element[1].$element[0]").defaultLanguage))
+      #end
+      #if(!$allPagesList.contains(["$element[1].$element[0]", $localeList]))
+        #set($ok = $allPagesList.add(["$element[1].$element[0]", $localeList]))
+      #end
+    #end
+    #if($spacePageList.size() == 0)
+      #set($ok = $allPagesList.add(["$space.$reservedDocumentName", []]))
+    #end
+  #else
+    #set($spacePageList = [])
+    #foreach($page in $pagesList)
+      #set($document = $xwiki.getDocument($page))
+      #set($localeList = $document.getTranslationList())
+      #set($localeList = $sorttool.sort($localeList))
+      #if($localeList.size() &gt; 0)
+        #set($ok = $localeList.add(0, $document.defaultLanguage))
+      #end
+      #if($space == $document.space &amp;&amp; !$allPagesList.contains([$document.fullName, $localeList]))
+        #set($ok = $allPagesList.add([$document.fullName, $localeList]))
+      #end
+    #end
+  #end
+#end
+## Display all the classes in the project
+(% class="hierarchy-list hierarchy-no-padding" id="hierarchyMainList" %)
+* **Classes**
+(% class="hierarchy-list" %)
+* image:icon:add [[Add new class&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newPage newClass" data-space='$escapetool.url($masterDoc.codeSpace).replace('+', '%20')' data-toggle="modal" data-target="#hierarchyPageModal"]]
+#set($classesInProjectList = []) ## All classes in the project
+#set($pagesInClassesList = []) ## All classes and sheets and templates in the project
+#foreach($pageData in $allPagesList)
+  #set($page = $pageData[0])
+  #set($classCount = $xwiki.getClass($page).properties.size())
+  #set($document = $xwiki.getDocument($page))
+  #if($classCount &gt; 0 || $document.getObject('XWiki.DocumentSheetBinding').sheet == 'XWiki.ClassSheet')
+    #set($ok = $classesInProjectList.add($page))
+    #set($ok = $pagesInClassesList.add($page))
+    #set($sheetDocList = $services.sheet.getClassSheets($document))
+    #set($className = $stringtool.removeEnd($document.name, 'Class'))
+    #set($classTemplateReference = $services.model.createDocumentReference($document.wiki, $document.space, "${className}ClassTemplate"))
+    #if(!$xwiki.exists($classTemplateReference))
+      #set($classTemplateReference = $services.model.createDocumentReference($document.wiki, $document.space, "${className}Template"))
+    #end
+    #set($classTemplateDoc = $xwiki.getDocument($classTemplateReference))
+    #set($pageClassHidden = " hierarchy-hidden")
+    #set($iconBulletToggle = "bullet_toggle_plus")
+    #if($visiblePages.contains($escapetool.url($page)) || $page == $currentDoc.fullName)
+      #set($pageClassHidden = "")
+      #set($iconBulletToggle = "bullet_toggle_minus")
+    #end
+    #set($addClassActive = "")
+    #if($page == $currentDoc.fullName)
+      ##set($addClassActive = " hierarchy-page-active")
+    #end
+    #set($spaceEscaped = $escapetool.url($document.space).replace("+", "%20"))
+    #set($pageEscaped = $escapetool.url($document.name).replace("+", "%20"))
+    ** (% data-pageid="Class-$escapetool.url($page)" class="hierarchy-displayPage$addClassActive" %)((([[image:icon:$iconBulletToggle||class="hierarchyDisplayPageIcon"]][[image:icon:monitor||class="hierarchyContextActionIcon"]](% id='hierarchyDisplayPage_$escapetool.url($page)' %)$className)))
+    (% id='hierarchyPageDetails_Class-$escapetool.url($page)' class='hierarchy-list${pageClassHidden}' %)
+    *** image:icon:monitor_edit [[Edit fields&gt;&gt;path:$document.getURL('edit', 'editor=class#!XWebIDE')||class="editClass" data-page='$pageEscaped' data-space='$spaceEscaped']]
+    #if($sheetDocList.size() &gt; 0)
+      #foreach($sheetFullName in $sheetDocList)
+        #set($addName = "")
+        #set($sheetDoc = $xwiki.getDocument($sheetFullName))
+        #set($ok = $pagesInClassesList.add($sheetDoc.fullName))
+        #set($spaceSheetEscaped = $escapetool.url($sheetDoc.space).replace("+", "%20"))
+        #set($pageSheetEscaped = $escapetool.url($sheetDoc.name).replace("+", "%20"))
+        #set($titleSheetEscaped = $escapetool.url($sheetDoc.title).replace("+", "%20"))
+        #if($sheetDocList.size() &gt; 1)
+          #set($addName = " ($sheetDoc.name)")
+        #end
+        *** image:icon:page_edit [[Edit sheet$addName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceSheetEscaped' data-page='$!pageSheetEscaped' data-locale="default" data-rawtitle='$titleSheetEscaped' class='editPage']]
+        (% class="hierarchy-list" %)
+        #foreach($jsxObject in $sheetDoc.getObjects('XWiki.JavaScriptExtension'))
+          **** image:icon:page_edit [[Edit sheet JS-$jsxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped' data-object="XWiki.JavaScriptExtension" data-objectnumber="$jsxObject.number" data-rawtitle="$titleSheetEscaped" class='editObject']]
+        #end
+        #if($sheetDoc.getObjects('XWiki.JavaScriptExtension').size() == 0)
+          **** image:icon:add [[Add sheet JS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newJSObject newLocalObject" data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped']]
+        #end
+        #foreach($ssxObject in $sheetDoc.getObjects('XWiki.StyleSheetExtension'))
+          **** image:icon:page_edit [[Edit sheet CSS-$ssxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped' data-object="XWiki.StyleSheetExtension" data-objectnumber="$ssxObject.number" data-rawtitle="$titleSheetEscaped" class='editObject']]
+        #end
+        #if($sheetDoc.getObjects('XWiki.StyleSheetExtension').size() == 0)
+          **** image:icon:add [[Add sheet CSS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newCSSObject newLocalObject" data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped']]
+        #end
+      #end
+    #else
+      *** image:icon:add [[Add bound sheet&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newPage newSheet" data-page='${pageEscaped}Sheet' data-space='$spaceEscaped' data-locale="default"]]
+    #end
+    #if(!$classTemplateDoc.isNew())
+      #set($ok = $pagesInClassesList.add($classTemplateDoc.fullName))
+      *** image:icon:page_edit [[Edit template&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$escapetool.url($classTemplateDoc.space).replace("+", "%20")' data-page='$escapetool.url($classTemplateDoc.name).replace("+", "%20")' data-locale="default" data-rawtitle="$escapetool.url($classTemplateDoc.title).replace("+", "%20")" class='editPage']]
+    #else
+      *** image:icon:add [[Add template&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newPage newTemplate" data-page='${pageEscaped}Template' data-space='$spaceEscaped' data-locale="default"]]
+    #end
+  #end
+#end
+#if($classesInProjectList.size() == 0)
+ ** //Empty//
+#end
+## Display all the pages in the project
+* **Pages**
+* image:icon:add [[Add a space&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newFolder" data-toggle="modal" data-target="#hierarchyFolderModal"]]
+#set($oldSpace = '')
+#foreach($pageFullNameData in $allPagesList)
+  #set($pageFullName = $pageFullNameData[0])
+  #set($pageLocaleList = $pageFullNameData[1])
+  #set($pageDoc = $xwiki.getDocument($pageFullName))
+  #set($space = $pageDoc.space)
+  #set($page = $pageDoc.name)
+  #set($jsxList = $pageDoc.getObjects('XWiki.JavaScriptExtension'))
+  #set($ssxList = $pageDoc.getObjects('XWiki.StyleSheetExtension'))
+  #set($macrosList = $pageDoc.getObjects('XWiki.WikiMacroClass'))
+  #set($translationsList = $pageDoc.getObjects('XWiki.TranslationDocumentClass'))
+  #set($ok = $allJSList.addAll($jsxList))
+  #set($ok = $allCSSList.addAll($ssxList))
+  #set($ok = $allMacrosList.addAll($macrosList))
+  #set($ok = $allTranslationsList.addAll($translationsList))
+  #set($isInClassesList = $pagesInClassesList.contains($pageFullName)) ## Classes should not be displayed in the 'pages' tree
+  #set($isGlobal = false)
+  #if($space == $masterDoc.codeSpace &amp;&amp; $page.indexOf('_') != -1)
+    #set($prefix = $page.substring(0, $page.indexOf('_')))
+    #if($prefix == 'JS' || $prefix == 'CSS' || $prefix == 'Macro' || $prefix == 'Translation')
+      #set($isGlobal = true)
+    #end
+  #end
+  ## Compute space elements
+  #if($space != $oldSpace)
+    #set($oldSpace = $space)
+    #set($spaceInListInit = $spacesListInit.contains($space)) ##Spaces in the 'spaces' object property
+    #set($spaceInListNested = $spacesListNested.contains($space)) ##Spaces to displays
+    #set($spaceEscaped = $escapetool.url($space).replace("+", "%20"))
+    ## Determine the level of depth of the space to know the number of starrs (level of sublist)
+    #set($depthLevel = -1)
+    #set($tlist = $space.replace("\.", "%5C%2E").split('\.'))
+    #set($spacePath = "")
+    #set($Integer = 0)
+    #foreach($item in $tlist)
+      #set($spacePath = "${spacePath}$item.replace('%5C%2E', '\.')")
+      #if($spacesListNested.contains($spacePath))
+        #set($depthLevel = $depthLevel+1)
+      #end
+      #set($spacePath = "${spacePath}.")
+    #end
+    #set($addStars = $stringtool.repeat('*', $depthLevel))
+      ##Determine the name of the subspace (without its parents), use when renaming the folder
+    #set($subspaceNameIndex = $tlist.size() - 1)
+    #set($subspaceName = $tlist.get($subspaceNameIndex).replace('%5C%2E', '.'))
+    #set($subspaceNameEscaped = $escapetool.url($subspaceName).replace("+", "%20"))
+    #if($nestedSpaces)
+      #set($spaceEscapedBackslash = $escapetool.url($space).replace("+", "%20"))
+    #else
+      #set($spaceEscapedBackslash = $escapetool.url($space.replace('\', '\\').replace('.', '\.')).replace("+", "%20")) ##"'
+    #end
+    #if($visibleSpaces.contains($spaceEscapedBackslash) || $spaceParentList.contains($space))
+      #set($contentDisplay = "")
+      #set($folderIcon = "bullet_toggle_minus")
+    #else
+      #set($contentDisplay = " hierarchy-hidden")
+      #set($folderIcon = "bullet_toggle_plus")
+    #end
+    $addStars* (% class="hierarchy-toggleFolder" data-space="$spaceEscapedBackslash" %)((([[image:icon:$folderIcon||id="hierarchyFolderIcon_$spaceEscapedBackslash"]][[image:icon:folder]] (% id="hierarchyDisplaySpace_$spaceEscaped" %)$subspaceName(%%) )))
+    (% id="hierarchySpace_$spaceEscapedBackslash" class="hierarchy-list${contentDisplay}" %)
+    #if($spaceInListNested)
+      $addStars** image:icon:add [[Create a page&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newPage" data-space="$spaceEscaped" data-toggle="modal" data-target="#hierarchyPageModal"]]
+    #end
+    #set($pageCount = 0)
+  #end
+  #if(!$isInClassesList &amp;&amp; !$isGlobal)
+    ## Compute page elements
+    #if(!$pageDoc.isNew()) ##TODO
+      #set($pageEscaped = $escapetool.url($page).replace("+", "%20"))
+      #if($nestedSpaces)
+        #set($pageEscapedBackslash = $escapetool.url($page).replace("+", "%20"))
+      #else
+        #set($pageEscapedBackslash = $escapetool.url($page.replace('\', '\\').replace('.', '\.')).replace("+", "%20")) ##"'
+      #end
+      #set($pageInPagesList = $pagesList.contains($pageFullName))
+      #set($pageFullNameEscaped = $escapetool.url($pageFullName).replace("+", "%20"))
+      #set($pageRawTitleEscaped = $escapetool.url($xwiki.getDocument($pageFullName).title).replace("+", "%20"))
+      #set($pageClassHidden = " hierarchy-hidden")
+      #set($iconBulletToggle = "bullet_toggle_plus")
+      #if($visiblePages.contains($pageFullNameEscaped) || $pageFullName == $currentDoc.fullName)
+        #set($pageClassHidden = "")
+        #set($iconBulletToggle = "bullet_toggle_minus")
+      #end
+      #set($pageName = "(% id='hierarchyDisplayPage_$pageFullNameEscaped' %)$page)))") ##'"
+      #if($xwiki.getDocument($pageFullName).hasAccessLevel('edit'))
+        #set($pageCount = $pageCount + 1)
+        #set($itemPage = false)
+        #foreach($className in $classesInProjectList)
+          #if($pageDoc.getObject($className))
+            #set($itemPage = true)
+            #break
+          #end
+        #end
+        #set($displayedIcon = 'page')
+        #if($itemPage) ##It's an "Item" page
+          #set($displayedIcon = 'application')
+        #end
+        $addStars** (% data-pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((([[image:icon:$iconBulletToggle||class="hierarchyDisplayPageIcon"]][[image:icon:$displayedIcon||class="hierarchyContextActionIcon"]]$pageName
+        (% id='hierarchyPageDetails_$spaceEscapedBackslash.$pageEscapedBackslash' class='hierarchy-list${pageClassHidden}' %)
+        #if($itemPage) ##It's an "Item" page
+          $addStars*** image:icon:application_edit [[Edit fields&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" class='editObject']]
+        #else ##It's an "Content" page
+          #if($pageLocaleList.size() == 0)
+            #set($ok = $pageLocaleList.add('default'))
+          #end
+          #foreach($pageLocale in $pageLocaleList)
+            #set($pageLocaleDisplay = "")
+            #if($pageLocale != "default" &amp;&amp; "$!pageLocale" != "")
+              #set($pageLocaleDisplay = " ($pageLocale)")
+            #end
+            #if($velocityCount == 1)
+              #set($pageLocale = 'default')
+            #end
+            $addStars*** image:icon:page_edit [[Edit content$!pageLocaleDisplay&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="$pageLocale" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" class='editPage']]
+          #end
+          #foreach($jsxObject in $jsxList)
+            #if($jsxObject.getProperty('use').value == "onDemand" || $jsxObject.getProperty('use').value == "currentPage" || !$jsxObject.getProperty('use').value)
+              $addStars*** image:icon:page_edit [[Edit JS-$jsxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.JavaScriptExtension" data-objectnumber="$jsxObject.number" data-rawtitle="$pageRawTitleEscaped" class='editObject']]
+            #end
+          #end
+          #foreach($ssxObject in $ssxList)
+            #if($ssxObject.getProperty('use').value == "onDemand" || $ssxObject.getProperty('use').value == "currentPage" || !$ssxObject.getProperty('use').value)
+              $addStars*** image:icon:page_edit [[Edit CSS-$ssxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.StyleSheetExtension" data-objectnumber="$ssxObject.number"  data-rawtitle="$pageRawTitleEscaped" class='editObject']]
+            #end
+          #end
+          #if($jsxList.size() == 0)
+            $addStars*** image:icon:add [[Add local JS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newJSObject newLocalObject" data-space='$spaceEscaped' data-page='$pageEscaped']]
+          #end
+          #if($ssxList.size() == 0)
+            $addStars*** image:icon:add [[Add local CSS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newCSSObject newLocalObject" data-space='$spaceEscaped' data-page='$pageEscaped']]
+          #end
+        #end
+      #end
+    #end
+  #end
+#end
+* **JavaScript**
+(% class="hierarchy-list" %)
+** image:icon:add [[Add global JS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newJSObject newGlobalObject" data-space='$escapetool.url($masterDoc.codeSpace).replace('+', '%20')' data-page='$xwiki.getUniquePageName($masterDoc.codeSpace, 'JS_Global')' data-toggle="modal" data-target="#hierarchyObjectModal"]]
+#foreach($jsxObject in $allJSList)
+  #if($jsxObject.getProperty('use').value == 'always')
+    #set($objDoc = $xwiki.getDocument($jsxObject.name))
+    #set($spaceEscaped = $escapetool.url($objDoc.space).replace("+", "%20"))
+    #set($pageEscaped = $escapetool.url($objDoc.name).replace("+", "%20"))
+    #set($titleEscaped = $escapetool.url($objDoc.title).replace("+", "%20"))
+    #set($docName = $objDoc.name)
+    #if("$!jsxObject.getProperty('name').value" != "")
+      #set($docName = $jsxObject.getProperty('name').value)
+    #end
+    ** image:icon:application_edit [[$docName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.JavaScriptExtension" data-objectnumber="$jsxObject.number" data-rawtitle="$titleEscaped" class='editObject']]
+  #end
+#end
+* **CSS**
+(% class="hierarchy-list" %)
+** image:icon:add [[Add global CSS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newCSSObject newGlobalObject" data-space='$escapetool.url($masterDoc.codeSpace).replace('+', '%20')' data-page='$xwiki.getUniquePageName($masterDoc.codeSpace, 'CSS_Global')' data-toggle="modal" data-target="#hierarchyObjectModal"]]
+#foreach($ssxObject in $allCSSList)
+  #if($ssxObject.getProperty('use').value == 'always')
+    #set($objDoc = $xwiki.getDocument($ssxObject.name))
+    #set($spaceEscaped = $escapetool.url($objDoc.space).replace("+", "%20"))
+    #set($pageEscaped = $escapetool.url($objDoc.name).replace("+", "%20"))
+    #set($titleEscaped = $escapetool.url($objDoc.title).replace("+", "%20"))
+    #set($docName = $objDoc.name)
+    #if("$!ssxObject.getProperty('name').value" != "")
+      #set($docName = $ssxObject.getProperty('name').value)
+    #end
+    ** image:icon:application_edit [[$docName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.StyleSheetExtension" data-objectnumber="$ssxObject.number" data-rawtitle="$titleEscaped" class='editObject']]
+  #end
+#end
+* **Macros**
+(% class="hierarchy-list" %)
+** image:icon:add [[Add global Macro&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newMacroObject newGlobalObject" data-space='$escapetool.url($masterDoc.codeSpace).replace('+', '%20')' data-page='$xwiki.getUniquePageName($masterDoc.codeSpace, 'Macro_Global')' data-toggle="modal" data-target="#hierarchyObjectModal"]]
+#foreach($macroObject in $allMacrosList)
+  #if($macroObject.getProperty('visibility').value == 'Current Wiki')
+    #set($objDoc = $xwiki.getDocument($macroObject.name))
+    #set($spaceEscaped = $escapetool.url($objDoc.space).replace("+", "%20"))
+    #set($pageEscaped = $escapetool.url($objDoc.name).replace("+", "%20"))
+    #set($titleEscaped = $escapetool.url($objDoc.title).replace("+", "%20"))
+    #set($docName = $objDoc.name)
+    #if("$!macroObject.getProperty('name').value" != "")
+      #set($docName = $macroObject.getProperty('name').value)
+    #end
+    ** image:icon:application_edit [[$docName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.WikiMacroClass" data-objectnumber="$macroObject.number" data-rawtitle="$titleEscaped" class='editObject']]
+  #end
+#end
+* **Translations**
+(% class="hierarchy-list" %)
+** image:icon:add [[Add global translation&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newTranslationObject newGlobalObject" data-space='$escapetool.url($masterDoc.codeSpace).replace('+', '%20')' data-page='$xwiki.getUniquePageName($masterDoc.codeSpace, 'Translation_Global')' data-toggle="modal" data-target="#hierarchyObjectModal"]]
+#foreach($translationObj in $allTranslationsList)
+  #set($objDoc = $xwiki.getDocument($translationObj.name))
+  #set($docName = $objDoc.name)
+  #set($spaceEscaped = $escapetool.url($objDoc.space).replace("+", "%20"))
+  #set($pageEscaped = $escapetool.url($objDoc.name).replace("+", "%20"))
+  #if($nestedSpaces)
+    #set($pageFullName = "${objDoc.space}.${docName.replace('\', '\\').replace('.', '\.')}") ##'"
+    #set($spaceEscapedBackslash = $escapetool.url($objDoc.space).replace("+", "%20"))
+    #set($pageEscapedBackslash = $escapetool.url($docName).replace("+", "%20"))
+  #else
+    #set($pageFullName = "${objDoc.space.replace('\', '\\').replace('.', '\.')}.${docName.replace('\', '\\').replace('.', '\.')}") ##'"
+    #set($spaceEscapedBackslash = $escapetool.url($objDoc.space.replace('\', '\\').replace('.', '\.')).replace("+", "%20")) ##'
+    #set($pageEscapedBackslash = $escapetool.url($docName.replace('\', '\\').replace('.', '\.')).replace("+", "%20")) ##'
+  #end
+  #set($pageFullNameEscaped = $escapetool.url($pageFullName).replace("+", "%20"))
+  #set($titleEscaped = $escapetool.url($objDoc.title).replace("+", "%20"))
+  #set($pageClassHidden = " hierarchy-hidden")
+  #set($iconBulletToggle = "bullet_toggle_plus")
+  #if($visiblePages.contains("Tr-$pageFullNameEscaped") || $pageFullName == $currentDoc.fullName)
+    #set($pageClassHidden = "")
+    #set($iconBulletToggle = "bullet_toggle_minus")
+  #end
+  #set($pageLocaleList = $objDoc.getTranslationList())
+  #set($pageLocaleList = $sorttool.sort($pageLocaleList))
+  #set($ok = $pageLocaleList.add(0, $objDoc.defaultLanguage))
+  ** (% data-pageid="Tr-$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((([[image:icon:$iconBulletToggle||class="hierarchyDisplayPageIcon"]][[image:icon:page||class="hierarchyContextActionIcon"]](% class="" %)$docName )))
+  (% id='hierarchyPageDetails_Tr-$spaceEscapedBackslash.$pageEscapedBackslash' class='hierarchy-list${pageClassHidden}' %)
+  *** image:icon:add [[Add a language&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newPage newLanguage" data-space="$spaceEscaped" data-page="$pageEscaped" data-toggle="modal" data-target="#hierarchyPageModal"]]
+  #foreach($pageLocale in $pageLocaleList)
+    #if($pageLocale == "")
+      #set($pageLocale = "default")
+      #set($displayLanguage = "Default")
+    #else
+      #set($language = $services.localization.toLocale($pageLocale).getDisplayLanguage())
+      #set($displayLanguage = $language)
+      #if($language.length() &gt; 0)
+        #set($displayLanguage = "${language.substring(0, 1).toUpperCase()}${language.substring(1)}")
+      #end
+    #end
+    *** image:icon:page_edit [[$displayLanguage&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="$pageLocale" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$titleEscaped" class='editPage']]
+  #end
+#end
+
+{{html clean=false}}
+&lt;div id="hierarchyUpdatedClassList" class="hierarchy-hidden"&gt;#foreach($class in $classesInProjectList)
+  #set($classDoc = $xwiki.getDocument($class))
+    &lt;option value="$escapetool.url($class).replace('+', '%20')"&gt;$classDoc.name&lt;/option&gt;
+#end&lt;/div&gt;
+{{/html}}
+{{/velocity}}</content>
+</xwikidoc>
