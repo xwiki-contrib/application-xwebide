@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434954547000</creationDate>
-  <date>1445525508000</date>
+  <date>1445958048000</date>
   <contentUpdateDate>1443170830000</contentUpdateDate>
   <version>1.1</version>
   <title/>
@@ -129,12 +129,12 @@ $(function(){
   var currentSpace = encodeURIComponent(XWiki.currentSpace);
   var currentPageEscaped = encodeURIComponent(XWiki.currentPage.replace(/\\/g, '\\\\').replace(/\./g, '\\\.'));
   var currentSpaceEscaped = encodeURIComponent(getSpacesEscaped(XWiki.currentSpace));
-  var wikiViewURL = '/xwiki/bin/view/';
+  var wikiViewURL = '/'+XWiki.webapppath+''+XWiki.servletpath+'view/';
   var bootstrap = (typeof($.fn.modal) !== 'undefined'); // Modal won't work without bootstrap
   if(window.docviewurl.indexOf('/'+XWiki.currentSpace+'/') &gt;= 0) {
     wikiViewURL = window.docviewurl.substring(0,window.docviewurl.indexOf('/'+XWiki.currentSpace+'/')+1);
   }
-  var wikiEditURL = '/xwiki/bin/edit/';
+  var wikiEditURL = '/'+XWiki.webapppath+''+XWiki.servletpath+'edit/';
   if(window.docediturl.indexOf('/'+XWiki.currentSpace+'/') &gt;= 0) {
     wikiGetURL = window.docediturl.substring(0,window.docediturl.indexOf('/'+XWiki.currentSpace+'/')+1);
   }
@@ -150,7 +150,7 @@ $(function(){
         if($('#tmEdit .submenu .submenuseparator').length) { //Colibri Skin
           $('#tmEdit .submenu .submenuseparator').before('&lt;span class="submenuitem "&gt;&lt;a href="#" id="tmEditWebIDE" class="tmEditXWebIDE" title="Edit '+data.documentName+' in XWebIDE"&gt;XWebIDE&lt;/a&gt;&lt;/span&gt;');
           $('.tmEditXWebIDE').css({
-            "backgroundImage": "url('/xwiki/resources/icons/silk/folder_page.png')"
+            "backgroundImage": "url('/"+XWiki.webapppath+"resources/icons/silk/folder_page.png')"
           });
         }
         else { //Flamingo
@@ -178,7 +178,7 @@ $(function(){
         if($('#tmEdit .submenu .submenuseparator').length) { //Colibri Skin
           $('#tmEdit .submenu .submenuseparator').before('&lt;span class="submenuitem "&gt;&lt;a href="#" id="tmEditWebIDE" class="tmEditXWebIDESheet" title="Edit the sheet of '+data.documentName+' in XWebIDE"&gt;XWebIDE (Sheet)&lt;/a&gt;&lt;/span&gt;');
           $('.tmEditXWebIDESheet').css({
-            "backgroundImage": "url('/xwiki/resources/icons/silk/folder_page.png')"
+            "backgroundImage": "url('/"+XWiki.webapppath+"resources/icons/silk/folder_page.png')"
           });
         }
         else { //Flamingo
@@ -257,7 +257,7 @@ $(function(){
       hierarchyStatus = true;
       var visibleSpaces = getCookieHierarchy(encodeURIComponent(masterName), 'visibleSpaces');
       var visiblePages = getCookieHierarchy(encodeURIComponent(masterName), 'visiblePages');
-      var wikiGetURL = '/xwiki/bin/get/';
+      var wikiGetURL = '/'+XWiki.webapppath+''+XWiki.servletpath+'get/';
       var remotePageName = currentPageEscaped;
       var remoteSpaceName = currentSpaceEscaped;
       var currentTree = getCookieHierarchy(encodeURIComponent(masterName), 'currentTree') || 'logical';
@@ -278,8 +278,8 @@ $(function(){
         if(XWiki.editor == "class"){
           mainBlock = '#propupdate';
           $(mainBlock).before('&lt;div id="hierarchyBlock" &gt;'+data+'&lt;/div&gt;');
-          $('head').append('&lt;link rel="stylesheet" type="text/css" href="/xwiki/bin/ssx/WebIDECode/ApplicationHierarchy"/&gt;');
-          $('head').append('&lt;script type="text/javascript" src="/xwiki/bin/jsx/WebIDECode/ApplicationHierarchy" defer="defer"&gt;&lt;/script&gt;');
+          $('head').append('&lt;link rel="stylesheet" type="text/css" href="/'+XWiki.webapppath+''+XWiki.servletpath+'ssx/WebIDECode/ApplicationHierarchy"/&gt;');
+          $('head').append('&lt;script type="text/javascript" src="/'+XWiki.webapppath+''+XWiki.servletpath+'jsx/WebIDECode/ApplicationHierarchy" defer="defer"&gt;&lt;/script&gt;');
           $(mainBlock).css({
             "overflow" : "auto",
             "display" : "block",

@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1445955660000</date>
+  <date>1445958130000</date>
   <contentUpdateDate>1445954321000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -190,11 +190,11 @@ $(function(){
   var visibleSpaces = getCookieHierarchy('visibleSpaces').split(',');
   var visiblePages = getCookieHierarchy('visiblePages').split(',');
   // Get the "get" and "view" url structure for ajax queries
-  var wikiGetURL = '/xwiki/bin/get/';
+  var wikiGetURL = '/'+XWiki.webapppath+''+XWiki.servletpath+'get/';
   if(window.docgeturl.indexOf('/get/') &gt;= 0) {
     wikiGetURL = window.docgeturl.substring(0,window.docgeturl.indexOf('/get/')+5);
   }
-  var wikiViewURL = '/xwiki/bin/view/';
+  var wikiViewURL = '/'+XWiki.webapppath+''+XWiki.servletpath+'view/';
   if(window.docviewurl.indexOf('/'+XWiki.currentSpace+'/') &gt;= 0) {
     wikiViewURL = window.docviewurl.substring(0,window.docviewurl.indexOf('/'+XWiki.currentSpace+'/')+1);
   }
@@ -362,13 +362,13 @@ $(function(){
         if(indexSpace &gt;= 0) {
           visibleSpaces.splice(indexSpace, 1);
         }
-        $(document.getElementById('hierarchyFolderIcon_'+spaceToggle)).attr('src', '/xwiki/resources/icons/silk/bullet_toggle_plus.png');
+        $(document.getElementById('hierarchyFolderIcon_'+spaceToggle)).attr('src', '/'+XWiki.webapppath+'resources/icons/silk/bullet_toggle_plus.png');
       }
       else {
         if(indexSpace &lt; 0) {
           visibleSpaces.push(spaceToggle);
         }
-       $(document.getElementById('hierarchyFolderIcon_'+spaceToggle)).attr('src', '/xwiki/resources/icons/silk/bullet_toggle_minus.png');
+       $(document.getElementById('hierarchyFolderIcon_'+spaceToggle)).attr('src', '/'+XWiki.webapppath+'resources/icons/silk/bullet_toggle_minus.png');
       }
       setCookieHierarchy('visibleSpaces', visibleSpaces, 365);
     });
@@ -381,13 +381,13 @@ $(function(){
         if(indexPage &gt;= 0) {
           visiblePages.splice(indexPage, 1);
         }
-        $(this).find('.hierarchyDisplayPageIcon').attr('src', '/xwiki/resources/icons/silk/bullet_toggle_plus.png');
+        $(this).find('.hierarchyDisplayPageIcon').attr('src', '/'+XWiki.webapppath+'resources/icons/silk/bullet_toggle_plus.png');
       }
       else {
         if(indexPage &lt; 0) {
           visiblePages.push(pageToggle);
         }
-        $(this).find('.hierarchyDisplayPageIcon').attr('src', '/xwiki/resources/icons/silk/bullet_toggle_minus.png');
+        $(this).find('.hierarchyDisplayPageIcon').attr('src', '/'+XWiki.webapppath+'resources/icons/silk/bullet_toggle_minus.png');
       }
       setCookieHierarchy('visiblePages', visiblePages, 365);
     });
@@ -657,7 +657,7 @@ $(function(){
       var fileTitle = $('input[data-space="'+encodeURIComponent(space)+'"][data-page="'+encodeURIComponent(page)+'"]').val();
       var fileContent = getCurrentContent(tabNumberId);
       $.ajax({
-        url: "/xwiki/rest/wikis/"+getDocumentReferenceData('wiki')+"/"+restSpaces+"/pages/"+page+restLocale,
+        url: "/"+XWiki.webapppath+"rest/wikis/"+getDocumentReferenceData('wiki')+"/"+restSpaces+"/pages/"+page+restLocale,
         type: "PUT",
         contentType: "application/x-www-form-urlencoded",
         accept: "application/xml",
@@ -724,7 +724,7 @@ $(function(){
       }
       var restSpaces = getCurrentSpace(false, false, true);
       $.ajax({
-        url: '/xwiki/rest/wikis/'+getDocumentReferenceData('wiki')+'/'+restSpaces+'/pages/'+getCurrentPage(false)+'/objects'+selectedObjectURL,
+        url: '/'+XWiki.webapppath+'rest/wikis/'+getDocumentReferenceData('wiki')+'/'+restSpaces+'/pages/'+getCurrentPage(false)+'/objects'+selectedObjectURL,
         type: "GET",
         contentType: "application/xml",
       }).success(function(dataContent){
@@ -773,7 +773,7 @@ $(function(){
       menuNode = $('&lt;div id="tab'+currentTabNumber+'_editorObjectMenuContent" class="editorObjectMenuContent"&gt;&lt;/div&gt;').appendTo($('&lt;div id="tab'+currentTabNumber+'_editorObjectMenu" class="editorObjectMenu"&gt;&lt;span id="tab'+currentTabNumber+'_editorObjectMenuTitle" class="editorObjectMenuTitle"&gt;Quick Access&lt;/span&gt;&lt;/div&gt;').appendTo($(jQueryTabId)));
       addObjectNode = $('&lt;div id="tab'+currentTabNumber+'_addObjectBlock" class="addObjectBlock"&gt;&lt;/div&gt;').appendTo($(jQueryTabId));
     }
-    var dataNode = $('&lt;form method="post" action="/xwiki/bin/save/'+urlSpaces+'/'+file+'" id="tab'+currentTabNumber+'_objectIDEform" class="objectIDEform"&gt;&lt;input type="hidden" name="form_token" value="'+form_token+'" /&gt;&lt;/form&gt;').appendTo($(jQueryTabId));
+    var dataNode = $('&lt;form method="post" action="/'+XWiki.webapppath+''+XWiki.servletpath+'save/'+urlSpaces+'/'+file+'" id="tab'+currentTabNumber+'_objectIDEform" class="objectIDEform"&gt;&lt;input type="hidden" name="form_token" value="'+form_token+'" /&gt;&lt;/form&gt;').appendTo($(jQueryTabId));
     if(getCurrentObject(false)) {
       $(dataNode).append('&lt;input type="button" class="btn btn-default editorDisplayAdvancedFields" value="Advanced fields" /&gt;');
       menuNode = $('&lt;div class="editorOtherFieldsBlock"&gt;&lt;/div&gt;').appendTo(dataNode);
@@ -920,7 +920,7 @@ $(function(){
               reloadHierarchy();
             }
             else if(type &amp;&amp; type === 'class') { // Create a class with the logical view and add the ClassSheet : redirect to the class editor
-              window.location.href = '/xwiki/bin/edit/'+getURLSpacesString(space)+'/'+page+'?editor=class#!XWebIDE';
+              window.location.href = '/'+XWiki.webapppath+''+XWiki.servletpath+'edit/'+getURLSpacesString(space)+'/'+page+'?editor=class#!XWebIDE';
             }
             else {
               reloadHierarchy();
@@ -1079,7 +1079,7 @@ $(function(){
       var currentTabNumber = getTabNumber(jQueryTabId);
       var restCurrentSpaces = getRestSpacesString(getCurrentSpace());
       $.ajax({
-        url: '/xwiki/rest/wikis/'+getDocumentReferenceData('wiki')+'/'+restCurrentSpaces+'/pages/'+getCurrentPage()+'/objects/'+className+'/'+number,
+        url: '/'+XWiki.webapppath+'rest/wikis/'+getDocumentReferenceData('wiki')+'/'+restCurrentSpaces+'/pages/'+getCurrentPage()+'/objects/'+className+'/'+number,
         type: "DELETE",
       }).success(function(dataContent){
         setSavingState(false, 'Deleted', 2500);
@@ -1225,12 +1225,12 @@ $(function(){
    */
   function goToNewPage(mode, file, folder, objectSelected, objectNumber, locale) {
     if(mode === 'class') {
-      window.location.href = '/xwiki/bin/edit/'+getURLSpacesString(folder)+'/'+file+'?editor=class#!XWebIDE';
+      window.location.href = '/'+XWiki.webapppath+''+XWiki.servletpath+'edit/'+getURLSpacesString(folder)+'/'+file+'?editor=class#!XWebIDE';
     }
     else if(currentEditor === 'class') {
       var redirectLocale = locale || 'default';
       var redirectHash = getHash(mode, file, folder, objectSelected, objectNumber, locale);
-      window.location.href = '/xwiki/bin/view/'+getURLSpacesString(masterSpace)+'/'+masterPage+redirectHash;
+      window.location.href = '/'+XWiki.webapppath+''+XWiki.servletpath+'view/'+getURLSpacesString(masterSpace)+'/'+masterPage+redirectHash;
     }
     else {
       if(!$(TAB_MAIN_CONTAINER).is(":visible")) {
@@ -1617,7 +1617,7 @@ $(function(){
         return xm ? xm.form_token : $('meta[name="form_token"]').attr('content');
         break;
       case 'restURL':
-        return (typeof restURL != 'undefined') ? restURL : '/xwiki/rest/wikis/xwiki/'+getRestSpacesString(getDocumentReferenceData('space'))+'/pages/'+getDocumentReferenceData('page');
+        return (typeof restURL != 'undefined') ? restURL : '/'+XWiki.webapppath+'rest/wikis/'+getDocumentReferenceData('wiki')+'/'+getRestSpacesString(getDocumentReferenceData('space'))+'/pages/'+getDocumentReferenceData('page');
         break;
       default:
         return xm ? (xm.documentReference ? xm.documentReference : xm.wiki+':'+xm.space+'.'+xm.page) : $('meta[name="wiki"]').attr('content')+':'+$('meta[name="space"]').attr('content')+'.'+$('meta[name="page"]').attr('content');
@@ -1635,7 +1635,7 @@ $(function(){
         page: $('#hierarchyMasterDocName').val(),
         document: $('#hierarchyMasterDocSpace').val()+'.'+$('#hierarchyMasterDocName').val(),
         form_token: getDocumentReferenceData('form_token'),
-        restURL: '/xwiki/rest/wikis/'+getDocumentReferenceData("wiki")+'/'+getRestSpacesString($('#hierarchyMasterDocSpace').val())+'/pages/'+$('#hierarchyMasterDocName').val(),
+        restURL: '/'+XWiki.webapppath+'rest/wikis/'+getDocumentReferenceData("wiki")+'/'+getRestSpacesString($('#hierarchyMasterDocSpace').val())+'/pages/'+$('#hierarchyMasterDocName').val(),
         documentReference: getDocumentReferenceData('wiki')+':'+$('#hierarchyMasterDocSpace').val()+'.'+$('#hierarchyMasterDocName').val()
       };
     }
@@ -2082,7 +2082,7 @@ $(function(){
       var folder = $('#hierarchyObjectSpace').html();
       var file = !$('#hierarchyObjectPage').is(':empty') ? $('#hierarchyObjectPage').html() : ($('#hierarchyObjectPageInput').val() !== '' ?  $('#hierarchyObjectPageInput').val() : $('#hierarchyObjectPageInputDefault').val());
       var className = $('#hierarchyObjectClassName').val();
-      if(folder.trim() &amp;&amp; file.trim() &amp;&amp; v.trim()) {
+      if(folder.trim() &amp;&amp; file.trim() &amp;&amp; className.trim()) {
         var global = ($('#hierarchyObjectPageInputDefault').val() !== '');
         addObject(null, className, true, folder, file, global, true);
       }
@@ -2269,7 +2269,7 @@ $(function(){
   function reloadHierarchy() {
     var iconSrc = $('#hierarchyRefresh').attr('src');
     $('#hierarchyRefresh').off('click', reloadHierarchy);
-    $('#hierarchyRefresh').attr('src', '/xwiki/resources/icons/xwiki/spinner.gif');
+    $('#hierarchyRefresh').attr('src', '/'+XWiki.webapppath+'resources/icons/xwiki/spinner.gif');
     $.ajax({
       url: wikiGetURL+"WebIDECode/ApplicationHierarchy?xpage=plain&amp;language="+$('#hierarchyMainLanguage').val(),
       type: "GET",
@@ -2470,7 +2470,7 @@ $(function(){
       addRestLanguage = '/translations/'+itemValue;
     }
     $.ajax({
-      url: "/xwiki/rest/wikis/"+getDocumentReferenceData('wiki')+"/"+restSpaces+"/pages/"+file+addRestLanguage,
+      url: "/"+XWiki.webapppath+"rest/wikis/"+getDocumentReferenceData('wiki')+"/"+restSpaces+"/pages/"+file+addRestLanguage,
       type: "GET",
       contentType: "application/xml",
     }).success(function(xhr){
@@ -2481,7 +2481,7 @@ $(function(){
       setHierarchyState('ERROR : Name already used!', 4000, 'red');
     }).error(function(res){
       $.ajax({
-        url: "/xwiki/rest/wikis/"+getDocumentReferenceData('wiki')+"/"+restSpaces+"/pages/"+file+addRestLanguage,
+        url: "/"+XWiki.webapppath+"rest/wikis/"+getDocumentReferenceData('wiki')+"/"+restSpaces+"/pages/"+file+addRestLanguage,
         type: "PUT",
         contentType: "application/x-www-form-urlencoded",
         accept: "application/xml",
@@ -2547,7 +2547,7 @@ $(function(){
     var restSpacesMaster = getRestSpacesString(masterSpace);
     setHierarchyState('Adding page...');
     $.ajax({
-      url: "/xwiki/rest/wikis/"+getDocumentReferenceData('wiki')+"/"+restSpaces+"/pages/"+existingPageName,
+      url: "/"+XWiki.webapppath+"rest/wikis/"+getDocumentReferenceData('wiki')+"/"+restSpaces+"/pages/"+existingPageName,
       type: "GET",
       contentType: "application/xml",
     }).error(function(){
@@ -2557,7 +2557,7 @@ $(function(){
       });
     }).success(function(){
       $.ajax({
-        url: "/xwiki/rest/wikis/"+getDocumentReferenceData('wiki')+"/"+restSpacesMaster+"/pages/"+masterPage+"/objects/WebIDECode.ApplicationClass/0/properties/pages",
+        url: "/"+XWiki.webapppath+"rest/wikis/"+getDocumentReferenceData('wiki')+"/"+restSpacesMaster+"/pages/"+masterPage+"/objects/WebIDECode.ApplicationClass/0/properties/pages",
         type: "GET",
         contentType: "application/xml",
       }).success(function(res){
