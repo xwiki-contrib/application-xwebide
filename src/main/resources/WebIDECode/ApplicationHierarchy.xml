@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1445961955000</date>
-  <contentUpdateDate>1445958669000</contentUpdateDate>
+  <date>1445965818000</date>
+  <contentUpdateDate>1445965818000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -2953,7 +2953,7 @@ $(function(){
 **Project :** $masterDoc.display('projectName', 'view') [[image:icon:control_start_blue||title="Hide menu" id="hierarchyClose"]] [[image:icon:arrow_refresh||title="Refresh the menu" id="hierarchyRefresh"]]
 )))
 #set($nestedSpaces = false)
-#if($services.model.createDocumentReference("wiki", ["A", "B"], "page") == 'wiki:A.B.page')
+#if($services.model.serialize($services.model.createDocumentReference("wiki", ["A", "B"], "page")) == 'wiki:A.B.page')
   #set($nestedSpaces = true)
 #end
 #set($masterObj = $masterDoc.getObject('WebIDECode.ApplicationClass'))

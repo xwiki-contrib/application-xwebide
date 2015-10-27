@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347285000</creationDate>
-  <date>1445955456000</date>
-  <contentUpdateDate>1445955456000</contentUpdateDate>
+  <date>1445964896000</date>
+  <contentUpdateDate>1445964896000</contentUpdateDate>
   <version>1.1</version>
   <title>LogicalTree</title>
   <defaultTemplate/>
@@ -339,7 +339,7 @@
 (% class="hierarchy-list" %)
 ** image:icon:add [[Add global Macro&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newMacroObject newGlobalObject" data-space='$escapetool.url($codeSpace).replace('+', '%20')' data-page='$xwiki.getUniquePageName($codeSpace, 'Macro-Global')' data-toggle="modal" data-target="#hierarchyObjectModal"]]
 #foreach($macroObject in $allMacrosList)
-  #if($macroObject.getProperty('visibility').value == 'Current Wiki')
+  #if($macroObject.getProperty('visibility').value != 'Current User')
     #set($objDoc = $xwiki.getDocument($macroObject.name))
     #set($spaceEscaped = $escapetool.url($objDoc.space).replace("+", "%20"))
     #set($pageEscaped = $escapetool.url($objDoc.name).replace("+", "%20"))
