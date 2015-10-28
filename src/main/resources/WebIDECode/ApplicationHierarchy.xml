@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1446024539000</date>
-  <contentUpdateDate>1446024539000</contentUpdateDate>
+  <date>1446030583000</date>
+  <contentUpdateDate>1446030583000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -189,6 +189,7 @@ $(function(){
   var TITLE_VIEW = '#editorObjectTitle';
   var visibleSpaces = getCookieHierarchy('visibleSpaces').split(',');
   var visiblePages = getCookieHierarchy('visiblePages').split(',');
+  var visibleCategory = getCookieHierarchy('visibleCategory').split(',');
   if(XWiki.webapppath.substr(0,1) === '/') {
     XWiki.webapppath = XWiki.webapppath.substr(1,(XWiki.webapppath.length-1));
   }
@@ -393,6 +394,24 @@ $(function(){
         $(this).find('.hierarchyDisplayPageIcon').attr('src', '/'+XWiki.webapppath+'resources/icons/silk/bullet_toggle_minus.png');
       }
       setCookieHierarchy('visiblePages', visiblePages, 365);
+    });
+    $('.hierarchy-toggleCategory').click(function(){
+      var category = $(this).attr('data-category');
+      $(document.getElementById('hierarchyCategory_'+category)).toggle();
+      var indexCategory = $.inArray(category, visibleCategory);
+      if($(document.getElementById('hierarchyCategory_'+category)).is(':hidden')) {
+        if(indexCategory &gt;= 0) {
+          visibleCategory.splice(indexCategory, 1);
+        }
+        $(this).find('.hierarchyDisplayPageIcon').attr('src', '/'+XWiki.webapppath+'resources/icons/silk/bullet_toggle_plus.png');
+      }
+      else {
+        if(indexCategory &lt; 0) {
+          visibleCategory.push(category);
+        }
+        $(this).find('.hierarchyDisplayPageIcon').attr('src', '/'+XWiki.webapppath+'resources/icons/silk/bullet_toggle_minus.png');
+      }
+      setCookieHierarchy('visibleCategory', visibleCategory, 365);
     });
 
     // Add a page (if no bootstrap) / Change the folder to use when adding a new page
@@ -2276,7 +2295,7 @@ $(function(){
       url: wikiGetURL+"WebIDECode/ApplicationHierarchy?xpage=plain&amp;language="+$('#hierarchyMainLanguage').val(),
       type: "GET",
       datatype : "html",
-      data : "action="+XWiki.contextaction+"&amp;editor="+currentEditor+"&amp;masterPage="+masterSpace+"."+masterPage+"&amp;remotePage="+getCurrentSpace(true)+"."+getCurrentPage(true)+"&amp;visibleSpaces="+encodeURIComponent(visibleSpaces)+"&amp;visiblePages="+encodeURIComponent(visiblePages)+"&amp;treeview="+currentTree,
+      data : "action="+XWiki.contextaction+"&amp;editor="+currentEditor+"&amp;masterPage="+masterSpace+"."+masterPage+"&amp;remotePage="+getCurrentSpace(true)+"."+getCurrentPage(true)+"&amp;visibleSpaces="+encodeURIComponent(visibleSpaces)+"&amp;visiblePages="+encodeURIComponent(visiblePages)+"&amp;visibleCategory="+encodeURIComponent(visibleCategory)+"&amp;treeview="+currentTree,
       contentType: "text/html",
     }).success(function(data){
       //Update the hierarchy content (list of documents only)
@@ -2845,18 +2864,24 @@ $(function(){
   cursor: pointer;
   display: inline-block;
 }
+.hierarchy-displayPage:hover span{
+  text-decoration: underline;
+}
+.hierarchy-displayPage p{
+  margin-bottom:0;
+}
+.hierarchy-toggleCategory {
+  cursor: pointer;
+}
+.hierarchy-toggleCategory:hover strong{
+  text-decoration: underline;
+}
 .hierarchyCurrentSpacePageAction{
   font-weight: bold;
 }
 .hierarchy-page-active {
   font-weight: bold;
   color: black;
-}
-.hierarchy-displayPage:hover span{
-  text-decoration: underline;
-}
-.hierarchy-displayPage p{
-  margin-bottom:0;
 }
 .hierarchyContextActionIcon {
   margin-right: 5px;
@@ -2946,6 +2971,10 @@ $(function(){
   #set($visiblePagesString = $!{request.visiblePages})
 #end
 #set($visiblePages = $!visiblePagesString.split("[,]"))
+#if("$!{request.visibleCategory}" != "")
+  #set($visibleCategoryString = $!{request.visibleCategory})
+#end
+#set($visibleCategory = $!visibleCategoryString.split("[,]"))
 (% class="hierarchy-hidden" id="hierarchyOpenBlock" %)(((
 [[image:icon:control_end_blue||title="Open menu"]]
 )))
@@ -3084,7 +3113,7 @@ $(function(){
         &lt;div class="modal-body"&gt;
           Space : &lt;span id="hierarchyObjectSpace"&gt;&lt;/span&gt;&lt;br&gt;
           &lt;div id="hierarchyObjectPageBlock"&gt;Page : &lt;span id="hierarchyObjectPage"&gt;&lt;/span&gt;&lt;/div&gt;
-          &lt;div id="hierarchyObjectPageInputBlock"&gt;JS file name : &lt;input type="text" id="hierarchyObjectPageInput" value=""/&gt;&lt;input type="hidden" id="hierarchyObjectPageInputDefault" value=""/&gt;&lt;/div&gt;
+          &lt;div id="hierarchyObjectPageInputBlock"&gt;Name : &lt;input type="text" id="hierarchyObjectPageInput" value=""/&gt;&lt;input type="hidden" id="hierarchyObjectPageInputDefault" value=""/&gt;&lt;/div&gt;
           &lt;input type="hidden" id="hierarchyObjectClassName" /&gt;
           &lt;button id="hierarchyAddObject" class="btn btn-success"&gt;Add the object&lt;/button&gt;
           &lt;p id="hierarchyObjectModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
