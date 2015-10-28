@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1445965815000</date>
-  <contentUpdateDate>1445965815000</contentUpdateDate>
+  <date>1446024548000</date>
+  <contentUpdateDate>1446024548000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -712,7 +712,7 @@ $(function(){
    *#
   ## 1/ Check for subspaces
   #set($nestedSpaces = false)
-  #if($services.model.serialize($services.model.createDocumentReference("wiki", ["A", "B"], "page")) == 'wiki:A.B.page')
+  #if($services.model.serialize($services.model.createDocumentReference("wiki", ["A", "B"], "page"), 'default') == 'wiki:A.B.page')
     #set($nestedSpaces = true)
   #end
   #set($spacesListNested = $sorttool.sort($spacesList))
