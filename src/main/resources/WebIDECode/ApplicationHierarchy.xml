@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1446030583000</date>
-  <contentUpdateDate>1446030583000</contentUpdateDate>
+  <date>1446114284000</date>
+  <contentUpdateDate>1446114284000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -366,13 +366,13 @@ $(function(){
         if(indexSpace &gt;= 0) {
           visibleSpaces.splice(indexSpace, 1);
         }
-        $(document.getElementById('hierarchyFolderIcon_'+spaceToggle)).attr('src', '/'+XWiki.webapppath+'resources/icons/silk/bullet_toggle_plus.png');
+        $(document.getElementById('hierarchyFolderIcon_'+spaceToggle)).find('span').attr('class', 'fa fa-caret-right');
       }
       else {
         if(indexSpace &lt; 0) {
           visibleSpaces.push(spaceToggle);
         }
-       $(document.getElementById('hierarchyFolderIcon_'+spaceToggle)).attr('src', '/'+XWiki.webapppath+'resources/icons/silk/bullet_toggle_minus.png');
+        $(document.getElementById('hierarchyFolderIcon_'+spaceToggle)).find('span').attr('class', 'fa fa-caret-down');
       }
       setCookieHierarchy('visibleSpaces', visibleSpaces, 365);
     });
@@ -385,13 +385,13 @@ $(function(){
         if(indexPage &gt;= 0) {
           visiblePages.splice(indexPage, 1);
         }
-        $(this).find('.hierarchyDisplayPageIcon').attr('src', '/'+XWiki.webapppath+'resources/icons/silk/bullet_toggle_plus.png');
+        $(this).find('.hierarchyDisplayPageIcon &gt; span').attr('class', 'fa fa-caret-right');
       }
       else {
         if(indexPage &lt; 0) {
           visiblePages.push(pageToggle);
         }
-        $(this).find('.hierarchyDisplayPageIcon').attr('src', '/'+XWiki.webapppath+'resources/icons/silk/bullet_toggle_minus.png');
+        $(this).find('.hierarchyDisplayPageIcon &gt; span').attr('class', 'fa fa-caret-down');
       }
       setCookieHierarchy('visiblePages', visiblePages, 365);
     });
@@ -403,13 +403,13 @@ $(function(){
         if(indexCategory &gt;= 0) {
           visibleCategory.splice(indexCategory, 1);
         }
-        $(this).find('.hierarchyDisplayPageIcon').attr('src', '/'+XWiki.webapppath+'resources/icons/silk/bullet_toggle_plus.png');
+        $(this).find('.hierarchyDisplayPageIcon &gt; span').attr('class', 'fa fa-caret-right');
       }
       else {
         if(indexCategory &lt; 0) {
           visibleCategory.push(category);
         }
-        $(this).find('.hierarchyDisplayPageIcon').attr('src', '/'+XWiki.webapppath+'resources/icons/silk/bullet_toggle_minus.png');
+        $(this).find('.hierarchyDisplayPageIcon &gt; span').attr('class', 'fa fa-caret-down');
       }
       setCookieHierarchy('visibleCategory', visibleCategory, 365);
     });
@@ -528,6 +528,17 @@ $(function(){
         openModalNoBootstrap('#hierarchyObjectModal');
         addObjectShortcut();
       }
+    });
+
+    $('#hierarchyAddNewElement').click(function(e) {
+      e.preventDefault();
+      $('#hierarchyElementToAdd').toggle();
+    });
+    $('#hierarchyElementToAdd').on('mouseenter', function() {
+      $(this).on('mouseleave', function() {
+        $(this).hide();
+        $(this).unbind('mouseleave');
+      });
     });
 
     // Remove a folder by clicking on the cross
@@ -1899,7 +1910,7 @@ $(function(){
       menuElement = $('.hierarchy-viewElement[data-space="'+folder+'"][data-page="'+file+'"]');
     }
     menuElement.addClass('hierarchy-page-active');
-    menuElement.parents().siblings('.hierarchy-displayPage, .hierarchy-toggleFolder').addClass('hierarchy-page-active');
+    menuElement.parents().siblings('.hierarchy-displayPage, .hierarchy-toggleFolder').find('span[id^="hierarchyDisplayPage"], span[id^="hierarchyDisplaySpace"]').addClass('hierarchy-page-active');
     menuElement.parents('ul.hierarchy-list').show();
   }
 
@@ -2791,6 +2802,10 @@ $(function(){
   top: 0px;
   padding: 1px;
 }
+.hierarchy-right span{
+  padding: 1px;
+  margin-left: 1px
+}
 #hierarchyOpenBlock {
   cursor: pointer;
   padding-top: 5px;
@@ -2801,10 +2816,11 @@ $(function(){
   padding: 5px;
   margin: 0px;
 }
-#hierarchyCloseBlock img{
+#hierarchyCloseBlock .hierarchy-icon{
   cursor: pointer;
   float: right;
   padding: 5px;
+  margin-left: 5px;
 }
 .exportLink {
   font-weight: bold;
@@ -2854,7 +2870,7 @@ $(function(){
   cursor: pointer;
   display: inline-block;
 }
-.hierarchy-toggleFolder:hover span{
+.hierarchy-toggleFolder:hover .hierarchySpaceName{
   text-decoration: underline;
 }
 .hierarchy-toggleFolder p{
@@ -2864,7 +2880,7 @@ $(function(){
   cursor: pointer;
   display: inline-block;
 }
-.hierarchy-displayPage:hover span{
+.hierarchy-displayPage:hover .hierarchyPageName{
   text-decoration: underline;
 }
 .hierarchy-displayPage p{
@@ -2883,9 +2899,6 @@ $(function(){
   font-weight: bold;
   color: black;
 }
-.hierarchyContextActionIcon {
-  margin-right: 5px;
-}
 .hierarchy-export {
   background: none !important;
   border: none;
@@ -2895,6 +2908,21 @@ $(function(){
 }
 .masterExportForm {
   display: inline-block;
+  width: 100%;
+}
+.hierarchy-export-button {
+  display: inline-block;
+  width: 100%;
+}
+#hierarchyChangeTree {
+  display: inline-block;
+  width: 50%;
+  box-sizing: border-box;
+}
+#hierarchyAddNewElement {
+  display: inline-block;
+  width: 50%;
+  box-sizing: border-box;
 }
 #hierarchyElementToAdd {
   background: white;
@@ -2902,8 +2930,13 @@ $(function(){
   margin-top: 0px;
   z-index: 100;
   border:1px solid black;
-  width: 80%;
+  right: 5px;
+  left: 5px;
   padding: 10px;
+  box-sizing: border-box;
+}
+#hierarchyElementToAdd h4 {
+  margin: 0px;
 }
 #hierarchyElementToAdd p {
   margin: 0;
@@ -2979,7 +3012,7 @@ $(function(){
 [[image:icon:control_end_blue||title="Open menu"]]
 )))
 (% id="hierarchyCloseBlock" %)(((
-**Project :** $masterDoc.display('projectName', 'view') [[image:icon:control_start_blue||title="Hide menu" id="hierarchyClose"]] [[image:icon:arrow_refresh||title="Refresh the menu" id="hierarchyRefresh"]]
+**Project :** $masterDoc.display('projectName', 'view') (% title="Hide menu" id="hierarchyClose" class="hierarchy-icon" %)$services.icon.render('step-backward', 'Font Awesome') (% title="Refresh the menu" id="hierarchyRefresh" class="hierarchy-icon" %)$services.icon.render('refresh', 'Font Awesome')
 )))
 #set($nestedSpaces = false)
 #if($services.model.serialize($services.model.createDocumentReference("wiki", ["A", "B"], "page"), 'default') == 'wiki:A.B.page')
@@ -3036,6 +3069,9 @@ $(function(){
   #set($spaceParentList = [$currentDoc.space])
 #end
 (% id="hierarchyContent" %) (((
+#if($masterDoc.hasAccessLevel('edit'))
+  {{html clean=false}}&lt;form method="post" action="$masterDoc.getURL('view')" class="masterExportForm"&gt;&lt;input type="hidden" name="export" value="1" /&gt;&lt;input class="btn btn-default hierarchy-export-button" type="submit" value="Export the project (XAR)" title="Export the project"/&gt;&lt;/form&gt;{{/html}}
+#end
 #if($currentTree == 'physical')
   {{include reference="WebIDECode.PhysicalTree" /}}
 #else

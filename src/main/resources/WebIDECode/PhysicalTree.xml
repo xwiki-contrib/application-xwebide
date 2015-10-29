@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347276000</creationDate>
-  <date>1445952085000</date>
-  <contentUpdateDate>1445952085000</contentUpdateDate>
+  <date>1446048927000</date>
+  <contentUpdateDate>1446048927000</contentUpdateDate>
   <version>1.1</version>
   <title>PhysicalTree</title>
   <defaultTemplate/>
@@ -43,12 +43,19 @@
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>false</hidden>
   <content>{{velocity}}
-(% class="btn btn-primary" id="hierarchyChangeTree" %)(((Go to logical view)))
-#if($masterDoc.hasAccessLevel('edit'))
-  {{html clean=false wiki=true}}&lt;form method="post" action="$masterDoc.getURL('view')" class="masterExportForm"&gt;&lt;input type="hidden" name="export" value="1" /&gt;&lt;a&gt;image:icon:bullet_disk &lt;input class="hierarchy-export" type="submit" value="Export the project (XAR)" title="Export the project"&gt; &lt;/input&gt;&lt;/a&gt;&lt;/form&gt;{{/html}}
-  image:icon:add [[Add a space&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newFolder" data-toggle="modal" data-target="#hierarchyFolderModal"]]
-  image:icon:add [[Add existing page&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newExistingPage" data-toggle="modal" data-target="#hierarchyExistingPageModal"]]
-#end
+(% class="btn btn-success" id="hierarchyAddNewElement" %)((($services.icon.render('add', 'Font Awesome') Add new...)))
+(% class="btn btn-primary" id="hierarchyChangeTree" %)(((Logical view)))
+  (% class="hierarchy-hidden" id="hierarchyElementToAdd"%)(((
+    ==== Project ====
+    #if($masterDoc.hasAccessLevel('edit'))
+      [[Add/create a space&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newFolder" data-toggle="modal" data-target="#hierarchyFolderModal"]]
+      [[Add an existing page&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newExistingPage" data-toggle="modal" data-target="#hierarchyExistingPageModal"]]
+    #else
+      You need to have at least "edit" rights in the project page to add spaces to the project.
+    #end
+    ==== Spaces ====
+    [[Create a new page&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newPage" data-toggle="modal" data-target="#hierarchyPageModal"]]
+  )))
 (% class="hierarchy-list hierarchy-no-padding" id="hierarchyMainList" %)
 #foreach($space in $spacesList)
   #set($spaceInListInit = $spacesListInit.contains($space)) ##Spaces in the 'spaces' object property
@@ -78,10 +85,10 @@
   #end
   #if($visibleSpaces.contains($spaceEscapedBackslash) || $spaceParentList.contains($space))
     #set($contentDisplay = "")
-    #set($folderIcon = "bullet_toggle_minus")
+    #set($iconBulletToggle = "(% id='hierarchyFolderIcon_$spaceEscapedBackslash'%)$services.icon.render('caret-down', 'Font Awesome')") ##'"
   #else
     #set($contentDisplay = " hierarchy-hidden")
-    #set($folderIcon = "bullet_toggle_plus")
+    #set($iconBulletToggle = "(% id='hierarchyFolderIcon_$spaceEscapedBackslash'%)$services.icon.render('caret-right', 'Font Awesome')") ##'"
   #end
   #set($displayCurrentSpace = '')
   #if($spaceParentList.contains($space))
@@ -91,15 +98,17 @@
   #set($addRenameButton = "")
   #set($addRenameForm = "")
   #set($addSpanClass = "")
+  #set($addSpanClassEnd = "")
   #if($spaceInListInit &amp;&amp; $masterDoc.hasAccessLevel('edit'))
-    #set($addRemoveButton = "[[image:icon:cross||title='Remove folder $spaceEscaped' data-space='$spaceEscaped' class='hierarchy-remove-folder']]")
+    #set($addRemoveButton = "(% title='Remove folder $spaceEscaped' data-space='$spaceEscaped' class='hierarchy-icon hierarchy-remove-folder'%)$services.icon.render('cross', 'Font Awesome')") ##'"
   #end
   #if($spaceInListNested &amp;&amp; $masterDoc.hasAccessLevel('edit') &amp;&amp; $xwiki.hasAccessLevel('edit', "$spaceEscaped.$reservedDocumentName"))
-    #set($addRenameForm = "{{html clean=false}}&lt;input type='text' id='renameFolder_$spaceEscaped' style='display:none;'/&gt;{{/html}}")
-    #set($addRenameButton = "[[image:icon:pencil||title='Rename folder $subspaceNameEscaped' data-subspace='$subspaceNameEscaped' data-space='$spaceEscaped' class='hierarchy-rename-folder']]")
+    #set($addRenameForm = "{{html clean=false}}&lt;input type='text' id='renameFolder_$spaceEscaped' style='display:none;'/&gt;{{/html}}") ##'"
+    #set($addRenameButton = "(% title='Rename folder $subspaceNameEscaped' data-subspace='$subspaceNameEscaped' data-space='$spaceEscaped' class='hierarchy-icon hierarchy-rename-folder'%)$services.icon.render('pencil', 'Font Awesome')") ##'"
   #end
   #if(($spaceInListNested || $spaceInListInit) &amp;&amp; $masterDoc.hasAccessLevel('edit'))
-    #set($addSpanClass = '(% class="hierarchy-right" %)')
+    #set($addSpanClass = '(% class="hierarchy-right" %)(((')
+    #set($addSpanClassEnd = ')))')
   #end
   #if($spaceInListNested)
     #set($spacePageList = [])
@@ -130,11 +139,8 @@
     #end
     #set($ok = $sorttool.sort($spacePageList))
   #end
-  $addStars* (% class="hierarchy-toggleFolder $!{displayCurrentSpace}" data-space="$spaceEscapedBackslash" %)((([[image:icon:$folderIcon||id="hierarchyFolderIcon_$spaceEscapedBackslash"]][[image:icon:folder]] (% id="hierarchyDisplaySpace_$spaceEscaped" %)$subspaceName(%%) ($spacePageList.size()) )))$!addRenameForm $!addSpanClass$!addRenameButton$!addRemoveButton
+  $addStars* (% class="hierarchy-toggleFolder $!{displayCurrentSpace}" data-space="$spaceEscapedBackslash" %)((($iconBulletToggle (%%)$services.icon.render('folder', 'Font Awesome') (% id="hierarchyDisplaySpace_$spaceEscaped" class="hierarchySpaceName" %)$subspaceName(%%) ($spacePageList.size()) )))$!addRenameForm $!addSpanClass$!addRenameButton$!addRemoveButton$!addSpanClassEnd
   (% id="hierarchySpace_$spaceEscapedBackslash" class="hierarchy-list${contentDisplay}" %)
-  #if($spaceInListNested)
-    $addStars** image:icon:add [[Create a page&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newPage" data-space="$spaceEscaped" data-toggle="modal" data-target="#hierarchyPageModal"]]
-  #end
   #set($pageCount = 0)
   #foreach($pageData in $spacePageList)
     #set($page = $pageData[0])
@@ -151,8 +157,6 @@
     #set($pageInPagesList = $pagesList.contains($pageFullName))
     #set($pageFullNameEscaped = $escapetool.url($pageFullName).replace("+", "%20"))
     #set($pageRawTitleEscaped = $escapetool.url($pageDoc.title).replace("+", "%20"))
-    #set($pageClassHidden = " hierarchy-hidden")
-    #set($iconBulletToggle = "bullet_toggle_plus")
     #set($isPageActive = false)
     #set($addPageActiveViewClass = '')
     #set($addPageActiveWikiClass = '')
@@ -169,30 +173,31 @@
         #set($addPageActiveObjectClass = 'hierarchy-page-active')
       #end
     #end
+    #set($pageClassHidden = " hierarchy-hidden")
+    #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-right', 'Font Awesome')")
     #if($visiblePages.contains($pageFullNameEscaped) || $isPageActive)
       #set($pageClassHidden = "")
-      #set($iconBulletToggle = "bullet_toggle_minus")
+      #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-down', 'Font Awesome')")
     #end
-    #set($pageName = "(% id='hierarchyDisplayPage_$pageFullNameEscaped' class='$!addPageActive' %)$page)))")
-    #set($addSpanClass = '(% class="hierarchy-right" %)')
+    #set($pageName = "(% id='hierarchyDisplayPage_$pageFullNameEscaped' class='hierarchyPageName $!addPageActive' %)$page)))") ##'"
     #set($addRemoveButton = "")
     #set($addRenameButton = "")
     #set($addRenameForm = "")
     #if($pageInPagesList &amp;&amp; $masterDoc.hasAccessLevel('edit'))
-      #set($addRemoveButton = "[[image:icon:cross||title='Remove page $pageFullNameEscaped' data-pageid='$pageFullNameEscaped' class='hierarchy-remove-page']]")
+      #set($addRemoveButton = "(% title='Remove page $pageFullNameEscaped' data-pageid='$pageFullNameEscaped' class='hierarchy-icon hierarchy-remove-page'%)$services.icon.render('cross', 'Font Awesome')") ##'"
     #end
     #if($masterDoc.hasAccessLevel('edit') &amp;&amp; $currentDoc.hasAccessLevel('edit'))
-      #set($addRenameForm = "{{html clean=false}}&lt;input type='text' data-pageinlist='$pageInPagesList' id='renamePage_$pageFullNameEscaped' style='display:none;' value='$pageFullName'/&gt;{{/html}}")
-      #set($addRenameButton = "[[image:icon:pencil||title='Rename page $pageFullNameEscaped' data-pageid='$pageFullNameEscaped' class='hierarchy-rename-page']]")
+      #set($addRenameForm = "{{html clean=false}}&lt;input type='text' data-pageinlist='$pageInPagesList' id='renamePage_$pageFullNameEscaped' style='display:none;' value='$pageFullName'/&gt;{{/html}}") ##'"
+      #set($addRenameButton = "(% title='Rename page $pageFullNameEscaped' data-pageid='$pageFullNameEscaped' class='hierarchy-icon hierarchy-rename-page'%)$services.icon.render('pencil', 'Font Awesome')") ##'"
     #end
     #set($attachmentCount = $pageDoc.getAttachmentList().size())
     #if($pageDoc.hasAccessLevel('edit'))
       #set($pageCount = $pageCount + 1)
       #set($objectCount = $services.query.xwql("select count(obj.className) from BaseObject as obj, Document as doc where obj.name = doc.fullName and doc.fullName = :pageFullName and doc.translation=0").bindValue('pageFullName', $pageFullName).execute()[0])
       #set($classCount = $xwiki.getClass($pageFullName).properties.size())
-      $addStars** (% data-pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage $!addPageActive" %)((([[image:icon:$iconBulletToggle||class="hierarchyDisplayPageIcon"]][[image:icon:page||class="hierarchyContextActionIcon"]]$pageName $!addRenameForm $!addSpanClass$!addRenameButton$!addRemoveButton
+      $addStars** (% data-pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage $!addPageActive" %)((($iconBulletToggle (%%)$services.icon.render('file', 'Font Awesome') $pageName $!addRenameForm (% class="hierarchy-right" %)((($!addRenameButton$!addRemoveButton)))
       (% id='hierarchyPageDetails_$spaceEscapedBackslash.$pageEscapedBackslash' class='hierarchy-list${pageClassHidden}' %)
-      $addStars*** [[image:icon:page View&gt;&gt;path:$pageDoc.getURL('view', "language=default")||class="hierarchy-viewElement" data-page='$pageEscaped' data-space='$spaceEscaped']]
+      $addStars*** $services.icon.render('page_white', 'Font Awesome') [[View&gt;&gt;path:$pageDoc.getURL('view')||class="hierarchy-viewElement" data-page='$pageEscaped' data-space='$spaceEscaped']]
       #if($pageLocaleList.size() == 0)
         #set($ok = $pageLocaleList.add('default'))
       #end
@@ -204,21 +209,21 @@
         #if($velocityCount == 1)
           #set($pageLocale = 'default')
         #end
-        $addStars*** image:icon:page_edit [[Edit content$!pageLocaleDisplay&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="$pageLocale" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" class='editPage $!addPageActiveWikiClass']]
+        $addStars*** $services.icon.render('pencil', 'Font Awesome') [[Edit content$!pageLocaleDisplay&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="$pageLocale" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" class='editPage $!addPageActiveWikiClass']]
       #end
-      $addStars*** image:icon:application_edit [[Objects ($objectCount)&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" class='editObject $!addPageActiveObjectClass']]
-      $addStars*** [[image:icon:monitor_edit Class ($classCount)&gt;&gt;path:$pageDoc.getURL('edit', 'editor=class#!XWebIDE')||class="editClass" data-page='$pageEscaped' data-space='$spaceEscaped']]
-      $addStars*** [[image:icon:attach Attachments ($attachmentCount)&gt;&gt;path:$pageDoc.getURL('view')#Attachments]]
+      $addStars*** $services.icon.render('drive', 'Font Awesome') [[Objects ($objectCount)&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" class='editObject $!addPageActiveObjectClass']]
+      $addStars*** $services.icon.render('database', 'Font Awesome') [[Class ($classCount)&gt;&gt;path:$pageDoc.getURL('edit', 'editor=class#!XWebIDE')||class="editClass" data-page='$pageEscaped' data-space='$spaceEscaped']]
+      $addStars*** $services.icon.render('attach', 'Font Awesome') [[Attachments ($attachmentCount)&gt;&gt;path:$pageDoc.getURL('view')#Attachments]]
     #elseif($pageDoc.hasAccessLevel('view'))
       #set($pageCount = $pageCount + 1)
-      $addStars** (% data-pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((([[image:icon:$iconBulletToggle||class="hierarchyDisplayPageIcon"]][[image:icon:page||class="hierarchyContextActionIcon"]]$pageName $!addRemoveButton
+      $addStars** (% data-pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((($iconBulletToggle (%%)$services.icon.render('page', 'Font Awesome') $pageName $!addRemoveButton
       (% id='hierarchyPageDetails_$spaceEscapedBackslash.$pageEscapedBackslash' class='hierarchy-list${pageClassHidden}' %)
       #if($xcontext.action != "edit" &amp;&amp; "$!request.action" != "edit" &amp;&amp; $isPageActive)
-        $addStars*** image:icon:page {{html clean=false}}&lt;span class='hierarchyCurrentSpacePageAction'&gt;View&lt;/span&gt;{{/html}}
+        $addStars*** $services.icon.render('page_white', 'Font Awesome') (% class='hierarchyCurrentSpacePageAction'%)View
       #else
-        $addStars*** [[image:icon:page View&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')]]
+        $addStars*** $services.icon.render('page_white', 'Font Awesome') [[View&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')]]
       #end
-      $addStars*** [[image:icon:attach Attachments ($attachmentCount)&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')#Attachments]]
+      $addStars*** $services.icon.render('attach', 'Font Awesome') [[Attachments ($attachmentCount)&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')#Attachments]]
     #end
   #end
   #if($pageCount == 0 &amp;&amp; $spacePageList.size() != 0) ##Space not empty but user doesn't have the right to view any page

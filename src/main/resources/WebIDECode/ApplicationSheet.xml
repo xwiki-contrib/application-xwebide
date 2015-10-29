@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1446030774000</date>
-  <contentUpdateDate>1446024548000</contentUpdateDate>
+  <date>1446050954000</date>
+  <contentUpdateDate>1446050954000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -590,7 +590,7 @@ $(function(){
   -ms-user-select: none;
   user-select: none;
 }
-.editorTabButton span {
+.editorTabButtonCross {
   position: absolute;
   right: 0px;
   top: 0px;
@@ -837,12 +837,12 @@ To learn about other features of the XWiki WebIDE, see the [[Online Documentatio
   (% id="hierarchyBottomActionsBar" class="editorElement editorEditElement" %)
   (((
   {{html clean=false}}
-&lt;input type="button" id="hierarchySaveButtonIDE" class="btn btn-primary" value="Save &amp; Continue" title="Save the page and continue editing" /&gt;&lt;input type="button" id="hierarchySaveViewButtonIDE" class="btn btn-success" value="Save &amp; View" title="Save the page and view it" /&gt;&lt;input type="button" id="hierarchyDiscardViewButtonIDE" class="btn btn-default" value="Discard &amp; View" title="View the page without saving" /&gt;
+&lt;input type="button" id="hierarchySaveButtonIDE" class="btn btn-primary" value="Save &amp; Continue" title="Save the page and continue editing" /&gt;&lt;input type="button" id="hierarchySaveViewButtonIDE" class="btn btn-success" value="Save &amp; View" title="Save the page and view it" /&gt;&lt;input type="button" id="hierarchyDiscardViewButtonIDE" class="btn btn-default" value="Discard &amp; View" title="View the page without saving" /&gt;&lt;input type="button" id="hierarchyViewTabButtonIDE" class="btn btn-default" value="View in a new tab" title="View the page in a new tab" /&gt;
   {{/html}}
   )))
   )))
-  (% id="editorCrossIcon" class="editorIcon"%)(((#if($services.icon.render('cross'))$services.icon.render('cross')#else {{html wiki="true" clean="false"}}&lt;span&gt; image:icon:cross &lt;/span&gt;{{/html}} #end)))  (% id="editorWikiIcon" class="editorIcon"%)(((image:icon:page_edit )))
-  (% id="editorObjectIcon" class="editorIcon"%)(((image:icon:application_edit )))
+  (% id="editorCrossIcon" class="editorIcon"%)((((% class="editorTabButtonCross"%)$services.icon.render('cross')))) (% id="editorWikiIcon" class="editorIcon"%)((($services.icon.render('pencil'))))
+  (% id="editorObjectIcon" class="editorIcon"%)((($services.icon.render('drive'))))
   {{html clean="false"}}&lt;input type="hidden" id="syntaxHState" value="$syntaxHState" /&gt;{{/html}}
 #end
 {{/velocity}}</content>
