@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1446114284000</date>
-  <contentUpdateDate>1446114284000</contentUpdateDate>
+  <date>1446116420000</date>
+  <contentUpdateDate>1446114791000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -155,10 +155,6 @@ $(function(){
   var currentObject;
   var currentNumber;
   var currentLocale = 'default';
-  // currentPageEscaped and currentSpaceEscaped are used in ajax queries with XWiki pages
-  var currentPageEscaped;
-  var currentSpaceEscaped;
-  var currentObjectEscaped;
   setCurrentPage(getDocumentReferenceData('page'));
   setCurrentSpace(getDocumentReferenceData('space'));
   setDocumentReferenceData();
@@ -512,6 +508,7 @@ $(function(){
 
       if($(this).hasClass('newGlobalObject')) {
         objScope = 'global';
+        $('#hierarchyAddObject').attr('data-scope', 'global');
         $('#hierarchyObjectPageInput').val(file);
         $('#hierarchyObjectPageInputDefault').val(file);
         $('#hierarchyObjectPageBlock').hide();
@@ -519,6 +516,7 @@ $(function(){
       }
       else if($(this).hasClass('newLocalObject')) {
         // Add the object without modal
+        $('#hierarchyAddObject').attr('data-scope', 'local');
         var className = $('#hierarchyObjectClassName').val();
         addObject(null, className, true, folder, file, false, true);
         modal = false;
@@ -648,7 +646,7 @@ $(function(){
   /**
    * loadPage()
    * savePage(string space, string page, boolean changeSavedContent, boolean continueEditing)
-   * cancelAndViewIDE()
+   * cancelAndViewIDE(newTab)
    */
   function loadPage() {
     if(!loading &amp;&amp; currentEditor === 'wiki') {
@@ -720,11 +718,9 @@ $(function(){
     }
   }
 
-  function cancelAndViewIDE() {
-    if(currentEditor == 'wiki' &amp;&amp; savedContent != getCurrentContent()) {
-      if(confirm("Are you sure?")) {
-        window.location.href = wikiViewURL+currentSpace+'/'+currentPage;
-      }
+  function cancelAndViewIDE(newTab) {
+    if(newTab) {
+      window.open(wikiViewURL+currentSpace+'/'+currentPage);
     }
     else {
       window.location.href = wikiViewURL+currentSpace+'/'+currentPage;
@@ -1431,6 +1427,7 @@ $(function(){
     shortcut.remove("Alt+Shift+S");
     shortcut.remove("Alt+S");
     shortcut.remove("Alt+C");
+    shortcut.remove("Alt+Shift+C");
     if(addEvents) {
       // Add events on buttons and shortcuts
       $('#hierarchySaveButtonIDE').click(function(e){
@@ -1443,7 +1440,11 @@ $(function(){
       });
       $('#hierarchyDiscardViewButtonIDE').click(function(e){
         e.preventDefault();
-        cancelAndViewIDE();
+        cancelAndViewIDE(false);
+      });
+      $('#hierarchyViewTabButtonIDE').click(function(e){
+        e.preventDefault();
+        cancelAndViewIDE(true);
       });
       shortcut.add("Alt+Shift+S", function() {
         saveEventsFunction(true);
@@ -1452,7 +1453,10 @@ $(function(){
         saveEventsFunction(false);
       });
       shortcut.add("Alt+C", function() {
-        cancelAndViewIDE();
+        cancelAndViewIDE(false);
+      });
+      shortcut.add("Alt+Shift+C", function() {
+        cancelAndViewIDE(true);
       });
     }
   }
@@ -1546,15 +1550,12 @@ $(function(){
    */
   function setCurrentPage(file) {
     currentPage = file;
-    currentPageEscaped = getEscapedValue(currentPage);
   }
   function setCurrentSpace(folder) {
     currentSpace = folder;
-    currentSpaceEscaped = getSpacesEscaped(currentSpace);
   }
   function setCurrentObject(objName) {
     currentObject = objName;
-    currentObjectEscaped = (currentObject === null) ? null : getEscapedValue(currentObject);
   }
   function setCurrentNumber(objNumber) {
     currentNumber = objNumber;
@@ -1566,17 +1567,17 @@ $(function(){
    * @input Boolean rest: return an REST-formatted string representing the folder (spaces/A/spaces/B/spaces/C/)
    */
   function getCurrentPage(escaped) {
-    if(escaped) {return currentPageEscaped;}
+    if(escaped) {return getEscapedValue(currentPage);}
     else {return currentPage;}
   }
   function getCurrentSpace(escaped, url, rest) {
-    if(escaped) {return currentSpaceEscaped;}
+    if(escaped) {return getSpacesEscaped(currentSpace);}
     else if(url) {return getURLSpacesString(currentSpace)}
     else if(rest) {return getRestSpacesString(currentSpace);}
     else {return currentSpace;}
   }
   function getCurrentObject(escaped) {
-    if(escaped) {return currentObjectEscaped;}
+    if(escaped) {return (currentObject === null) ? null : getEscapedValue(currentObject);}
     else {return currentObject;}
   }
   function getEscapedValue(file) {
@@ -1726,7 +1727,7 @@ $(function(){
    */
   function getRawTitle(folder, file, locale) {
     var editPageTitle = $('.editPage[data-space="'+folder+'"][data-page="'+file+'"][data-locale="'+locale+'"]').attr('data-rawtitle');
-    return (editPageTitle || editPageTitle === '') ? editPageTitle : $('.editObject[data-space="'+folder+'"][data-page="'+file+'"]').attr('data-rawtitle');
+    return (editPageTitle || editPageTitle === '') ? editPageTitle : $('.editObject[data-space="'+folder+'"][data-page="'+file+'"]').attr('data-rawtitle') || '';
   }
   /**
    * Write the title in the corresponding fields
@@ -1768,8 +1769,17 @@ $(function(){
     var jQueryId = '#'+id;
     $('.editorTab').hide();
     tabNumber++;
-    var tabName = file+' ('+decodeURIComponent(folder)+')';
-    if(tabName.length &gt; 20) tabName = tabName.substr(0,16)+'...';
+    var tabName;
+    if(objectSelected) {
+      tabName = '('+getObjectShortName(objectSelected)+') '+file+' ('+decodeURIComponent(folder)+')';
+    }
+    else if(locale &amp;&amp; locale !== 'default') {
+      tabName = '('+locale+') '+file+' ('+decodeURIComponent(folder)+')';
+    }
+    else {
+      tabName = file+' ('+decodeURIComponent(folder)+')';
+    }
+    if(tabName.length &gt; 30) tabName = tabName.substr(0,27)+'...';
     var rawtitle = getRawTitle(folder, file, locale);
     var prettyModeName;
     var iconModeId;
@@ -1785,13 +1795,13 @@ $(function(){
     }
     if(mode === 'wiki') {
       prettyModeName = 'Wiki';
-      iconModeId = '#editorWikiIcon p';
+      iconModeId = '#editorWikiIcon';
       tabModeClass = 'editorWikiTab';
       addTextareaWiki = '&lt;div class="editorWikiTabContent"&gt;&lt;textarea id="content_'+id+'"&gt;&lt;/textarea&gt;&lt;/div&gt;';
     }
     else if(mode === 'object') {
       prettyModeName = 'Object';
-      iconModeId = '#editorObjectIcon p';
+      iconModeId = '#editorObjectIcon';
       tabModeClass = 'editorObjectTab';
       if(objectSelected) {
         addSelectedObject = 'data-object="'+encodeURI(objectSelected)+'" data-objectnumber="'+objectNumber+'"';
@@ -1814,11 +1824,30 @@ $(function(){
         }
         return false;
       });
-      $($('#editorCrossIcon').html()).appendTo(tabButton).click(function() {
+      $($('#editorCrossIcon p').html()).appendTo(tabButton).click(function() {
         closeTab($(this).parent(), '('+prettyModeName+') '+tabName);
         return false;
       });
       setActiveTab(mode, file, folder, objectSelected, objectNumber, locale);
+    }
+  }
+
+  /**
+   * Get a short name for objects which can be displayed alone (JS, CSS, Macro) to be able to better identified a tab
+   * @input String className: The class of the object
+   */
+  function getObjectShortName(className) {
+    if(className === 'XWiki.JavaScriptExtension') {
+      return 'JSX';
+    }
+    else if(className === 'XWiki.StyleSheetExtension') {
+      return 'SSX';
+    }
+    else if(className === 'XWiki.WikiMacroClass') {
+      return 'Macro';
+    }
+    else {
+      return className || '';
     }
   }
 
@@ -2091,6 +2120,8 @@ $(function(){
         if(type === 'language') {
           itemvalue = $('#hierarchyAddPageLocale').val();
         }
+        // Fix name with best practices
+        file = fixName(file, type);
         // Create the page :
         addPage(folder, file, type, itemvalue);
       }
@@ -2116,8 +2147,22 @@ $(function(){
       var file = !$('#hierarchyObjectPage').is(':empty') ? $('#hierarchyObjectPage').html() : ($('#hierarchyObjectPageInput').val() !== '' ?  $('#hierarchyObjectPageInput').val() : $('#hierarchyObjectPageInputDefault').val());
       var className = $('#hierarchyObjectClassName').val();
       if(folder.trim() &amp;&amp; file.trim() &amp;&amp; className.trim()) {
-        var global = ($('#hierarchyObjectPageInputDefault').val() !== '');
-        addObject(null, className, true, folder, file, global, true);
+        var global = ($('#hierarchyAddObject').attr('data-scope') === 'global');
+        var properties = null;
+        if(global &amp;&amp; className === 'XWiki.JavaScriptExtension') {
+          properties = encodeURIComponent('{"name" : "'+file.replace(/"/g, '\"')+'"}');
+          file = 'JS';
+        }
+        else if(global &amp;&amp; className === 'XWiki.StyleSheetExtension') {
+          properties = encodeURIComponent('{"name" : "'+file.replace(/"/g, '\"')+'"}');
+          file = 'CSS';
+        }
+        else if(global &amp;&amp; className === 'XWiki.WikiMacroClass') {
+          var macroName = file.charAt(0).toLowerCase() + file.slice(1);
+          properties = encodeURIComponent('{"id" : "'+macroName.replace(/"/g, '\"')+'", "name" : "'+file.replace(/"/g, '\"')+'"}');
+          file = fixName(file, 'macros');
+        }
+        addObject(null, className, true, folder, file, global, true, properties);
       }
     });
     $('#editorDeleteObjectConfirmed').click(function(e){
@@ -2299,9 +2344,9 @@ $(function(){
    * 2/ Change the html content and call "hierarchyInitialization()" to register again the "click" events in the menu
   */
   function reloadHierarchy() {
-    var iconSrc = $('#hierarchyRefresh').attr('src');
     $('#hierarchyRefresh').off('click', reloadHierarchy);
-    $('#hierarchyRefresh').attr('src', '/'+XWiki.webapppath+'resources/icons/xwiki/spinner.gif');
+    $('#hierarchyRefresh span').hide();
+    var spinner = $('&lt;img title="Reloading the menu..."/&gt;').attr('src', '/'+XWiki.webapppath+'resources/icons/xwiki/spinner.gif').appendTo('#hierarchyRefresh');
     $.ajax({
       url: wikiGetURL+"WebIDECode/ApplicationHierarchy?xpage=plain&amp;language="+$('#hierarchyMainLanguage').val(),
       type: "GET",
@@ -2318,7 +2363,8 @@ $(function(){
     }).complete(function() {
       $('#hierarchyRefresh').on('click', reloadHierarchy);
       $('#hierarchyChangeTree').on('click', changeTreeView);
-      $('#hierarchyRefresh').attr('src', iconSrc);
+      spinner.remove();
+      $('#hierarchyRefresh span').show();
     });
   }
 
@@ -2337,6 +2383,22 @@ $(function(){
     reloadHierarchy();
   }
 
+  /**
+   * Fix the name of page based on best practices
+   */
+  function fixName(page, type) {
+    var file = page;
+    if(type === 'class' &amp;&amp; file.substr(file.length - 5) !== 'Class') {
+      file += 'Class';
+    }
+    else if(type === 'macros' &amp;&amp; file.substr(file.length - 6) !== 'Macros') {
+      file += 'Macros';
+    }
+    else if(type === 'translations' &amp;&amp; file.substr(file.length - 12) !== 'Translations') {
+      file += 'Translations';
+    }
+    return file;
+  }
   /**
    * Rename a page or a folder in the project :
    * 1/ Use the ApplicationRename page to rename the content
@@ -2494,9 +2556,6 @@ $(function(){
   function addPage(folder, file, type, itemValue) {
     var restSpaces = getRestSpacesString(folder);
     setHierarchyState('Adding page...');
-    if(type === 'class' &amp;&amp; file.substr(file.length - 5) !== 'Class') {
-      file += 'Class';
-    }
     var addRestLanguage = '';
     if(type === 'language') {
       addRestLanguage = '/translations/'+itemValue;
@@ -2517,7 +2576,7 @@ $(function(){
         type: "PUT",
         contentType: "application/x-www-form-urlencoded",
         accept: "application/xml",
-        data: "title="+file+"&amp;content=&amp;parent="+currentSpaceEscaped+"."+currentPageEscaped,
+        data: "title="+file+"&amp;content=&amp;parent="+getCurrentSpace(true)+"."+getCurrentPage(true),
       }).success(function(){
         $('#hierarchyNewPageName').val('');
         if(bootstrap()) {

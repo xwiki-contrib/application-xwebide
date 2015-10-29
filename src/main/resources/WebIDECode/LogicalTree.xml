@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347285000</creationDate>
-  <date>1446114511000</date>
-  <contentUpdateDate>1446114511000</contentUpdateDate>
+  <date>1446114816000</date>
+  <contentUpdateDate>1446114816000</contentUpdateDate>
   <version>1.1</version>
   <title>LogicalTree</title>
   <defaultTemplate/>
@@ -97,10 +97,10 @@
     [[Add an existing page&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newExistingPage" data-toggle="modal" data-target="#hierarchyExistingPageModal"]]
     [[Create a new page&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newPage" data-toggle="modal" data-target="#hierarchyPageModal"]]
     ==== Global ====
-    [[Add global JS&amp;gt;&amp;gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newJSObject newGlobalObject" data-space='$escapetool.url($codeSpace).replace('+', '%20')' data-page='$xwiki.getUniquePageName($codeSpace, 'JS-Global')' data-toggle="modal" data-target="#hierarchyObjectModal"]]
-    [[Add global CSS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newCSSObject newGlobalObject" data-space='$escapetool.url($codeSpace).replace('+', '%20')' data-page='$xwiki.getUniquePageName($codeSpace, 'CSS-Global')' data-toggle="modal" data-target="#hierarchyObjectModal"]]
-    [[Add global Macro&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newMacroObject newGlobalObject" data-space='$escapetool.url($codeSpace).replace('+', '%20')' data-page='$xwiki.getUniquePageName($codeSpace, 'Macro-Global')' data-toggle="modal" data-target="#hierarchyObjectModal"]]
-    [[Add global translation&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newTranslationObject newGlobalObject" data-space='$escapetool.url($codeSpace).replace('+', '%20')' data-page='$xwiki.getUniquePageName($codeSpace, 'Translation-Global')' data-toggle="modal" data-target="#hierarchyObjectModal"]]
+    [[Add JavaScript&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newJSObject newGlobalObject" data-space='$escapetool.url($codeSpace).replace('+', '%20')' data-page='' data-toggle="modal" data-target="#hierarchyObjectModal"]]
+    [[Add CSS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newCSSObject newGlobalObject" data-space='$escapetool.url($codeSpace).replace('+', '%20')' data-page='' data-toggle="modal" data-target="#hierarchyObjectModal"]]
+    [[Add Macros&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newMacroObject newGlobalObject" data-space='$escapetool.url($codeSpace).replace('+', '%20')' data-page='' data-toggle="modal" data-target="#hierarchyObjectModal"]]
+    [[Add Translation&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newTranslationObject newGlobalObject" data-space='$escapetool.url($codeSpace).replace('+', '%20')' data-page='Translations' data-toggle="modal" data-target="#hierarchyObjectModal"]]
   )))
 ## Display all the classes in the project
 (% class="hierarchy-list hierarchy-no-padding" id="hierarchyMainList" %)
@@ -206,9 +206,8 @@
   #set($ok = $allTranslationsList.addAll($translationsList))
   #set($isInClassesList = $pagesInClassesList.contains($pageFullName)) ## Classes should not be displayed in the 'pages' tree
   #set($isGlobal = false)
-  #if($space == $codeSpace &amp;&amp; $page.indexOf('-') != -1)
-    #set($prefix = $page.substring(0, $page.indexOf('-')))
-    #if($prefix == 'JS' || $prefix == 'CSS' || $prefix == 'Macro' || $prefix == 'Translation')
+  #if($space == $codeSpace)
+    #if(($page == 'JS' &amp;&amp; $pageDoc.getObjects('XWiki.JavaScriptExtension', 'use', 'always').size()&gt;0) || ($page == 'CSS' &amp;&amp; $pageDoc.getObjects('XWiki.StyleSheetExtension', 'use', 'always').size()&gt;0) || $macrosList.size()&gt;0 || $translationsList.size()&gt;0)
       #set($isGlobal = true)
     #end
   #end
@@ -441,6 +440,7 @@
   #set($ok = $pageLocaleList.add(0, $objDoc.defaultLanguage))
   ** (% data-pageid="Tr-$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((($iconBulletToggle  (%%)$services.icon.render('page', 'Font Awesome') (%%)$docName )))
   (% id='hierarchyPageDetails_Tr-$spaceEscapedBackslash.$pageEscapedBackslash' class='hierarchy-list${pageClassHidden}' %)
+   *** image:icon:add [[Add a language&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newPage newLanguage" data-space="$spaceEscaped" data-page="$pageEscaped" data-toggle="modal" data-target="#hierarchyPageModal"]]
   #foreach($pageLocale in $pageLocaleList)
     #if($pageLocale == "")
       #set($pageLocale = "default")
