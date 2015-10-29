@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1446116420000</date>
-  <contentUpdateDate>1446114791000</contentUpdateDate>
+  <date>1446125136000</date>
+  <contentUpdateDate>1446125136000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -287,7 +287,7 @@ $(function(){
     $('#hierarchyOpenBlock').show();
     $('#hierarchyCloseBlock').hide();
     $("#hierarchyBlock").css({
-      "min-width": "0px",
+      "min-width": "42px",
       "width": "42px"
     });
   });
@@ -804,11 +804,13 @@ $(function(){
     }
     var dataNode = $('&lt;form method="post" action="/'+XWiki.webapppath+''+XWiki.servletpath+'save/'+urlSpaces+'/'+file+'" id="tab'+currentTabNumber+'_objectIDEform" class="objectIDEform"&gt;&lt;input type="hidden" name="form_token" value="'+form_token+'" /&gt;&lt;/form&gt;').appendTo($(jQueryTabId));
     if(getCurrentObject(false)) {
-      $(dataNode).append('&lt;input type="button" class="btn btn-default editorDisplayAdvancedFields" value="Advanced fields" /&gt;');
-      menuNode = $('&lt;div class="editorOtherFieldsBlock"&gt;&lt;/div&gt;').appendTo(dataNode);
+      //$(dataNode).append('&lt;input type="button" class="btn btn-default editorDisplayAdvancedFields" value="Advanced fields" /&gt;');
+      var menuNodeBlock = $('&lt;div class="editorOtherFieldsBlock"&gt;&lt;/div&gt;').appendTo(dataNode);
+      menuNode = $('&lt;div class="editorOtherFieldsBlockContent"&gt;&lt;/div&gt;').appendTo(menuNodeBlock);
       if(getCurrentObject(false) === 'XWiki.WikiMacroClass') {
-        $('&lt;input type="hidden" id="tab'+currentTabNumber+'_addClassList" value="XWiki.WikiMacroParameterClass" /&gt;&lt;button class="btn btn-success" id="tab'+currentTabNumber+'_editorObjectAddButton"&gt;Add a parameter&lt;/button&gt;&lt;br&gt;').appendTo(menuNode);
+        $('&lt;input type="hidden" id="tab'+currentTabNumber+'_addClassList" value="XWiki.WikiMacroParameterClass" /&gt;&lt;button class="btn btn-success" id="tab'+currentTabNumber+'_editorObjectAddButton"&gt;Add a parameter&lt;/button&gt;&lt;button class="btn btn-default" id="tab'+currentTabNumber+'_editorExpandAllButton"&gt;Expand all&lt;/button&gt;&lt;button class="btn btn-default" id="tab'+currentTabNumber+'_editorCollapseAllButton"&gt;Collapse all&lt;/button&gt;&lt;br&gt;').appendTo(menuNode);
       }
+      $('&lt;span class="editorDisplayAdvancedFields"&gt;'+$('#hierarchyOpenBlock').html()+'&lt;/span&gt; &lt;strong class="editorOtherFieldsBlockTitle"&gt;Advanced fields&lt;/strong&gt;').prependTo(menuNodeBlock);
       loadObjectsDetails(jQueryTabId, objectsList, 0, objectsListSize, '', menuNode, dataNode, null);
     }
     else {
@@ -1060,17 +1062,18 @@ $(function(){
       if(getCurrentObject(false)){
         $(jQueryTabId+' .editorOtherFieldsBlock').css({'backgroundColor' : $('#hierarchyBlock').css('backgroundColor')});
         $(jQueryTabId+' .editorDisplayAdvancedFields').click(function() {
-          $(jQueryTabId+' .editorOtherFieldsBlock').toggle();
-          if($(jQueryTabId+' .editorOtherFieldsBlock').is(':visible')) {
-            $(jQueryTabId+' .editorDisplayedObject').css({
-              'width' : ($(jQueryTabId+' .objectIDEform').width()-410)+'px',
-              'max-width' : ($(jQueryTabId+' .objectIDEform').width()-410)+'px'
+          $(jQueryTabId+' .editorOtherFieldsBlockContent').toggle();
+          $(jQueryTabId+' .editorOtherFieldsBlockTitle').toggle();
+          if($(jQueryTabId+' .editorOtherFieldsBlockContent').is(':visible')) {
+            $('.editorDisplayAdvancedFields').html($('#hierarchyOpenBlock').html());
+            $(jQueryTabId+' .editorOtherFieldsBlock').css({
+              'width' : '400px',
             });
           }
           else {
-            $(jQueryTabId+' .editorDisplayedObject').css({
-              'width' : '100%',
-              'max-width' : '100%'
+            $('.editorDisplayAdvancedFields').html($('#hierarchyClose').html());
+            $(jQueryTabId+' .editorOtherFieldsBlock').css({
+              'width' : 'auto',
             });
           }
         });
@@ -2104,7 +2107,7 @@ $(function(){
       e.preventDefault();
       var folder = $('#hierarchyPageFolder').val();
       var file = encodeURIComponent($('#hierarchyNewPageName').val());
-      if(folder.trim() &amp;&amp; file.trim()) {
+      if(folder &amp;&amp; file &amp;&amp; folder.trim() &amp;&amp; file.trim()) {
         // Check if it is a page, a class, a sheet or a template :
         var type = 'page';
         if($('#hierarchyAddPage').attr('data-type')) {
@@ -2125,12 +2128,24 @@ $(function(){
         // Create the page :
         addPage(folder, file, type, itemvalue);
       }
+      else {
+        $('#hierarchyPageModalError').html('ERROR : You have to fill all the fields!').show().delay(4000).queue(function(n) {
+          $(this).hide().html('');
+          n();
+        });
+      }
     });
     $('#hierarchyAddFolder').click(function(e){
       $('body').removeClass('modal-open');
       e.preventDefault();
       if($('#hierarchyNewFolderName').val().trim()) {
         addFolder($('#hierarchyNewFolderName').val());
+      }
+      else {
+        $('#hierarchyFolderModalError').html('ERROR : You have to fill the name of the folder!').show().delay(4000).queue(function(n) {
+          $(this).hide().html('');
+          n();
+        });
       }
     });
     $('#hierarchyAddExistingPage').click(function(e){
@@ -2139,6 +2154,12 @@ $(function(){
       if($('#hierarchyExistingPageName').val().trim()) {
         addExistingPage($('#hierarchyExistingPageName').val());
       }
+      else {
+        $('#hierarchyExistingPageModalError').html('ERROR : You have to fill the name of the page!').show().delay(4000).queue(function(n) {
+          $(this).hide().html('');
+          n();
+        });
+      }
     });
     $('#hierarchyAddObject').click(function(e){
       $('body').removeClass('modal-open');
@@ -2146,7 +2167,7 @@ $(function(){
       var folder = $('#hierarchyObjectSpace').html();
       var file = !$('#hierarchyObjectPage').is(':empty') ? $('#hierarchyObjectPage').html() : ($('#hierarchyObjectPageInput').val() !== '' ?  $('#hierarchyObjectPageInput').val() : $('#hierarchyObjectPageInputDefault').val());
       var className = $('#hierarchyObjectClassName').val();
-      if(folder.trim() &amp;&amp; file.trim() &amp;&amp; className.trim()) {
+      if(folder &amp;&amp; file &amp;&amp; className &amp;&amp; folder.trim() &amp;&amp; file.trim() &amp;&amp; className.trim()) {
         var global = ($('#hierarchyAddObject').attr('data-scope') === 'global');
         var properties = null;
         if(global &amp;&amp; className === 'XWiki.JavaScriptExtension') {
@@ -2163,6 +2184,12 @@ $(function(){
           file = fixName(file, 'macros');
         }
         addObject(null, className, true, folder, file, global, true, properties);
+      }
+      else {
+        $('#hierarchyObjectModalError').html('ERROR : You have to fill all the fields!').show().delay(4000).queue(function(n) {
+          $(this).hide().html('');
+          n();
+        });
       }
     });
     $('#editorDeleteObjectConfirmed').click(function(e){
@@ -3018,7 +3045,7 @@ $(function(){
 #hierarchyBottomActionsBar input {
   margin-left: 10px;
 }
-#hierarchyExistingPageModalError, #hierarchyPageModalError {
+#hierarchyExistingPageModalError, #hierarchyPageModalError, #hierarchyFolderModalError, #hierarchyObjectModalError {
   font-weight: bold;
   color: #8A0808;
 }</code>
@@ -3067,8 +3094,8 @@ $(function(){
   #set($visibleCategoryString = $!{request.visibleCategory})
 #end
 #set($visibleCategory = $!visibleCategoryString.split("[,]"))
-(% class="hierarchy-hidden" id="hierarchyOpenBlock" %)(((
-[[image:icon:control_end_blue||title="Open menu"]]
+(% class="hierarchy-hidden" id="hierarchyOpenBlock" title="Open menu"%)(((
+$services.icon.render('step-forward', 'Font Awesome')
 )))
 (% id="hierarchyCloseBlock" %)(((
 **Project :** $masterDoc.display('projectName', 'view') (% title="Hide menu" id="hierarchyClose" class="hierarchy-icon" %)$services.icon.render('step-backward', 'Font Awesome') (% title="Refresh the menu" id="hierarchyRefresh" class="hierarchy-icon" %)$services.icon.render('refresh', 'Font Awesome')
@@ -3157,6 +3184,7 @@ $(function(){
         &lt;div class="modal-body"&gt;
           Folder : &lt;input type="text" id="hierarchyNewFolderName" /&gt;
           &lt;button id="hierarchyAddFolder" class="btn btn-success"&gt;Add the folder&lt;/button&gt;&lt;br&gt;
+          &lt;p id="hierarchyFolderModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
         &lt;/div&gt;
       &lt;/div&gt;
     &lt;/div&gt;

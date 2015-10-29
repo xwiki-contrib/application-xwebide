@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1446050954000</date>
+  <date>1446124196000</date>
   <contentUpdateDate>1446050954000</contentUpdateDate>
   <version>1.1</version>
   <title/>
@@ -669,10 +669,30 @@ $(function(){
 .editorOtherFieldsBlock {
   float: right;
   width: 400px;
-  display: none;
+  margin-left: 10px;
   border: 1px solid #DDDDDD;
   padding: 10px;
   box-sizing: border-box;
+}
+.editorOtherFieldsBlockContent {
+  margin-top: 5px;
+}
+.editorOtherFieldsBlockTitle {
+  display: table;
+  margin: auto;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.editorDisplayAdvancedFields { /*button*/
+  cursor: pointer;
+  padding: 10px;
+  position: relative;
+  float: left;
+  top: 0px;
+  left: 0px;
+}
+.editorDisplayedObject {
+  overflow: hidden;
 }
 #hierarchyCloseTabModalInfo {
   font-style: italic;
