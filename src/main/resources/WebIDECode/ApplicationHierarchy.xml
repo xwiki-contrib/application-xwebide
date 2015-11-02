@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1446470941000</date>
+  <date>1446472475000</date>
   <contentUpdateDate>1446468924000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -905,7 +905,8 @@ $(function(){
         fixIds(dataContentTmp, tabAdd);
         dataContent = dataContentTmp.html();
         if(getCurrentObject(false)) {
-          if($(dataContent).find('.editorCodeField').length &gt; 0) {
+          // Display the code field in the main block, and all other fields in the right-hand menu. If there is no code field, the object should be displayed in the main block. If the object is a macro with parameters (objectsListSize &gt; 1), it's parameters should be displayed in the right-hand menu :
+          if($(dataContent).find('.editorCodeField').length &gt; 0 || objectsListSize &gt; 1) {
             $(menuNode).append(dataContent);
             var currentMainBlock = $('&lt;div class="editorDisplayedObject"&gt;&lt;/div&gt;').appendTo(currentClassNode);
             $(menuNode).find('.editorCodeField').detach().appendTo(currentMainBlock);
@@ -1008,8 +1009,11 @@ $(function(){
             dataContent = dataContentTmp.html();
             var anchor = $('&lt;div /&gt;').append(dataContent).find('h4').attr('id');
             var newObjectId = '#tab'+currentTabNumber+'_editorObject-'+className+'-'+number;
-            if(getCurrentObject(false)) { // Single object editor : add in the "other fields" block
+            if(getCurrentObject(false)) { // Single object editor : add in the "other fields" block (e.g. : macro parameters)
               $(jQueryTabId+' .editorOtherFieldsBlock').append(dataContent);
+              // Collapse the existing parameters/fields and expand only the new object
+              $(jQueryTabId+' .editorObjectDetails').hide();
+              $(jQueryTabId+' .editorObjectDetails:last').show();
             }
             else { // Classic object editor
               // Add the object in the right class if an object of that class is already in that page
