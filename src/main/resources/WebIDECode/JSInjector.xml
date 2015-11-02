@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434954547000</creationDate>
-  <date>1446459574000</date>
+  <date>1446474160000</date>
   <contentUpdateDate>1443170830000</contentUpdateDate>
   <version>1.1</version>
   <title/>
@@ -199,10 +199,10 @@ $(function(){
 
     function loadMasterPage(checkType) {
       if(checkType == 1 &amp;&amp; data.size == "1") {
-        window.location.href = wikiViewURL+encodeURI(getURLSpacesString(unescape(data.projectData[0].masterSpace)))+'/'+encodeURIComponent(unescape(data.projectData[0].masterName))+'#!XWebIDE&amp;!!wiki&amp;!!'+currentPage+'&amp;!!'+currentSpace;
+        window.location.href = wikiViewURL+encodeURI(getURLSpacesString(unescape(data.projectData[0].masterSpace)))+'/'+encodeURIComponent(unescape(data.projectData[0].masterName))+'#!XWebIDE&amp;!!wiki&amp;!!logical&amp;!!'+currentPage+'&amp;!!'+currentSpace+'&amp;!!default';
       }
       else if(checkType == 2 &amp;&amp; data.sheetSize == "1") {
-        window.location.href = wikiViewURL+encodeURI(getURLSpacesString(unescape(data.sheet[0].sheetProjectData[0].sheetMasterSpace)))+'/'+encodeURIComponent(unescape(data.sheet[0].sheetProjectData[0].sheetMasterName))+'#!XWebIDE&amp;!!wiki&amp;!!'+encodeURIComponent(unescape(data.sheet[0].sheetDocumentName))+'&amp;!!'+encodeURIComponent(unescape(data.sheet[0].sheetDocumentSpace))+'';
+        window.location.href = wikiViewURL+encodeURI(getURLSpacesString(unescape(data.sheet[0].sheetProjectData[0].sheetMasterSpace)))+'/'+encodeURIComponent(unescape(data.sheet[0].sheetProjectData[0].sheetMasterName))+'#!XWebIDE&amp;!!wiki&amp;!!logical&amp;!!'+encodeURIComponent(unescape(data.sheet[0].sheetDocumentName))+'&amp;!!'+encodeURIComponent(unescape(data.sheet[0].sheetDocumentSpace))+'&amp;!!default';
       }
       else if(parseInt(data.size) &gt; 1 || parseInt(data.sheetSize) &gt; 1){
         var message = 'That page is in several projects. Which one do you want to edit?';
