@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347285000</creationDate>
-  <date>1446459179000</date>
-  <contentUpdateDate>1446459179000</contentUpdateDate>
+  <date>1446459922000</date>
+  <contentUpdateDate>1446459922000</contentUpdateDate>
   <version>1.1</version>
   <title>LogicalTree</title>
   <defaultTemplate/>
@@ -401,6 +401,19 @@
       #set($docName = $macroObject.getProperty('name').value)
     #end
     ** $services.icon.render('drive', 'Font Awesome') [[$docName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.WikiMacroClass" data-objectnumber="$macroObject.number" data-rawtitle="$titleEscaped" class='editObject']]
+    (% class='hierarchy-list' %)
+      #foreach($jsxObject in $objDoc.getObjects('XWiki.JavaScriptExtension'))
+        *** $services.icon.render('pencil', 'Font Awesome') [[Edit macro JS-$jsxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.JavaScriptExtension" data-objectnumber="$jsxObject.number" data-rawtitle="$titleSheetEscaped" class='editObject']]
+      #end
+      #if($objDoc.getObjects('XWiki.JavaScriptExtension').size() == 0)
+        *** $services.icon.render('add', 'Font Awesome') [[Add macro JS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newJSObject newLocalObject" data-space='$spaceEscaped' data-page='$pageEscaped']]
+      #end
+      #foreach($ssxObject in $objDoc.getObjects('XWiki.StyleSheetExtension'))
+        *** $services.icon.render('pencil', 'Font Awesome') [[Edit macro CSS-$ssxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.StyleSheetExtension" data-objectnumber="$ssxObject.number" data-rawtitle="$titleSheetEscaped" class='editObject']]
+      #end
+      #if($objDoc.getObjects('XWiki.StyleSheetExtension').size() == 0)
+        *** $services.icon.render('add', 'Font Awesome') [[Add macro CSS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newCSSObject newLocalObject" data-space='$spaceEscaped' data-page='$pageEscaped']]
+      #end
   #end
 #end
 ## Translations
