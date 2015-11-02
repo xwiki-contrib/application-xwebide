@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347276000</creationDate>
-  <date>1446048927000</date>
-  <contentUpdateDate>1446048927000</contentUpdateDate>
+  <date>1446479125000</date>
+  <contentUpdateDate>1446479125000</contentUpdateDate>
   <version>1.1</version>
   <title>PhysicalTree</title>
   <defaultTemplate/>
@@ -157,6 +157,7 @@
     #set($pageInPagesList = $pagesList.contains($pageFullName))
     #set($pageFullNameEscaped = $escapetool.url($pageFullName).replace("+", "%20"))
     #set($pageRawTitleEscaped = $escapetool.url($pageDoc.title).replace("+", "%20"))
+    #set($pageParentEscaped = $escapetool.url($pageDoc.parent).replace("+", "%20"))
     #set($isPageActive = false)
     #set($addPageActiveViewClass = '')
     #set($addPageActiveWikiClass = '')
@@ -209,9 +210,9 @@
         #if($velocityCount == 1)
           #set($pageLocale = 'default')
         #end
-        $addStars*** $services.icon.render('pencil', 'Font Awesome') [[Edit content$!pageLocaleDisplay&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="$pageLocale" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" class='editPage $!addPageActiveWikiClass']]
+        $addStars*** $services.icon.render('pencil', 'Font Awesome') [[Edit content$!pageLocaleDisplay&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="$pageLocale" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" data-parent="$pageParentEscaped" class='editPage $!addPageActiveWikiClass']]
       #end
-      $addStars*** $services.icon.render('drive', 'Font Awesome') [[Objects ($objectCount)&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" class='editObject $!addPageActiveObjectClass']]
+      $addStars*** $services.icon.render('drive', 'Font Awesome') [[Objects ($objectCount)&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' class='editObject $!addPageActiveObjectClass']]
       $addStars*** $services.icon.render('database', 'Font Awesome') [[Class ($classCount)&gt;&gt;path:$pageDoc.getURL('edit', 'editor=class#!XWebIDE')||class="editClass" data-page='$pageEscaped' data-space='$spaceEscaped']]
       $addStars*** $services.icon.render('attach', 'Font Awesome') [[Attachments ($attachmentCount)&gt;&gt;path:$pageDoc.getURL('view')#Attachments]]
     #elseif($pageDoc.hasAccessLevel('view'))

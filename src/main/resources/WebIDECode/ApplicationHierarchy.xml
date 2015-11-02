@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1446472475000</date>
+  <date>1446480382000</date>
   <contentUpdateDate>1446468924000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -181,8 +181,6 @@ $(function(){
   }
   var NESTED_SPACES = checkNestedSpaces();
   var TAB_MAIN_CONTAINER = '#contentMainBlock';
-  var TITLE_INPUT = '#xwikidoctitleinput';
-  var TITLE_VIEW = '#editorObjectTitle';
   var visibleSpaces = getCookieHierarchy('visibleSpaces').split(',');
   var visiblePages = getCookieHierarchy('visiblePages').split(',');
   var visibleCategory = getCookieHierarchy('visibleCategory').split(',');
@@ -326,7 +324,6 @@ $(function(){
         objName = decodeURIComponent($(closedTab).attr('data-object'));
         objNumber = decodeURIComponent($(closedTab).attr('data-objectnumber'));
       }
-      var rawTitle = $('input[data-space="'+encodeURIComponent(folder)+'"][data-page="'+encodeURIComponent(file)+'"]').val();
       // Determine the editor used in the selected tab
       var selectedTabEditor = 'object';
       if($(tabElement).hasClass('editorWikiTab')) {
@@ -662,7 +659,14 @@ $(function(){
         var tabId = getTabId('wiki', getCurrentSpace(false), getCurrentPage(false), null, null, locale);
         var jQueryTabId = '#'+tabId;
         var tabNumberId = getTabNumber(jQueryTabId);
+        var rawtitle = decodeURIComponent(getRawTitle(getCurrentSpace(false), getCurrentPage(false), locale));
+        var parentPage = decodeURIComponent(getParentPage(getCurrentSpace(false), getCurrentPage(false), locale));
+        initOtherFieldsBlock($(jQueryTabId), jQueryTabId);
+        var addTextareaWiki = '&lt;div class="editorWikiTabContent"&gt;&lt;div class="editorPropertyLabel"&gt;&lt;p class="editorWikiTitleLabel"&gt;Title&lt;/p&gt;&lt;/div&gt; &lt;input type="text" class="editorWikiTitle" value="'+rawtitle+'" /&gt;&lt;div class="editorPropertyLabel"&gt;&lt;p class="editorWikiTitleLabel"&gt;Content&lt;/p&gt;&lt;/div&gt;&lt;textarea id="content_'+tabId+'"&gt;&lt;/textarea&gt;&lt;/div&gt;';
+        $(jQueryTabId).append(addTextareaWiki);
         $(jQueryTabId+' &gt; .editorWikiTabContent &gt; textarea').val(dataContent);
+        var advancedFieldBlock = $(jQueryTabId+' .editorOtherFieldsBlockContent');
+        $(advancedFieldBlock).append('&lt;div class="editorPropertyLabel"&gt;&lt;p&gt;Parent&lt;/p&gt;&lt;/div&gt; &lt;input type="text" class="editorWikiParent" value="'+parentPage+'" size="45"/&gt;')
         if(syntaxHighlighting) {
           // Add the CodeMirror editor
           initCodeMirrorsCustom('wiki', tabId);
@@ -717,17 +721,15 @@ $(function(){
       var restLocale = (locale === 'default' || locale === '') ? '' : '/translations/'+locale;
       var jQueryTabId = '#'+getTabId('wiki', space, page, null, null, locale);
       var tabNumberId = getTabNumber(jQueryTabId);
-      if(space === getCurrentSpace(false) &amp;&amp; page === getCurrentPage(false) &amp;&amp; currentEditor === 'wiki') {
-        $('input[data-space="'+encodeURIComponent(getCurrentSpace(false))+'"][data-page="'+encodeURIComponent(getCurrentPage(false))+'"].editorHiddenTitle').val(getCurrentTitle());
-      }
-      var fileTitle = $('input[data-space="'+encodeURIComponent(space)+'"][data-page="'+encodeURIComponent(page)+'"]').val();
+      var fileTitle = getCurrentTitle(jQueryTabId);
       var fileContent = getCurrentContent(tabNumberId);
+      var fileParent = getCurrentParent(jQueryTabId);
       $.ajax({
         url: "/"+XWiki.webapppath+"rest/wikis/"+getDocumentReferenceData('wiki')+"/"+restSpaces+"/pages/"+page+restLocale,
         type: "PUT",
         contentType: "application/x-www-form-urlencoded",
         accept: "application/xml",
-        data: "title="+encodeURIComponent(fileTitle)+"&amp;content="+encodeURIComponent(fileContent),
+        data: "title="+encodeURIComponent(fileTitle)+"&amp;content="+encodeURIComponent(fileContent)+"&amp;parent="+encodeURIComponent(fileParent),
       }).error(function(xhr, errorStatus){
         if(!saveAll) {
           setSavingState(false, xhr.statusText, 4000, 'red');
@@ -755,10 +757,10 @@ $(function(){
 
   function cancelAndViewIDE(newTab) {
     if(newTab) {
-      window.open(wikiViewURL+currentSpace+'/'+currentPage);
+      window.open(wikiViewURL+getCurrentSpace(false, true)+'/'+currentPage);
     }
     else {
-      window.location.href = wikiViewURL+currentSpace+'/'+currentPage;
+      window.location.href = wikiViewURL+getCurrentSpace(false, true)+'/'+currentPage;
     }
   }
 
@@ -840,12 +842,11 @@ $(function(){
     var dataNode = $('&lt;form method="post" action="/'+XWiki.webapppath+''+XWiki.servletpath+'save/'+urlSpaces+'/'+file+'" id="tab'+currentTabNumber+'_objectIDEform" class="objectIDEform"&gt;&lt;input type="hidden" name="form_token" value="'+form_token+'" /&gt;&lt;/form&gt;').appendTo($(jQueryTabId));
     if(getCurrentObject(false)) {
       //$(dataNode).append('&lt;input type="button" class="btn btn-default editorDisplayAdvancedFields" value="Advanced fields" /&gt;');
-      var menuNodeBlock = $('&lt;div class="editorOtherFieldsBlock"&gt;&lt;/div&gt;').appendTo(dataNode);
-      menuNode = $('&lt;div class="editorOtherFieldsBlockContent"&gt;&lt;/div&gt;').appendTo(menuNodeBlock);
+      initOtherFieldsBlock(dataNode, jQueryTabId);
+      menuNode = $(jQueryTabId+' .editorOtherFieldsBlockContent');
       if(getCurrentObject(false) === 'XWiki.WikiMacroClass') {
         $('&lt;input type="hidden" id="tab'+currentTabNumber+'_addClassList" value="XWiki.WikiMacroParameterClass" /&gt;&lt;button class="btn btn-success" id="tab'+currentTabNumber+'_editorObjectAddButton"&gt;Add a parameter&lt;/button&gt;&lt;button class="btn btn-default" id="tab'+currentTabNumber+'_editorExpandAllButton"&gt;Expand all&lt;/button&gt;&lt;button class="btn btn-default" id="tab'+currentTabNumber+'_editorCollapseAllButton"&gt;Collapse all&lt;/button&gt;&lt;br&gt;').appendTo(menuNode);
       }
-      $('&lt;span class="editorDisplayAdvancedFields"&gt;'+$('#hierarchyOpenBlock').html()+'&lt;/span&gt; &lt;strong class="editorOtherFieldsBlockTitle"&gt;Advanced fields&lt;/strong&gt;').prependTo(menuNodeBlock);
       loadObjectsDetails(jQueryTabId, objectsList, 0, objectsListSize, '', menuNode, dataNode, null);
     }
     else {
@@ -1105,25 +1106,6 @@ $(function(){
     $(jQueryTabId+' .editorRemoveObject').on('click', clickOnRemoveObject);
 
     if(allObjects) { //Executed only when the page is loaded for the first time (not when an object is added)
-      if(getCurrentObject(false)){
-        $(jQueryTabId+' .editorOtherFieldsBlock').css({'backgroundColor' : $('#hierarchyBlock').css('backgroundColor')});
-        $(jQueryTabId+' .editorDisplayAdvancedFields').click(function() {
-          $(jQueryTabId+' .editorOtherFieldsBlockContent').toggle();
-          $(jQueryTabId+' .editorOtherFieldsBlockTitle').toggle();
-          if($(jQueryTabId+' .editorOtherFieldsBlockContent').is(':visible')) {
-            $('.editorDisplayAdvancedFields').html($('#hierarchyOpenBlock').html());
-            $(jQueryTabId+' .editorOtherFieldsBlock').css({
-              'width' : '400px',
-            });
-          }
-          else {
-            $('.editorDisplayAdvancedFields').html($('#hierarchyClose').html());
-            $(jQueryTabId+' .editorOtherFieldsBlock').css({
-              'width' : 'auto',
-            });
-          }
-        });
-      }
       // Event : Expand/Collapse objects list
       $('#tab'+currentTabNumber+'_editorExpandAllButton').on('click', function(e) {
         e.preventDefault();
@@ -1288,15 +1270,12 @@ $(function(){
     $('.editorViewElement').hide();
     $('.editorEditElement').css({"display" : "block"});
     $('.editorWikiElement').css({"display" : "block"});
-    $(TITLE_INPUT).css({"display" : "inline-block"});
     addSaveEvents(true);
   }
   function initViewEditor() {
     $('.editorEditElement').hide();
     $('.editorWikiElement').hide();
     $('.editorViewElement').css({"display" : "block"});
-    $(TITLE_INPUT).hide();
-    $(TITLE_VIEW).hide();
     addSaveEvents(false);
   }
 
@@ -1322,10 +1301,6 @@ $(function(){
       if(!$(TAB_MAIN_CONTAINER).is(":visible")) {
         initEditor();
       }
-      else if(currentEditor === 'wiki') {
-        //Save the current title
-        $('input[data-space="'+encodeURIComponent(getCurrentSpace(false))+'"][data-page="'+encodeURIComponent(getCurrentPage(false))+'"].editorHiddenTitle').val(getCurrentTitle());
-      }
       // Display a star in the old tab button if there is unsaved content when we leave it
       var tabId = getTabId(currentEditor, getCurrentSpace(false), getCurrentPage(false), getCurrentObject(false), currentNumber, currentLocale);
       var jQueryTabId = '#'+tabId;
@@ -1343,14 +1318,6 @@ $(function(){
       currentEditor = mode;
       tabId = getTabId(mode, getCurrentSpace(false), getCurrentPage(false), getCurrentObject(false), currentNumber, currentLocale);
       jQueryTabId = '#'+tabId;
-      if(mode === 'wiki') {
-        $(TITLE_INPUT).show();
-        $(TITLE_VIEW).hide();
-      }
-      else if(mode === 'object') {
-        $(TITLE_INPUT).hide();
-        $(TITLE_VIEW).show();
-      }
       //Open the tab
       if(!$(jQueryTabId).length) { //Create a new tab
         createTab(mode, tabId, getCurrentSpace(false), getCurrentPage(false), getCurrentObject(false), currentNumber, currentLocale);
@@ -1374,8 +1341,6 @@ $(function(){
         $('#hierarchyDeleteButtonIDE').attr('class', 'btn btn-danger deletePage');
         $('#hierarchyDeleteButtonIDE').val('Delete this page from XWiki');
       }
-      //Add the correct title in the title fields
-      setTitleInForm($('input[data-space="'+encodeURIComponent(folder)+'"][data-page="'+encodeURIComponent(file)+'"]').val()); //Insert title of new page in the title element
     }
   }
 
@@ -1471,9 +1436,6 @@ $(function(){
       var objNumber = nextSave[4];
       var locale = nextSave[5];
       if(mode === 'wiki') {
-        var jQueryTabId = '#'+getTabId('wiki', folder, file, null, null, locale);
-        var tabNumberId = getTabNumber(jQueryTabId);
-        var rawTitle = $('input[data-space="'+encodeURIComponent(folder)+'"][data-page="'+encodeURIComponent(file)+'"]').val();
         savePage(folder, file, locale, true, true, true);
       }
       else if(mode === 'object') {
@@ -1807,39 +1769,47 @@ $(function(){
   /*
    * Title tools
    * ---------------------------------
-   * getRawTitle(folder, file)
-   * setTitleInForm(rawTitle)
-   * getCurrentTitle()
+   * getRawTitle(folder, file, locale)
+   * getParentPage(folder, file, locale)
+   * getCurrentTitle(tabId)
    */
 
   /**
-   * Get the old raw title of the selected document
+   * Get the raw title of the selected document
    * @input String folder: the space of the document
    * @input String file: the name of the document
    */
   function getRawTitle(folder, file, locale) {
     var editPageTitle = $('.editPage[data-space="'+folder+'"][data-page="'+file+'"][data-locale="'+locale+'"]').attr('data-rawtitle');
-    return (editPageTitle || editPageTitle === '') ? editPageTitle : $('.editObject[data-space="'+folder+'"][data-page="'+file+'"]').attr('data-rawtitle') || '';
+    return editPageTitle || '';
   }
   /**
-   * Write the title in the corresponding fields
-   * @input String rawTitle: the title to write
+   * Get the parent of the selected document
+   * @input String folder: the space of the document
+   * @input String file: the name of the document
    */
-  function setTitleInForm(rawTitle) {
-    $(TITLE_INPUT).val(decodeURIComponent(rawTitle));
-    $(TITLE_VIEW).html(decodeURIComponent(rawTitle));
+  function getParentPage(folder, file, locale) {
+    var editPageParent = $('.editPage[data-space="'+folder+'"][data-page="'+file+'"][data-locale="'+locale+'"]').attr('data-parent');
+    return editPageParent || '';
   }
   /**
    * Get the title from the input field in the page
    */
-  function getCurrentTitle() {
-    return $(TITLE_INPUT).val();
+  function getCurrentTitle(jQueryTabId) {
+    return $(jQueryTabId+' .editorWikiTitle').val();
+  }
+  /**
+   * Get the title from the input field in the page
+   */
+  function getCurrentParent(jQueryTabId) {
+    return $(jQueryTabId+' .editorWikiParent').val();
   }
 
   /*
    * Tabs tools
    * ---------------------------------
    * createTab(mode, id, folder, file, objectSelected, objectNumber)
+   * initOtherFieldsBlock(dataNode, jQueryTabId)
    * closeTab(element, tabName)
    * removeTab(element, tabNumberId)
    * setActiveTab(mode, file, folder)
@@ -1872,7 +1842,6 @@ $(function(){
       tabName = file+' ('+decodeURIComponent(folder)+')';
     }
     if(tabName.length &gt; 30) tabName = tabName.substr(0,27)+'...';
-    var rawtitle = getRawTitle(folder, file, locale);
     var prettyModeName;
     var iconModeId;
     var tabModeClass;
@@ -1889,7 +1858,6 @@ $(function(){
       prettyModeName = 'Wiki';
       iconModeId = '#editorWikiIcon';
       tabModeClass = 'editorWikiTab';
-      addTextareaWiki = '&lt;div class="editorWikiTabContent"&gt;&lt;textarea id="content_'+id+'"&gt;&lt;/textarea&gt;&lt;/div&gt;';
     }
     else if(mode === 'object') {
       prettyModeName = 'Object';
@@ -1900,10 +1868,7 @@ $(function(){
       }
     }
     if(!$(jQueryId).length) {
-      $(TAB_MAIN_CONTAINER).append('&lt;div id="'+id+'" class="editorTab '+tabModeClass+'" data-tabnumber="'+tabNumber+'"&gt;'+addTextareaWiki+'&lt;/div&gt;');
-      if(!$('input[data-space="'+encodeURIComponent(folder)+'"][data-page="'+encodeURIComponent(file)+'"]').length) {
-        $(TAB_MAIN_CONTAINER).append('&lt;input class="editorHiddenTitle" data-space="'+encodeURIComponent(folder)+'" data-page="'+encodeURIComponent(file)+'" type="hidden" value="'+rawtitle+'"&gt;');
-      }
+      $(TAB_MAIN_CONTAINER).append('&lt;div id="'+id+'" class="editorTab '+tabModeClass+'" data-tabnumber="'+tabNumber+'"&gt;&lt;/div&gt;');
       var tabButton = $('&lt;span class="editorTabButton" data-tabnumber="'+tabNumber+'" data-editor="'+mode+'" data-space="'+encodeURIComponent(folder)+'" data-page="'+encodeURIComponent(file)+'" data-locale="'+locale+'" '+addSelectedObject+' title="('+prettyModeName+') '+folder+'.'+file+'"&gt;'+$(iconModeId).html()+' &lt;strong class="unsavedTab"&gt;*&lt;/strong&gt;'+tabName+'&lt;/span&gt;').appendTo('#editorTabBar').on('mousedown', function(e) {
         e.preventDefault();
         if(e.which === 1) { // Left-click
@@ -1922,6 +1887,34 @@ $(function(){
       });
       setActiveTab(mode, file, folder, objectSelected, objectNumber, locale);
     }
+  }
+
+  /**
+   * Create the "Advanced fields" block in a tab, witht he ability to show or hide it with a button
+   * @input DOM dataNode : The node where the block has to be created
+   * @input String jQueryTabId : The jQuery Id of the selected tab
+   */
+  function initOtherFieldsBlock(dataNode, jQueryTabId) {
+    var menuNodeBlock = $('&lt;div class="editorOtherFieldsBlock"&gt;&lt;/div&gt;').appendTo(dataNode);
+    $('&lt;div class="editorOtherFieldsBlockContent"&gt;&lt;/div&gt;').appendTo(menuNodeBlock);
+    $(jQueryTabId+' .editorOtherFieldsBlock').css({'backgroundColor' : $('#hierarchyBlock').css('backgroundColor')});
+    $('&lt;span class="editorDisplayAdvancedFields"&gt;'+$('#hierarchyOpenBlock').html()+'&lt;/span&gt; &lt;strong class="editorOtherFieldsBlockTitle"&gt;Advanced fields&lt;/strong&gt;').prependTo(jQueryTabId+' .editorOtherFieldsBlock');
+    $(jQueryTabId+' .editorDisplayAdvancedFields').click(function() {
+      $(jQueryTabId+' .editorOtherFieldsBlockContent').toggle();
+      $(jQueryTabId+' .editorOtherFieldsBlockTitle').toggle();
+      if($(jQueryTabId+' .editorOtherFieldsBlockContent').is(':visible')) {
+        $('.editorDisplayAdvancedFields').html($('#hierarchyOpenBlock').html());
+        $(jQueryTabId+' .editorOtherFieldsBlock').css({
+          'width' : '400px',
+        });
+      }
+      else {
+        $('.editorDisplayAdvancedFields').html($('#hierarchyClose').html());
+        $(jQueryTabId+' .editorOtherFieldsBlock').css({
+          'width' : 'auto',
+        });
+      }
+    });
   }
 
   /**
