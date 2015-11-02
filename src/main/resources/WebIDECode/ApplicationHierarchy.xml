@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1446458993000</date>
+  <date>1446460680000</date>
   <contentUpdateDate>1446125136000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -2182,6 +2182,9 @@ $(function(){
           var macroName = file.charAt(0).toLowerCase() + file.slice(1);
           properties = encodeURIComponent('{"id" : "'+macroName.replace(/"/g, '\"')+'", "name" : "'+file.replace(/"/g, '\"')+'"}');
           file = fixName(file, 'macros');
+        }
+        else if(global &amp;&amp; className === 'XWiki.TranslationDocumentClass') {
+          properties = encodeURIComponent('{"scope" : "WIKI"}');
         }
         addObject(null, className, true, folder, file, global, true, properties);
       }
