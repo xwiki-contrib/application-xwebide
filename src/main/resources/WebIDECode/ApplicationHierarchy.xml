@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1446125136000</date>
+  <date>1446458993000</date>
   <contentUpdateDate>1446125136000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -2854,7 +2854,6 @@ $(function(){
 #hierarchyBlock {
   background-color: $theme.fieldGradientColor;
   min-width: 250px;
-  overflow-y: auto;
   float: left;
   position: relative;
   height: 100%;

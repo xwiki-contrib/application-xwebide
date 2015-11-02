@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347285000</creationDate>
-  <date>1446114816000</date>
-  <contentUpdateDate>1446114816000</contentUpdateDate>
+  <date>1446459179000</date>
+  <contentUpdateDate>1446459179000</contentUpdateDate>
   <version>1.1</version>
   <title>LogicalTree</title>
   <defaultTemplate/>
@@ -190,6 +190,7 @@
 * (% data-category="pages" class="hierarchy-toggleCategory" %)((($iconBulletToggle  (%%)**Pages**)))
 (% id='hierarchyCategory_pages' class='hierarchy-list${pageClassHidden}' %)
 #set($oldSpace = '')
+#set($spaceCount = 0)
 #foreach($pageFullNameData in $allPagesList)
   #set($pageFullName = $pageFullNameData[0])
   #set($pageLocaleList = $pageFullNameData[1])
@@ -249,6 +250,7 @@
     #if($pageCount &amp;&amp; $pageCount == 0)
       $addStars*** //Empty//
     #end
+    #set($spaceCount = $spaceCount + 1)
     $addStars** (% class="hierarchy-toggleFolder" data-space="$spaceEscapedBackslash" %)((($iconBulletToggle (%%)$services.icon.render('folder', 'Font Awesome') (% id="hierarchyDisplaySpace_$spaceEscaped" class="hierarchySpaceName" %)$subspaceName(%%) )))
     (% id="hierarchySpace_$spaceEscapedBackslash" class="hierarchy-list${contentDisplay}" %)
     #set($pageCount = 0)
@@ -320,8 +322,8 @@
     #end
   #end
 #end
-#if($pageCount &amp;&amp; $pageCount == 0)
-  $addStars*** //Empty//
+#if($spaceCount == 0)
+  ** //Empty//
 #end
 ## JS
 #set($pageClassHidden = " hierarchy-hidden")
