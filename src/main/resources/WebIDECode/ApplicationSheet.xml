@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1446124196000</date>
-  <contentUpdateDate>1446050954000</contentUpdateDate>
+  <date>1446464021000</date>
+  <contentUpdateDate>1446464021000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -857,7 +857,7 @@ To learn about other features of the XWiki WebIDE, see the [[Online Documentatio
   (% id="hierarchyBottomActionsBar" class="editorElement editorEditElement" %)
   (((
   {{html clean=false}}
-&lt;input type="button" id="hierarchySaveButtonIDE" class="btn btn-primary" value="Save &amp; Continue" title="Save the page and continue editing" /&gt;&lt;input type="button" id="hierarchySaveViewButtonIDE" class="btn btn-success" value="Save &amp; View" title="Save the page and view it" /&gt;&lt;input type="button" id="hierarchyDiscardViewButtonIDE" class="btn btn-default" value="Discard &amp; View" title="View the page without saving" /&gt;&lt;input type="button" id="hierarchyViewTabButtonIDE" class="btn btn-default" value="View in a new tab" title="View the page in a new tab" /&gt;
+&lt;input type="button" id="hierarchyDeleteButtonIDE" class="btn btn-danger" value="Delete" title="Delete the content from XWiki" /&gt;&lt;input type="button" id="hierarchySaveButtonIDE" class="btn btn-primary" value="Save &amp; Continue" title="Save the page and continue editing" /&gt;&lt;input type="button" id="hierarchySaveViewButtonIDE" class="btn btn-success" value="Save &amp; View" title="Save the page and view it" /&gt;&lt;input type="button" id="hierarchyDiscardViewButtonIDE" class="btn btn-default" value="Discard &amp; View" title="View the page without saving" /&gt;&lt;input type="button" id="hierarchyViewTabButtonIDE" class="btn btn-default" value="View in a new tab" title="View the page in a new tab" /&gt;
   {{/html}}
   )))
   )))

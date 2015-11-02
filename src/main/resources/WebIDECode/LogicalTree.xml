@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347285000</creationDate>
-  <date>1446460081000</date>
-  <contentUpdateDate>1446460081000</contentUpdateDate>
+  <date>1446463059000</date>
+  <contentUpdateDate>1446463059000</contentUpdateDate>
   <version>1.1</version>
   <title>LogicalTree</title>
   <defaultTemplate/>
@@ -171,7 +171,7 @@
     #end
     #if(!$classTemplateDoc.isNew())
       #set($ok = $pagesInClassesList.add($classTemplateDoc.fullName))
-      *** $services.icon.render('drive', 'Font Awesome') [[Edit template&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$escapetool.url($classTemplateDoc.space).replace("+", "%20")' data-page='$escapetool.url($classTemplateDoc.name).replace("+", "%20")' data-locale="default" data-rawtitle="$escapetool.url($classTemplateDoc.title).replace("+", "%20")" class='editObject']]
+      *** $services.icon.render('drive', 'Font Awesome') [[Edit template&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$escapetool.url($classTemplateDoc.space).replace("+", "%20")' data-page='$escapetool.url($classTemplateDoc.name).replace("+", "%20")' data-object="$pageFullNameEscaped" data-objectnumber="0" data-locale="default" data-rawtitle="$escapetool.url($classTemplateDoc.title).replace("+", "%20")" class='editObject']]
     #else
       *** $services.icon.render('add', 'Font Awesome') [[Add template&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newPage newTemplate" data-page='${pageEscaped}Template' data-space='$spaceEscaped' data-locale="default"]]
     #end
@@ -276,15 +276,15 @@
       #set($pageName = "(% id='hierarchyDisplayPage_$pageFullNameEscaped' class='hierarchyPageName'%)$page)))") ##'"
       #if($xwiki.getDocument($pageFullName).hasAccessLevel('edit'))
         #set($pageCount = $pageCount + 1)
-        #set($itemPage = false)
+        #set($itemPage = "")
         #foreach($className in $classesInProjectList)
           #if($pageDoc.getObject($className))
-            #set($itemPage = true)
+            #set($itemPage = $className)
             #break
           #end
         #end
-        #if($itemPage) ##It's an "Item" page
-          $addStars*** $services.icon.render('drive', 'Font Awesome') [[$page&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" class='editObject']]
+        #if("$!itemPage" != "") ##It's an "Item" page
+          $addStars*** $services.icon.render('drive', 'Font Awesome') [[$page&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" data-object="$itemPage" data-objectnumber="0" data-locale="default" class='editObject']]
         #else ##It's an "Content" page
           $addStars*** (% data-pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((($iconBulletToggle (%%)$services.icon.render('page', 'Font Awesome') $pageName
         (% id='hierarchyPageDetails_$spaceEscapedBackslash.$pageEscapedBackslash' class='hierarchy-list${pageClassHidden}' %)

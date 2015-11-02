@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1446460680000</date>
-  <contentUpdateDate>1446125136000</contentUpdateDate>
+  <date>1446470941000</date>
+  <contentUpdateDate>1446468924000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -673,6 +673,41 @@ $(function(){
     }
   }
 
+  function deletePage(space, page, locale) {
+    if(!loading &amp;&amp; currentEditor === 'wiki') {
+      setLoadingState(true, 'Deleting...');
+      var restSpaces = getRestSpacesString(space);
+      var addRestLanguage = '';
+      if(locale &amp;&amp; locale !== 'default') {
+        addRestLanguage = '/translations/'+locale;
+      }
+      var restPage = page;
+      $.ajax({
+        url: "/"+XWiki.webapppath+"rest/wikis/"+getDocumentReferenceData('wiki')+"/"+restSpaces+"/pages/"+restPage+addRestLanguage,
+        type: "DELETE",
+        contentType: "plain/text",
+      }).success(function(dataContent){
+        if(space === getCurrentSpace(false) &amp;&amp; page === getCurrentPage(false) &amp;&amp; locale === currentLocale) {
+          var tabId = getTabId(currentEditor, getCurrentSpace(false), getCurrentPage(false), getCurrentObject(false), currentNumber, currentLocale);
+          var jQueryTabId = '#'+tabId;
+          var tabNumberId = getTabNumber(jQueryTabId);
+          var element = $('.editorTabButton[data-tabnumber="'+tabNumberId+'"]');
+          removeTab(element, tabNumberId);
+          reloadHierarchy();
+        }
+        if(bootstrap()) {
+          $('#editorDeletePageModal').modal('hide');
+        }
+        else {
+          closeModalNoBootstrap();
+        }
+        setLoadingState(false, 'Deleted', 2500);
+      }).error(function(xhr){
+        setLoadingState(false, 'Error: '+xhr.statusText, 2500);
+      });
+    }
+  }
+
   function savePage(space, page, locale, changeSavedContent, continueEditing, saveAll) {
     if(!saving || saveAll) {
       if(!saveAll) {
@@ -870,9 +905,16 @@ $(function(){
         fixIds(dataContentTmp, tabAdd);
         dataContent = dataContentTmp.html();
         if(getCurrentObject(false)) {
-          $(menuNode).append(dataContent);
-          var currentMainBlock = $('&lt;div class="editorDisplayedObject"&gt;&lt;/div&gt;').appendTo(currentClassNode);
-          $(menuNode).find('.editorCodeField').detach().appendTo(currentMainBlock);
+          if($(dataContent).find('.editorCodeField').length &gt; 0) {
+            $(menuNode).append(dataContent);
+            var currentMainBlock = $('&lt;div class="editorDisplayedObject"&gt;&lt;/div&gt;').appendTo(currentClassNode);
+            $(menuNode).find('.editorCodeField').detach().appendTo(currentMainBlock);
+          }
+          else {
+            var currentMainBlock = $('&lt;div class="editorDisplayedObject"&gt;&lt;/div&gt;').appendTo(currentClassNode);
+            $(currentMainBlock).append(dataContent);
+            $(menuNode).parent().remove();
+          }
         }
         else {
           var anchor = $('&lt;div /&gt;').append(dataContent).find('h4').attr('id');
@@ -1123,6 +1165,14 @@ $(function(){
           $(this).hide().html('');
           n();
         });
+        if(className === getCurrentObject(false) &amp;&amp; number === currentNumber) {
+          var tabId = getTabId(currentEditor, getCurrentSpace(false), getCurrentPage(false), getCurrentObject(false), currentNumber, currentLocale);
+          var jQueryTabId = '#'+tabId;
+          var tabNumberId = getTabNumber(jQueryTabId);
+          var element = $('.editorTabButton[data-tabnumber="'+tabNumberId+'"]');
+          removeTab(element, tabNumberId);
+          reloadHierarchy();
+        }
         if(bootstrap()) {
           $('#editorDeleteObjectModal').modal('hide');
         }
@@ -1312,6 +1362,14 @@ $(function(){
         $(jQueryTabId).show();
         setActiveTab(mode, getCurrentPage(false), getCurrentSpace(false), getCurrentObject(false), currentNumber, currentLocale);
       }
+      if(getCurrentObject(false)) {
+        $('#hierarchyDeleteButtonIDE').attr('class', 'btn btn-danger deleteSingleObject');
+        $('#hierarchyDeleteButtonIDE').val('Delete this object from the page');
+      }
+      else {
+        $('#hierarchyDeleteButtonIDE').attr('class', 'btn btn-danger deletePage');
+        $('#hierarchyDeleteButtonIDE').val('Delete this page from XWiki');
+      }
       //Add the correct title in the title fields
       setTitleInForm($('input[data-space="'+encodeURIComponent(folder)+'"][data-page="'+encodeURIComponent(file)+'"]').val()); //Insert title of new page in the title element
     }
@@ -1433,6 +1491,7 @@ $(function(){
     shortcut.remove("Alt+Shift+C");
     if(addEvents) {
       // Add events on buttons and shortcuts
+      $('#hierarchyDeleteButtonIDE').click(clickOnDeleteButton);
       $('#hierarchySaveButtonIDE').click(function(e){
         e.preventDefault();
         saveEventsFunction(true);
@@ -1469,6 +1528,32 @@ $(function(){
     }
     if(currentEditor === 'wiki') {savePage(currentSpace, currentPage, currentLocale, true, continueEdit, false);}
     else {saveObjects(getCurrentSpace(true), getCurrentPage(true), getCurrentObject(false), currentNumber, true, continueEdit, false);}
+  }
+  function clickOnDeleteButton(e) {
+    e.preventDefault();
+    if($('#hierarchyDeleteButtonIDE').hasClass('deletePage')) {
+      $('#editorDeletedPageModalInfo').html(getCurrentSpace(false)+' - '+getCurrentPage(false));
+      $('#editorDeletePageConfirmed').attr('data-page', getCurrentPage(false));
+      $('#editorDeletePageConfirmed').attr('data-space', getCurrentSpace(false));
+      $('#editorDeletePageConfirmed').attr('data-locale', currentLocale);
+      if(bootstrap()) {
+        $('#editorDeletePageModal').modal('show');
+      }
+      else {
+        openModalNoBootstrap('#editorDeletePageModal');
+      }
+    }
+    else {
+      $('#editorDeletedObjectModalInfo').html(getCurrentObject(false)+' - '+currentNumber);
+      $('#editorDeleteObjectConfirmed').attr('data-classname', getCurrentObject(false));
+      $('#editorDeleteObjectConfirmed').attr('data-number', currentNumber);
+      if(bootstrap()) {
+        $('#editorDeleteObjectModal').modal('show');
+      }
+      else {
+        openModalNoBootstrap('#editorDeleteObjectModal');
+      }
+    }
   }
 
   /**
@@ -2199,6 +2284,11 @@ $(function(){
       $('body').removeClass('modal-open');
       e.preventDefault();
       removeObject($(this).attr('data-classname'), $(this).attr('data-number'));
+    });
+    $('#editorDeletePageConfirmed').click(function(e){
+      $('body').removeClass('modal-open');
+      e.preventDefault();
+      deletePage($(this).attr('data-space'), $(this).attr('data-page'), $(this).attr('data-locale'));
     });
   }
 
@@ -3288,6 +3378,22 @@ $services.icon.render('step-forward', 'Font Awesome')
           &lt;p&gt;
             Are you sure you want to delete that object &lt;span id="editorDeletedObjectModalInfo"&gt;&lt;/span&gt;&lt;br /&gt;
             &lt;button id="editorDeleteObjectConfirmed" class="btn btn-danger"&gt;Delete the object&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;Cancel&lt;/button&gt;
+          &lt;/p&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="modal fade text-left hierarchy-hidden" id="editorDeletePageModal" tabindex="-1" role="dialog" aria-hidden="true"&gt;
+    &lt;div class="modal-dialog"&gt;
+      &lt;div class="modal-content"&gt;
+        &lt;div class="modal-header"&gt;
+          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
+          &lt;h4 class="modal-title"&gt;Delete a page&lt;/h4&gt;
+        &lt;/div&gt;
+        &lt;div class="modal-body"&gt;
+          &lt;p&gt;
+            Are you sure you want to delete that page &lt;span id="editorDeletedPageModalInfo"&gt;&lt;/span&gt;&lt;br /&gt;
+            &lt;button id="editorDeletePageConfirmed" class="btn btn-danger"&gt;Delete the page&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;Cancel&lt;/button&gt;
           &lt;/p&gt;
         &lt;/div&gt;
       &lt;/div&gt;
