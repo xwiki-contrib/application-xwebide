@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347285000</creationDate>
-  <date>1446459922000</date>
-  <contentUpdateDate>1446459922000</contentUpdateDate>
+  <date>1446460081000</date>
+  <contentUpdateDate>1446460081000</contentUpdateDate>
   <version>1.1</version>
   <title>LogicalTree</title>
   <defaultTemplate/>
@@ -171,7 +171,7 @@
     #end
     #if(!$classTemplateDoc.isNew())
       #set($ok = $pagesInClassesList.add($classTemplateDoc.fullName))
-      *** $services.icon.render('pencil', 'Font Awesome') [[Edit template&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$escapetool.url($classTemplateDoc.space).replace("+", "%20")' data-page='$escapetool.url($classTemplateDoc.name).replace("+", "%20")' data-locale="default" data-rawtitle="$escapetool.url($classTemplateDoc.title).replace("+", "%20")" class='editPage']]
+      *** $services.icon.render('drive', 'Font Awesome') [[Edit template&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$escapetool.url($classTemplateDoc.space).replace("+", "%20")' data-page='$escapetool.url($classTemplateDoc.name).replace("+", "%20")' data-locale="default" data-rawtitle="$escapetool.url($classTemplateDoc.title).replace("+", "%20")" class='editObject']]
     #else
       *** $services.icon.render('add', 'Font Awesome') [[Add template&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newPage newTemplate" data-page='${pageEscaped}Template' data-space='$spaceEscaped' data-locale="default"]]
     #end
