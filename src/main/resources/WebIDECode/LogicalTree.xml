@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347285000</creationDate>
-  <date>1446479438000</date>
-  <contentUpdateDate>1446479438000</contentUpdateDate>
+  <date>1446656046000</date>
+  <contentUpdateDate>1446656046000</contentUpdateDate>
   <version>1.1</version>
   <title>LogicalTree</title>
   <defaultTemplate/>
@@ -87,7 +87,7 @@
     #end
   #end
 #end
-(% class="btn btn-success" id="hierarchyAddNewElement" %)((($services.icon.render('add', 'Font Awesome') Add new...)))
+(% class="btn btn-success" id="hierarchyAddNewElement" %)((($services.icon.render('add') Add new...)))
 (% class="btn btn-primary" id="hierarchyChangeTree" %)(((Physical view)))
   (% class="hierarchy-hidden" id="hierarchyElementToAdd"%)(((
     ==== Class ====
@@ -105,10 +105,10 @@
 ## Display all the classes in the project
 (% class="hierarchy-list hierarchy-no-padding" id="hierarchyMainList" %)
 #set($pageClassHidden = " hierarchy-hidden")
-#set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-right', 'Font Awesome')")
+#set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-right')")
 #if($visibleCategory.contains("classes"))
   #set($pageClassHidden = "")
-  #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-down', 'Font Awesome')")
+  #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-down')")
 #end
 * (% data-category="classes" class="hierarchy-toggleCategory" %)((($iconBulletToggle  (%%)**Classes**)))
 (% id='hierarchyCategory_classes' class='hierarchy-list${pageClassHidden}' %)
@@ -130,16 +130,16 @@
     #end
     #set($classTemplateDoc = $xwiki.getDocument($classTemplateReference))
     #set($pageClassHidden = " hierarchy-hidden")
-    #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-right', 'Font Awesome')")
+    #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-right')")
     #if($visiblePages.contains("Class-$pageFullNameEscaped") || $pageFullName == $currentDoc.fullName || $classTemplateDoc.fullName == $currentDoc.fullName || $sheetDocList.contains($currentDoc.getDocumentReference()))
       #set($pageClassHidden = "")
-      #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-down', 'Font Awesome')")
+      #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-down')")
     #end
     #set($spaceEscaped = $escapetool.url($document.space).replace("+", "%20"))
     #set($pageEscaped = $escapetool.url($document.name).replace("+", "%20"))
-    ** (% data-pageid="Class-$escapetool.url($pageFullName)" class="hierarchy-displayPage" %)((($iconBulletToggle (%%)$services.icon.render('desktop', 'Font Awesome') (% id='hierarchyDisplayPage_$escapetool.url($pageFullName)' class="hierarchyPageName"%)$className)))
+    ** (% data-pageid="Class-$escapetool.url($pageFullName)" class="hierarchy-displayPage" %)((($iconBulletToggle (%%)$services.icon.render('desktop') (% id='hierarchyDisplayPage_$escapetool.url($pageFullName)' class="hierarchyPageName"%)$className)))
     (% id='hierarchyPageDetails_Class-$escapetool.url($pageFullName)' class='hierarchy-list${pageClassHidden}' %)
-    *** $services.icon.render('database', 'Font Awesome') [[Edit fields&gt;&gt;path:$document.getURL('edit', 'editor=class#!XWebIDE')||class="editClass" data-page='$pageEscaped' data-space='$spaceEscaped']]
+    *** $services.icon.render('database') [[Edit fields&gt;&gt;path:$document.getURL('edit', 'editor=class#!XWebIDE')||class="editClass" data-page='$pageEscaped' data-space='$spaceEscaped']]
     #if($sheetDocList.size() &gt; 0)
       #foreach($sheetFullName in $sheetDocList)
         #set($addName = "")
@@ -152,29 +152,29 @@
         #if($sheetDocList.size() &gt; 1)
           #set($addName = " ($sheetDoc.name)")
         #end
-        *** $services.icon.render('pencil', 'Font Awesome') [[Edit sheet$addName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceSheetEscaped' data-page='$!pageSheetEscaped' data-locale="default" data-rawtitle='$titleSheetEscaped' data-parent="$pageParentEscaped" class='editPage']]
+        *** $services.icon.render('pencil') [[Edit sheet$addName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceSheetEscaped' data-page='$!pageSheetEscaped' data-locale="default" data-rawtitle='$titleSheetEscaped' data-parent="$pageParentEscaped" class='editPage']]
         (% class="hierarchy-list" %)
         #foreach($jsxObject in $sheetDoc.getObjects('XWiki.JavaScriptExtension'))
-          **** $services.icon.render('pencil', 'Font Awesome') [[Edit sheet JS-$jsxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped' data-object="XWiki.JavaScriptExtension" data-objectnumber="$jsxObject.number" class='editObject']]
+          **** $services.icon.render('pencil') [[Edit sheet JS-$jsxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped' data-object="XWiki.JavaScriptExtension" data-objectnumber="$jsxObject.number" class='editObject']]
         #end
         #if($sheetDoc.getObjects('XWiki.JavaScriptExtension').size() == 0)
-          **** $services.icon.render('add', 'Font Awesome') [[Add sheet JS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newJSObject newLocalObject" data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped']]
+          **** $services.icon.render('add') [[Add sheet JS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newJSObject newLocalObject" data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped']]
         #end
         #foreach($ssxObject in $sheetDoc.getObjects('XWiki.StyleSheetExtension'))
-          **** $services.icon.render('pencil', 'Font Awesome') [[Edit sheet CSS-$ssxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped' data-object="XWiki.StyleSheetExtension" data-objectnumber="$ssxObject.number" class='editObject']]
+          **** $services.icon.render('pencil') [[Edit sheet CSS-$ssxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped' data-object="XWiki.StyleSheetExtension" data-objectnumber="$ssxObject.number" class='editObject']]
         #end
         #if($sheetDoc.getObjects('XWiki.StyleSheetExtension').size() == 0)
-          **** $services.icon.render('add', 'Font Awesome') [[Add sheet CSS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newCSSObject newLocalObject" data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped']]
+          **** $services.icon.render('add') [[Add sheet CSS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newCSSObject newLocalObject" data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped']]
         #end
       #end
     #else
-      *** $services.icon.render('add', 'Font Awesome') [[Add bound sheet&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newPage newSheet" data-page='${pageEscaped}Sheet' data-space='$spaceEscaped' data-locale="default"]]
+      *** $services.icon.render('add') [[Add bound sheet&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newPage newSheet" data-page='${pageEscaped}Sheet' data-space='$spaceEscaped' data-locale="default"]]
     #end
     #if(!$classTemplateDoc.isNew())
       #set($ok = $pagesInClassesList.add($classTemplateDoc.fullName))
-      *** $services.icon.render('drive', 'Font Awesome') [[Edit template&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$escapetool.url($classTemplateDoc.space).replace("+", "%20")' data-page='$escapetool.url($classTemplateDoc.name).replace("+", "%20")' data-object="$pageFullNameEscaped" data-objectnumber="0" data-locale="default" class='editObject']]
+      *** $services.icon.render('drive') [[Edit template&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$escapetool.url($classTemplateDoc.space).replace("+", "%20")' data-page='$escapetool.url($classTemplateDoc.name).replace("+", "%20")' data-object="$pageFullNameEscaped" data-objectnumber="0" data-locale="default" class='editObject']]
     #else
-      *** $services.icon.render('add', 'Font Awesome') [[Add template&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newPage newTemplate" data-page='${pageEscaped}Template' data-space='$spaceEscaped' data-locale="default"]]
+      *** $services.icon.render('add') [[Add template&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newPage newTemplate" data-page='${pageEscaped}Template' data-space='$spaceEscaped' data-locale="default"]]
     #end
   #end
 #end
@@ -183,10 +183,10 @@
 #end
 ## Display all the pages in the project
 #set($pageClassHidden = " hierarchy-hidden")
-#set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-right', 'Font Awesome')")
+#set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-right')")
 #if($visibleCategory.contains("pages"))
   #set($pageClassHidden = "")
-  #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-down', 'Font Awesome')")
+  #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-down')")
 #end
 * (% data-category="pages" class="hierarchy-toggleCategory" %)((($iconBulletToggle  (%%)**Pages**)))
 (% id='hierarchyCategory_pages' class='hierarchy-list${pageClassHidden}' %)
@@ -243,22 +243,22 @@
     #end
     #if($visibleSpaces.contains($spaceEscapedBackslash) || $spaceParentList.contains($space))
       #set($contentDisplay = "")
-      #set($iconBulletToggle = "(% id='hierarchyFolderIcon_$spaceEscapedBackslash'%)$services.icon.render('caret-down', 'Font Awesome')") ##'"
+      #set($iconBulletToggle = "(% id='hierarchyFolderIcon_$spaceEscapedBackslash'%)$services.icon.render('caret-down')") ##'"
     #else
       #set($contentDisplay = " hierarchy-hidden")
-      #set($iconBulletToggle = "(% id='hierarchyFolderIcon_$spaceEscapedBackslash'%)$services.icon.render('caret-right', 'Font Awesome')") ##'"
+      #set($iconBulletToggle = "(% id='hierarchyFolderIcon_$spaceEscapedBackslash'%)$services.icon.render('caret-right')") ##'"
     #end
     #if($pageCount &amp;&amp; $pageCount == 0)
       $addStars*** //Empty//
     #end
     #set($spaceCount = $spaceCount + 1)
-    $addStars** (% class="hierarchy-toggleFolder" data-space="$spaceEscapedBackslash" %)((($iconBulletToggle (%%)$services.icon.render('folder', 'Font Awesome') (% id="hierarchyDisplaySpace_$spaceEscaped" class="hierarchySpaceName" %)$subspaceName(%%) )))
+    $addStars** (% class="hierarchy-toggleFolder" data-space="$spaceEscapedBackslash" %)((($iconBulletToggle (%%)$services.icon.render('folder') (% id="hierarchyDisplaySpace_$spaceEscaped" class="hierarchySpaceName" %)$subspaceName(%%) )))
     (% id="hierarchySpace_$spaceEscapedBackslash" class="hierarchy-list${contentDisplay}" %)
     #set($pageCount = 0)
   #end
   #if(!$isInClassesList &amp;&amp; !$isGlobal)
     ## Compute page elements
-    #if(!$pageDoc.isNew()) ##TODO
+    #if(!$pageDoc.isNew())
       #set($pageEscaped = $escapetool.url($page).replace("+", "%20"))
       #if($nestedSpaces)
         #set($pageEscapedBackslash = $escapetool.url($page).replace("+", "%20"))
@@ -270,10 +270,10 @@
       #set($pageRawTitleEscaped = $escapetool.url($pageDoc.title).replace("+", "%20"))
       #set($pageParentEscaped = $escapetool.url($pageDoc.parent).replace("+", "%20"))
       #set($pageClassHidden = " hierarchy-hidden")
-      #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-right', 'Font Awesome')")
+      #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-right')")
       #if($visiblePages.contains($pageFullNameEscaped) || $pageFullName == $currentDoc.fullName)
         #set($pageClassHidden = "")
-        #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-down', 'Font Awesome')")
+        #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-down')")
       #end
       #set($pageName = "(% id='hierarchyDisplayPage_$pageFullNameEscaped' class='hierarchyPageName'%)$page)))") ##'"
       #if($xwiki.getDocument($pageFullName).hasAccessLevel('edit'))
@@ -286,9 +286,9 @@
           #end
         #end
         #if("$!itemPage" != "") ##It's an "Item" page
-          $addStars*** $services.icon.render('drive', 'Font Awesome') [[$page&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="$itemPage" data-objectnumber="0" data-locale="default" class='editObject']]
+          $addStars*** $services.icon.render('drive') [[$page&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="$itemPage" data-objectnumber="0" data-locale="default" class='editObject']]
         #else ##It's an "Content" page
-          $addStars*** (% data-pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((($iconBulletToggle (%%)$services.icon.render('page', 'Font Awesome') $pageName
+          $addStars*** (% data-pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((($iconBulletToggle (%%)$services.icon.render('page') $pageName
         (% id='hierarchyPageDetails_$spaceEscapedBackslash.$pageEscapedBackslash' class='hierarchy-list${pageClassHidden}' %)
           #if($pageLocaleList.size() == 0)
             #set($ok = $pageLocaleList.add('default'))
@@ -301,38 +301,42 @@
             #if($velocityCount == 1)
               #set($pageLocale = 'default')
             #end
-            $addStars**** $services.icon.render('pencil', 'Font Awesome') [[Edit content$!pageLocaleDisplay&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="$pageLocale" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" data-parent="$pageParentEscaped" class='editPage']]
+            $addStars**** $services.icon.render('pencil') [[Edit content$!pageLocaleDisplay&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="$pageLocale" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" data-parent="$pageParentEscaped" class='editPage']]
           #end
           #foreach($jsxObject in $jsxList)
             #if($jsxObject.getProperty('use').value == "onDemand" || $jsxObject.getProperty('use').value == "currentPage" || !$jsxObject.getProperty('use').value)
-              $addStars**** $services.icon.render('pencil', 'Font Awesome') [[Edit JS-$jsxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.JavaScriptExtension" data-objectnumber="$jsxObject.number" class='editObject']]
+              $addStars**** $services.icon.render('pencil') [[Edit JS-$jsxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.JavaScriptExtension" data-objectnumber="$jsxObject.number" class='editObject']]
             #end
           #end
           #foreach($ssxObject in $ssxList)
             #if($ssxObject.getProperty('use').value == "onDemand" || $ssxObject.getProperty('use').value == "currentPage" || !$ssxObject.getProperty('use').value)
-              $addStars**** $services.icon.render('pencil', 'Font Awesome') [[Edit CSS-$ssxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.StyleSheetExtension" data-objectnumber="$ssxObject.number" class='editObject']]
+              $addStars**** $services.icon.render('pencil') [[Edit CSS-$ssxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.StyleSheetExtension" data-objectnumber="$ssxObject.number" class='editObject']]
             #end
           #end
           #if($jsxList.size() == 0)
-            $addStars**** $services.icon.render('add', 'Font Awesome') [[Add local JS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newJSObject newLocalObject" data-space='$spaceEscaped' data-page='$pageEscaped']]
+            $addStars**** $services.icon.render('add') [[Add local JS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newJSObject newLocalObject" data-space='$spaceEscaped' data-page='$pageEscaped']]
           #end
           #if($ssxList.size() == 0)
-            $addStars**** $services.icon.render('add', 'Font Awesome') [[Add local CSS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newCSSObject newLocalObject" data-space='$spaceEscaped' data-page='$pageEscaped']]
+            $addStars**** $services.icon.render('add') [[Add local CSS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newCSSObject newLocalObject" data-space='$spaceEscaped' data-page='$pageEscaped']]
           #end
         #end
       #end
     #end
   #end
 #end
-#if($spaceCount == 0)
-  ** //Empty//
+#if($pageCount &amp;&amp; $pageCount == 0)
+  #if($spaceCount == 0)
+    ** //Empty//
+  #else
+    $addStars*** //Empty//
+  #end
 #end
 ## JS
 #set($pageClassHidden = " hierarchy-hidden")
-#set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-right', 'Font Awesome')")
+#set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-right')")
 #if($visibleCategory.contains("js"))
   #set($pageClassHidden = "")
-  #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-down', 'Font Awesome')")
+  #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-down')")
 #end
 * (% data-category="js" class="hierarchy-toggleCategory" %)((($iconBulletToggle  (%%)**JavaScript**)))
 (% id='hierarchyCategory_js' class='hierarchy-list${pageClassHidden}' %)
@@ -347,7 +351,7 @@
     #if("$!jsxObject.getProperty('name').value" != "")
       #set($docName = $jsxObject.getProperty('name').value)
     #end
-    ** $services.icon.render('drive', 'Font Awesome') [[$docName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.JavaScriptExtension" data-objectnumber="$jsxObject.number" class='editObject']]
+    ** $services.icon.render('drive') [[$docName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.JavaScriptExtension" data-objectnumber="$jsxObject.number" class='editObject']]
   #end
 #end
 #if($jsCount == 0)
@@ -355,10 +359,10 @@
 #end
 ## CSS
 #set($pageClassHidden = " hierarchy-hidden")
-#set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-right', 'Font Awesome')")
+#set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-right')")
 #if($visibleCategory.contains("css"))
   #set($pageClassHidden = "")
-  #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-down', 'Font Awesome')")
+  #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-down')")
 #end
 * (% data-category="css" class="hierarchy-toggleCategory" %)((($iconBulletToggle  (%%)**CSS**)))
 (% id='hierarchyCategory_css' class='hierarchy-list${pageClassHidden}' %)
@@ -373,7 +377,7 @@
     #if("$!ssxObject.getProperty('name').value" != "")
       #set($docName = $ssxObject.getProperty('name').value)
     #end
-    ** $services.icon.render('drive', 'Font Awesome') [[$docName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.StyleSheetExtension" data-objectnumber="$ssxObject.number" class='editObject']]
+    ** $services.icon.render('drive') [[$docName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.StyleSheetExtension" data-objectnumber="$ssxObject.number" class='editObject']]
   #end
 #end
 #if($cssCount == 0)
@@ -381,10 +385,10 @@
 #end
 ## Macros
 #set($pageClassHidden = " hierarchy-hidden")
-#set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-right', 'Font Awesome')")
+#set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-right')")
 #if($visibleCategory.contains("macros"))
   #set($pageClassHidden = "")
-  #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-down', 'Font Awesome')")
+  #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-down')")
 #end
 * (% data-category="macros" class="hierarchy-toggleCategory" %)((($iconBulletToggle  (%%)**Macros**)))
 (% id='hierarchyCategory_macros' class='hierarchy-list${pageClassHidden}' %)
@@ -399,19 +403,19 @@
     #if("$!macroObject.getProperty('name').value" != "")
       #set($docName = $macroObject.getProperty('name').value)
     #end
-    ** $services.icon.render('drive', 'Font Awesome') [[$docName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.WikiMacroClass" data-objectnumber="$macroObject.number" class='editObject']]
+    ** $services.icon.render('drive') [[$docName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.WikiMacroClass" data-objectnumber="$macroObject.number" class='editObject']]
     (% class='hierarchy-list' %)
       #foreach($jsxObject in $objDoc.getObjects('XWiki.JavaScriptExtension'))
-        *** $services.icon.render('pencil', 'Font Awesome') [[Edit macro JS-$jsxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.JavaScriptExtension" data-objectnumber="$jsxObject.number" class='editObject']]
+        *** $services.icon.render('pencil') [[Edit macro JS-$jsxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.JavaScriptExtension" data-objectnumber="$jsxObject.number" class='editObject']]
       #end
       #if($objDoc.getObjects('XWiki.JavaScriptExtension').size() == 0)
-        *** $services.icon.render('add', 'Font Awesome') [[Add macro JS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newJSObject newLocalObject" data-space='$spaceEscaped' data-page='$pageEscaped']]
+        *** $services.icon.render('add') [[Add macro JS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newJSObject newLocalObject" data-space='$spaceEscaped' data-page='$pageEscaped']]
       #end
       #foreach($ssxObject in $objDoc.getObjects('XWiki.StyleSheetExtension'))
-        *** $services.icon.render('pencil', 'Font Awesome') [[Edit macro CSS-$ssxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.StyleSheetExtension" data-objectnumber="$ssxObject.number" class='editObject']]
+        *** $services.icon.render('pencil') [[Edit macro CSS-$ssxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.StyleSheetExtension" data-objectnumber="$ssxObject.number" class='editObject']]
       #end
       #if($objDoc.getObjects('XWiki.StyleSheetExtension').size() == 0)
-        *** $services.icon.render('add', 'Font Awesome') [[Add macro CSS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newCSSObject newLocalObject" data-space='$spaceEscaped' data-page='$pageEscaped']]
+        *** $services.icon.render('add') [[Add macro CSS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newCSSObject newLocalObject" data-space='$spaceEscaped' data-page='$pageEscaped']]
       #end
   #end
 #end
@@ -420,10 +424,10 @@
  ** //Empty//
 #end
 #set($pageClassHidden = " hierarchy-hidden")
-#set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-right', 'Font Awesome')")
+#set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-right')")
 #if($visibleCategory.contains("translations"))
   #set($pageClassHidden = "")
-  #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-down', 'Font Awesome')")
+  #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-down')")
 #end
 * (% data-category="translations" class="hierarchy-toggleCategory" %)((($iconBulletToggle  (%%)**Translations**)))
 (% id='hierarchyCategory_translations' class='hierarchy-list${pageClassHidden}' %)
@@ -445,17 +449,17 @@
   #set($titleEscaped = $escapetool.url($objDoc.title).replace("+", "%20"))
   #set($pageParentEscaped = $escapetool.url($objDoc.parent).replace("+", "%20"))
   #set($pageClassHidden = " hierarchy-hidden")
-  #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-right', 'Font Awesome')")
+  #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-right')")
   #if($visiblePages.contains("Tr-$pageFullNameEscaped") || $pageFullName == $currentDoc.fullName)
     #set($pageClassHidden = "")
-    #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-down', 'Font Awesome')")
+    #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%)$services.icon.render('caret-down')")
   #end
   #set($pageLocaleList = $objDoc.getTranslationList())
   #set($pageLocaleList = $sorttool.sort($pageLocaleList))
   #set($ok = $pageLocaleList.add(0, $objDoc.defaultLanguage))
-  ** (% data-pageid="Tr-$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((($iconBulletToggle  (%%)$services.icon.render('page', 'Font Awesome') (%%)$docName )))
+  ** (% data-pageid="Tr-$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((($iconBulletToggle  (%%)$services.icon.render('page') (%%)$docName )))
   (% id='hierarchyPageDetails_Tr-$spaceEscapedBackslash.$pageEscapedBackslash' class='hierarchy-list${pageClassHidden}' %)
-   *** image:icon:add [[Add a language&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newPage newLanguage" data-space="$spaceEscaped" data-page="$pageEscaped" data-toggle="modal" data-target="#hierarchyPageModal"]]
+   *** $services.icon.render('add') [[Add a language&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newPage newLanguage" data-space="$spaceEscaped" data-page="$pageEscaped" data-toggle="modal" data-target="#hierarchyPageModal"]]
   #foreach($pageLocale in $pageLocaleList)
     #if($pageLocale == "")
       #set($pageLocale = "default")
@@ -467,7 +471,7 @@
         #set($displayLanguage = "${language.substring(0, 1).toUpperCase()}${language.substring(1)}")
       #end
     #end
-    *** $services.icon.render('pencil', 'Font Awesome') [[$displayLanguage&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="$pageLocale" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$titleEscaped" data-parent="$pageParentEscaped" class='editPage']]
+    *** $services.icon.render('pencil') [[$displayLanguage&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="$pageLocale" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$titleEscaped" data-parent="$pageParentEscaped" class='editPage']]
   #end
 #end
 #if($allTranslationsList.size() == 0)

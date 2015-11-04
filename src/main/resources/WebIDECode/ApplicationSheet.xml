@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1446478741000</date>
-  <contentUpdateDate>1446464021000</contentUpdateDate>
+  <date>1446570494000</date>
+  <contentUpdateDate>1446555737000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -532,13 +532,6 @@ $(function(){
 
 /* Editor metadata */
 
-#titleBlock {
-  width: 60%;
-  height: 40px;
-}
-#xwikidoctitleinput {
-  width: 80%;
-}
 #hierarchyStateBlock {
   position: fixed;
   bottom: 5px;
@@ -611,30 +604,6 @@ $(function(){
   display: none;
   box-sizing: border-box;
 }
-.editorObjectMenu {
-  position: relative;
-  float: right;
-  width: auto;
-  background-color: #EEEEEE;
-  padding: 10px;
-  z-index: 50;
-}
-#xwikidoctitleinput {
-  display: none;
-}
-.editorWikiTitle {
-  width: 100% !important;
-}
-.editorObjectMenuTitle {
-  text-transform: uppercase;
-  font-weight: bold;
-}
-.editorObjectMenuContent {
-  display: none;
-}
-.editorObjectMenu:hover .editorObjectMenuContent{
-  display: block;
-}
 .objectIDEform {
   z-index: 10;
 }
@@ -645,31 +614,6 @@ $(function(){
 }
 .editorPropertyLabel p {
   margin: 0px;
-}
-.editorObjectDetails {
-  padding-left: 10px;
-  display: none;
-}
-.editorObjectTitle, .editorObjectClassTitle {
-  cursor: pointer;
-  position: relative;
-}
-.editorObjectTitle:hover, .editorObjectClassTitle:hover {
-  text-decoration: underline;
-  background-color: #EEEEEE;
-}
-.editorObjectTitle h4 {
-  padding: 0px;
-  -webkit-user-select: none;  /* Chrome all / Safari all */
-  -moz-user-select: none;     /* Firefox all */
-  -ms-user-select: none;      /* IE 10+ */
-  user-select: none;
-}
-.editorObjectTitle p {
-  position: absolute;
-  right: 0px;
-  top: 0px;
-  cursor: pointer;
 }
 .editorOtherFieldsBlock {
   float: right;
@@ -696,12 +640,6 @@ $(function(){
   top: 0px;
   left: 0px;
 }
-.editorDisplayedObject {
-  overflow: hidden;
-}
-.editorWikiTabContent {
-  overflow: hidden;
-}
 #hierarchyCloseTabModalInfo {
   font-style: italic;
 }</code>
@@ -710,10 +648,282 @@ $(function(){
       <contentType>CSS</contentType>
     </property>
     <property>
-      <name/>
+      <name>Common</name>
     </property>
     <property>
       <parse>0</parse>
+    </property>
+    <property>
+      <use>currentPage</use>
+    </property>
+  </object>
+  <object>
+    <class>
+      <name>XWiki.StyleSheetExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <contentType>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>contentType</name>
+        <number>6</number>
+        <prettyName>Content Type</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>CSS|LESS</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </contentType>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage|onDemand|always</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <name>WebIDECode.ApplicationSheet</name>
+    <number>1</number>
+    <className>XWiki.StyleSheetExtension</className>
+    <guid>9a89d238-771b-4e6d-a784-9a89c1fda0b6</guid>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>.editorWikiTabContent {
+  overflow: hidden;
+}
+.editorWikiTitle {
+  width: 100% !important;
+}</code>
+    </property>
+    <property>
+      <contentType>CSS</contentType>
+    </property>
+    <property>
+      <name>WikiEditor</name>
+    </property>
+    <property>
+      <parse/>
+    </property>
+    <property>
+      <use>currentPage</use>
+    </property>
+  </object>
+  <object>
+    <class>
+      <name>XWiki.StyleSheetExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <contentType>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>contentType</name>
+        <number>6</number>
+        <prettyName>Content Type</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>CSS|LESS</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </contentType>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage|onDemand|always</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <name>WebIDECode.ApplicationSheet</name>
+    <number>2</number>
+    <className>XWiki.StyleSheetExtension</className>
+    <guid>00a759db-c950-43ac-bb51-818362f49978</guid>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>.editorObjectMenu {
+  position: relative;
+  float: right;
+  width: auto;
+  background-color: #EEEEEE;
+  padding: 10px;
+  z-index: 50;
+}
+.editorObjectMenuTitle {
+  text-transform: uppercase;
+  font-weight: bold;
+}
+.editorObjectMenuContent {
+  display: none;
+}
+.editorObjectMenu:hover .editorObjectMenuContent{
+  display: block;
+}
+.editorObjectDetails {
+  padding-left: 10px;
+  display: none;
+}
+.editorObjectTitle, .editorObjectClassTitle {
+  cursor: pointer;
+  position: relative;
+}
+.editorObjectTitle:hover, .editorObjectClassTitle:hover {
+  text-decoration: underline;
+  background-color: #EEEEEE;
+}
+.editorObjectTitle h4 {
+  padding: 0px;
+  -webkit-user-select: none;  /* Chrome all / Safari all */
+  -moz-user-select: none;     /* Firefox all */
+  -ms-user-select: none;      /* IE 10+ */
+  user-select: none;
+}
+.editorObjectTitle p {
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  cursor: pointer;
+}
+.editorDisplayedObject {
+  overflow: hidden;
+}</code>
+    </property>
+    <property>
+      <contentType>CSS</contentType>
+    </property>
+    <property>
+      <name>ObjectEditor</name>
+    </property>
+    <property>
+      <parse/>
     </property>
     <property>
       <use>currentPage</use>
@@ -818,9 +1028,6 @@ $(function(){
   #elseif($xwiki.exists('SyntaxHighlighting.SyntaxHighlighting'))
     #set($syntaxHState = 'old')
   #end
-  {{html clean=false}}
-  &lt;div id="titleBlock"&gt;&lt;strong&gt;Title:&lt;/strong&gt; &lt;input type="text" id="xwikidoctitleinput"&gt;&lt;span id="editorObjectTitle"&gt;${doc.name}&lt;/span&gt;&lt;/div&gt;
-  {{/html}}
   (% id="editorBlock" %)
   (((
   (% id="hierarchyBlock" %)
