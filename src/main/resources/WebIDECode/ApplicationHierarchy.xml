@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1446656113000</date>
+  <date>1446737182000</date>
   <contentUpdateDate>1446655942000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -759,8 +759,8 @@ $(function(){
   var currentLocale;
   var WikiEditor = {
     editor : 'wiki',
-    load : function() {
-      if(!loading &amp;&amp; currentEditor === WikiEditor.editor) {
+    load : function(loadAllTabs) {
+      if(currentEditor === WikiEditor.editor) {
         setLoadingState(true);
         var urlSpaces = getCurrentSpace(false, true);
         var urlPage = getCurrentPage(false);
@@ -787,6 +787,9 @@ $(function(){
           }
           setSavedContent(tabNumberId);
           setLoadingState(false, 'Loaded', 2500);
+          if(loadAllTabs) {
+            continueLoadAll();
+          }
         });
       }
     },
@@ -1172,8 +1175,8 @@ $(function(){
     /**
      * Get the list of object in the current page
      */
-    load : function() {
-      if(!loading &amp;&amp; currentEditor === ObjectEditor.editor) {
+    load : function(loadAllTabs) {
+      if(currentEditor === ObjectEditor.editor) {
         setLoadingState(true);
         var selectedObjectURL = '';
         if(ObjectEditor._getCurrentObject(false) &amp;&amp; ObjectEditor._getCurrentObject(false) !== 'XWiki.WikiMacroClass') {
@@ -1206,7 +1209,9 @@ $(function(){
           else {
             var objectsList = $(dataContent).find('object');
           }
-          ObjectEditor._startDisplayObjects(jQueryTabId, objectsList);
+          ObjectEditor._startDisplayObjects(jQueryTabId, objectsList, loadAllTabs);
+        }).error(function(xhr) {
+          setLoadingState(false, xhr.statusText, 4000, 'red');
         });
       }
     },
@@ -1215,7 +1220,7 @@ $(function(){
      * @input String jQueryTabId : id of the div where to put the data
      * @input List objectsList : list of objects to display from XWiki Rest API
      */
-    _startDisplayObjects: function(jQueryTabId, objectsList) {
+    _startDisplayObjects: function(jQueryTabId, objectsList, loadAllTabs) {
       var form_token = getDocumentReferenceData('form_token');
       var currentTabNumber = getTabNumber(jQueryTabId);
       var urlSpaces = getCurrentSpace(false, true);
@@ -1237,7 +1242,7 @@ $(function(){
         if(ObjectEditor._getCurrentObject(false) === 'XWiki.WikiMacroClass') {
           $('&lt;input type="hidden" id="tab'+currentTabNumber+'_addClassList" value="XWiki.WikiMacroParameterClass" /&gt;&lt;button class="btn btn-success" id="tab'+currentTabNumber+'_editorObjectAddButton"&gt;Add a parameter&lt;/button&gt;&lt;button class="btn btn-default" id="tab'+currentTabNumber+'_editorExpandAllButton"&gt;Expand all&lt;/button&gt;&lt;button class="btn btn-default" id="tab'+currentTabNumber+'_editorCollapseAllButton"&gt;Collapse all&lt;/button&gt;&lt;br&gt;').appendTo(menuNode);
         }
-        ObjectEditor._loadObjectsDetails(jQueryTabId, objectsList, 0, objectsListSize, '', menuNode, dataNode, null);
+        ObjectEditor._loadObjectsDetails(jQueryTabId, objectsList, 0, objectsListSize, '', menuNode, dataNode, null, loadAllTabs);
       }
       else {
         // Add the list which propose the user to add an object from a selected class
@@ -1252,7 +1257,7 @@ $(function(){
           fixIds(dataContentTmp, tabAdd);
           addObjectNode.html(dataContentTmp.html());
           // loadObjectsDetails : Add details recursively for each object and call the finalizing function
-          ObjectEditor._loadObjectsDetails(jQueryTabId, objectsList, 0, objectsListSize, '', menuNode, dataNode, null);
+          ObjectEditor._loadObjectsDetails(jQueryTabId, objectsList, 0, objectsListSize, '', menuNode, dataNode, null, loadAllTabs);
         });
       }
     },
@@ -1266,7 +1271,7 @@ $(function(){
      * @input String oldClass : the class of the previous object displayed
      * @input DOMElements menuNode, dataNode : The element in which object details have to be added
      */
-    _loadObjectsDetails : function(jQueryTabId, objectsList, index, objectsListSize, oldClass, menuNode, dataNode, currentClassNode) {
+    _loadObjectsDetails : function(jQueryTabId, objectsList, index, objectsListSize, oldClass, menuNode, dataNode, currentClassNode, loadAllTabs) {
       if(objectsListSize == 0) {ObjectEditor._endDisplayObjects(jQueryTabId, objectsListSize);}
       else {
         var currentTabNumber = getTabNumber(jQueryTabId);
@@ -1315,8 +1320,8 @@ $(function(){
           currentClassNode.append('Error while loading object '+className+' '+number+' : '+xhr.statusText+'&lt;br&gt;');
         }).complete(function(xhr) {
           index++;
-          if(index &lt; objectsListSize) {ObjectEditor._loadObjectsDetails(jQueryTabId, objectsList, index, objectsListSize, className, menuNode, dataNode, currentClassNode);}
-          else {ObjectEditor._endDisplayObjects(jQueryTabId, objectsListSize);}
+          if(index &lt; objectsListSize) {ObjectEditor._loadObjectsDetails(jQueryTabId, objectsList, index, objectsListSize, className, menuNode, dataNode, currentClassNode, loadAllTabs);}
+          else {ObjectEditor._endDisplayObjects(jQueryTabId, objectsListSize, loadAllTabs);}
         });
       }
     },
@@ -1325,7 +1330,7 @@ $(function(){
      * @input String jQueryTabId : id of the div where to put the data
      * @input number of objects in the page
      */
-    _endDisplayObjects : function(jQueryTabId, objectsListSize) {
+    _endDisplayObjects : function(jQueryTabId, objectsListSize, loadAllTabs) {
       // Initialize the events (click on link/buttons) for all the objects
       ObjectEditor._initEvents(true, jQueryTabId);
       // Objects should be hidden if there are more than 2
@@ -1335,6 +1340,9 @@ $(function(){
       var tabNumberId = getTabNumber(jQueryTabId);
       setSavedContent(tabNumberId);
       setLoadingState(false, 'Loaded', 2500);
+      if(loadAllTabs) {
+        continueLoadAll();
+      }
     },
     /**
      * Initialize the different events related to object editor
@@ -1474,7 +1482,7 @@ $(function(){
     getParametersFromTab : function(tabButton) {
       var tabObj = tabButton.attr('data-object') || null;
       var tabObjNumber = tabButton.attr('data-objectnumber') || null;
-      return [tabObj || tabObjNumber];
+      return [tabObj, tabObjNumber];
     },
     getMenuElement : function(folder, file, parameters) {
       return (parameters[0]) ? $('.editObject[data-space="'+folder+'"][data-page="'+file+'"][data-object="'+parameters[0]+'"][data-objectnumber="'+parameters[1]+'"]') : $('.editObject[data-space="'+folder+'"][data-page="'+file+'"]').not('[data-object]');
@@ -1963,15 +1971,40 @@ $(function(){
   Hierarchy.init();
   Hierarchy.initModals();
   // Initialize the first editor to display
-  if(currentEditor == "view") {
+  var openedTabs = window.localStorage['XWiki.extension.XWebIDE.'+masterPage+'.tabs'];
+  var loadList = [];
+  if(openedTabs) {
+    var tabsArray = openedTabs.split(',');
+    for(var index = 0; index &lt; tabsArray.length; index++) {
+      var tab = decodeURIComponent(tabsArray[index]).split(',');
+      var tabEditor = decodeURIComponent(tab[0]);
+      var tabSpace = decodeURIComponent(tab[1]);
+      var tabPage = decodeURIComponent(tab[2]);
+      var tabParameters = decodeURIComponent(tab[3]).split(',');
+      loadList.push([tabEditor, tabSpace, tabPage, tabParameters]);
+    }
+  }
+  if(currentEditor === 'class') {
+    setActiveTab('class', currentPage, currentSpace, []);
+  }
+  else if(currentEditor === "view" &amp;&amp; loadList.length === 0) {
     initViewEditor();
     setActiveTab('view', currentPage, currentSpace, []);
   }
-  else if(currentEditor == 'class') {
-    setActiveTab('class', currentPage, currentSpace, []);
+  else if(currentEditor === "view") {
+    initViewEditor();
+    continueLoadAll();
   }
-  else {
-    goToNewPage(currentEditor, getCurrentPage(false), getCurrentSpace(false), Modules[currentEditor].getParameters());
+  else { //Element loaded from hash : added to loadList
+    loadList.push([currentEditor, getCurrentSpace(false), getCurrentPage(false), Modules[currentEditor].getParameters()]);
+    continueLoadAll();
+  }
+
+  function continueLoadAll() {
+    if(loadList.length &gt; 0) {
+      var tabToLoad = loadList.shift();
+      goToNewPage(tabToLoad[0], tabToLoad[2], tabToLoad[1], tabToLoad[3], true);
+    }
   }
   // Improve the F5 shortcut to stay on the current editor and the current page
   if(currentEditor !== 'class') {
@@ -1988,15 +2021,25 @@ $(function(){
 
   // Display a warning message when the user try to close/reload the tab/window and he has unsaved content
   window.onbeforeunload = function() {
-    var unsaved = false;
-    $('.editorTabButton').each(function(index, elt) {
-      var tabNumberId = $(elt).attr('data-tabnumber');
-      if(savedContent[tabNumberId] != getCurrentContent(tabNumberId)) {
-        unsaved = true;
+    if(currentEditor !== 'class') {
+      var unsaved = false;
+      var openedTabs = [];
+      $('.editorTabButton').each(function(index, elt) {
+        var editor = $(elt).attr('data-editor');
+        var space = $(elt).attr('data-space');
+        var page = $(elt).attr('data-page');
+        var parameters = Modules[editor].getParametersFromTab($(elt));
+        var list = encodeURIComponent([encodeURIComponent(editor), encodeURIComponent(space), encodeURIComponent(page), encodeURIComponent(parameters)]);
+        openedTabs.push(list);
+        var tabNumberId = $(elt).attr('data-tabnumber');
+        if(savedContent[tabNumberId] != getCurrentContent(tabNumberId)) {
+          unsaved = true;
+        }
+      });
+      window.localStorage['XWiki.extension.XWebIDE.'+masterPage+'.tabs'] = openedTabs;
+      if(unsaved) {
+        return "You have unsaved content! Are you sure you want to close the page?";
       }
-    });
-    if(unsaved) {
-      return "You have unsaved content! Are you sure you want to close the page?";
     }
   };
 
@@ -2004,6 +2047,7 @@ $(function(){
   $('body').on('DOMNodeInserted', function(e) {
     if ($(e.target).is('.CodeMirror')) {
       window.setTimeout(function() {
+        $(e.target).css({'height':'650px'});
         var cmInstance = $(e.target)[0].CodeMirror;
         cmInstance.setOption('lineWrapping', true);
         var parentTab = $(e.target).closest('.editorTab');
@@ -2048,7 +2092,6 @@ $(function(){
       }
       // Determine the editor used in the selected tab
       var selectedTabEditor = $(closedTab).attr('data-editor');
-      alert(selectedTabEditor);
       if($(this).attr('id') === 'hierarchySaveAndCloseModal') {
         Modules[selectedTabEditor].save(tabNumberId, false, true, false);
       }
@@ -2122,7 +2165,7 @@ $(function(){
    * @input String objectNumber: number of the object displayed (JSX, SSX, macro) when single-object editor
    * @input String locale: the locale of the new tab
    */
-  function goToNewPage(mode, file, folder, parameters) {
+  function goToNewPage(mode, file, folder, parameters, loadAllTabs) {
     if(mode === 'class') {
       window.location.href = '/'+XWiki.webapppath+''+XWiki.servletpath+'edit/'+getURLSpacesString(folder)+'/'+file+'?editor=class#!XWebIDE';
     }
@@ -2154,12 +2197,19 @@ $(function(){
       jQueryTabId = '#'+tabId;
       //Open the tab
       if(!$(jQueryTabId).length) { //Create a new tab
-        createTab(currentEditor, tabId, getCurrentSpace(false), getCurrentPage(false), Modules[currentEditor].getParameters());
-        Modules[mode].load();
+        createTab(currentEditor, getCurrentSpace(false), getCurrentPage(false), Modules[currentEditor].getParameters());
+        Modules[mode].load(loadAllTabs);
       }
       else { //Open an existing tab
         $('.editorTab').hide();
         $(jQueryTabId).show();
+        if(syntaxHighlighting) {
+          window.setTimeout(function() {
+            $(jQueryTabId+' .CodeMirror').each(function(i, elmt) {
+              $(elmt)[0].CodeMirror.refresh();
+            });
+          }, 50);
+        }
         setActiveTab(currentEditor, getCurrentPage(false), getCurrentSpace(false), Modules[currentEditor].getParameters());
       }
       // CHange the effect of the bottom delete button (delete an object or a page or ?? depending on the current editor)
@@ -2546,7 +2596,7 @@ $(function(){
   /*
    * Tabs tools
    * ---------------------------------
-   * createTab(mode, id, folder, file, parameters)
+   * createTab(mode, folder, file, parameters)
    * initOtherFieldsBlock(dataNode, jQueryTabId)
    * closeTab(element, tabName)
    * removeTab(element, tabNumberId)
@@ -2565,7 +2615,8 @@ $(function(){
    * @input String objectSelected: name of the object displayed (JSX, SSX, macro) when single-object editor
    * @input String objectNumber: number of the object displayed (JSX, SSX, macro) when single-object editor
    */
-  function createTab(mode, id, folder, file, parameters) {
+  function createTab(mode, folder, file, parameters) {
+    var id = getTabId(mode, folder, file, parameters);
     var jQueryId = '#'+id;
     $('.editorTab').hide();
     tabNumber++;

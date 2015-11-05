@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347285000</creationDate>
-  <date>1446656046000</date>
-  <contentUpdateDate>1446656046000</contentUpdateDate>
+  <date>1446735988000</date>
+  <contentUpdateDate>1446735988000</contentUpdateDate>
   <version>1.1</version>
   <title>LogicalTree</title>
   <defaultTemplate/>
@@ -139,7 +139,7 @@
     #set($pageEscaped = $escapetool.url($document.name).replace("+", "%20"))
     ** (% data-pageid="Class-$escapetool.url($pageFullName)" class="hierarchy-displayPage" %)((($iconBulletToggle (%%)$services.icon.render('desktop') (% id='hierarchyDisplayPage_$escapetool.url($pageFullName)' class="hierarchyPageName"%)$className)))
     (% id='hierarchyPageDetails_Class-$escapetool.url($pageFullName)' class='hierarchy-list${pageClassHidden}' %)
-    *** $services.icon.render('database') [[Edit fields&gt;&gt;path:$document.getURL('edit', 'editor=class#!XWebIDE')||class="editClass" data-page='$pageEscaped' data-space='$spaceEscaped']]
+    *** $services.icon.render('database') [[Edit fields&gt;&gt;path:$document.getURL('edit', "editor=class#!XWebIDE&amp;!!$escapetool.url($masterDoc.space).replace('+', '%20')&amp;!!$escapetool.url($masterDoc.name).replace('+', '%20')")||class="editClass" data-page='$pageEscaped' data-space='$spaceEscaped']]
     #if($sheetDocList.size() &gt; 0)
       #foreach($sheetFullName in $sheetDocList)
         #set($addName = "")
