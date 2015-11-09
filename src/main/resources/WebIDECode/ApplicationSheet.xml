@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1446740780000</date>
+  <date>1447085251000</date>
   <contentUpdateDate>1446740309000</contentUpdateDate>
   <version>1.1</version>
   <title/>
@@ -603,6 +603,11 @@ $(function(){
 }
 .unsavedTab {
   display: none;
+  font-weight: bold;
+  font-size: 24px;
+  position: absolute;
+  left: 2px;
+  top: -6px;
 }
 .editorElement {
   display: none;

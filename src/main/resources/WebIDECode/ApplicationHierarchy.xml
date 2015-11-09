@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1447077643000</date>
+  <date>1447088688000</date>
   <contentUpdateDate>1446740651000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -425,6 +425,19 @@ $(function(){
 
     // Contains all events that have to be registered again each time the hierarchy is updated (mostly "click" events on elements in the hierarchy)
     init : function() {
+      // Check for unsaved content
+      $('#contentMainBlock').on('keyup click', function(){
+        if($.inArray(currentEditor, Object.keys(Modules)) &gt;= 0 &amp;&amp; !loading &amp;&amp; !saving) {
+          // Display a star in the old tab button if there is unsaved content when we leave it
+          var tabId = getTabId(currentEditor, getCurrentSpace(false), getCurrentPage(false), Modules[currentEditor].getParameters());
+          var jQueryTabId = '#'+tabId;
+          var tabNumberId = getTabNumber(jQueryTabId);
+          if(tabNumber &gt; 0 &amp;&amp; tabNumberId &gt; 0) {
+            var unsavedState = (savedContent[tabNumberId] !== getCurrentContent(tabNumberId));
+            setStar(unsavedState, tabNumberId);
+          }
+        }
+      });
       // Display or hide the content of a folder by clicking on its name
       $('.hierarchy-toggleFolder').click(function(){
         var spaceToggle = $(this).attr('data-space');
@@ -1743,6 +1756,10 @@ $(function(){
         var isSelectedObject = '';
         var isGlobal = '';
         var addProperties = '';
+        if(!newTab) {
+          var currentTabNumber = getTabNumber(jQueryTabId);
+          var unsavedStateBefore = (savedContent[currentTabNumber] !== getCurrentContent(currentTabNumber));
+        }
         if(ObjectEditor._getCurrentObject(false) || newTab) {
           isSelectedObject = '&amp;selectedObject';
         }
@@ -1781,7 +1798,6 @@ $(function(){
               }
             }
             else { // Add an object from an object editor tab
-              var currentTabNumber = getTabNumber(jQueryTabId);
               var divSelector = 'div[id="tab'+currentTabNumber+'_editorObjects-'+className+'"]';
               var dataContentTmp = $('&lt;div/&gt;').html(dataContent);
               var tabAdd = 'tab'+currentTabNumber+'_';
@@ -1829,6 +1845,12 @@ $(function(){
             else {
               closeModalNoBootstrap();
             }
+            // If all the content was initially saved, update the new "savedContent" value (the new object is automatically saved)
+            if(!newTab &amp;&amp; !unsavedStateBefore) {
+              setSavedContent(currentTabNumber);
+            }
+            var unsavedState = (savedContent[currentTabNumber] !== getCurrentContent(currentTabNumber));
+            setStar(unsavedState, currentTabNumber);
             setLoadingState(false, 'Complete', 2500);
           });
         }
@@ -1845,6 +1867,7 @@ $(function(){
         setLoadingState(true, 'Removing text...');
         var jQueryTabId = '#'+getTabId(ObjectEditor.editor, getCurrentSpace(false), getCurrentPage(false), ObjectEditor.getParameters());
         var currentTabNumber = getTabNumber(jQueryTabId);
+        var unsavedStateBefore = (savedContent[currentTabNumber] !== getCurrentContent(currentTabNumber));
         var restCurrentSpaces = getRestSpacesString(getCurrentSpace());
         $.ajax({
           url: '/'+XWiki.webapppath+'rest/wikis/'+getDocumentReferenceData('wiki')+'/'+restCurrentSpaces+'/pages/'+getCurrentPage()+'/objects/'+className+'/'+number,
@@ -1877,6 +1900,12 @@ $(function(){
           setSavingState(true, xhr.statusText, 5000, 'red');
         }).complete(function() {
           $('#editorDeletedObjectModalInfo').html('');
+          // If all the content was initially saved, update the new "savedContent" value (the removed object is automatically saved)
+          if(!unsavedStateBefore) {
+            setSavedContent(currentTabNumber);
+          }
+          var unsavedState = (savedContent[currentTabNumber] !== getCurrentContent(currentTabNumber));
+          setStar(unsavedState, currentTabNumber);
           setLoadingState(false, 'Removed', 2500);
         });
       }
@@ -2224,24 +2253,14 @@ $(function(){
       if(!$(TAB_MAIN_CONTAINER).is(":visible")) {
         initEditor();
       }
-      if(currentEditor !== 'view') {
-        // Display a star in the old tab button if there is unsaved content when we leave it
-        var tabId = getTabId(currentEditor, getCurrentSpace(false), getCurrentPage(false), Modules[currentEditor].getParameters());
-        var jQueryTabId = '#'+tabId;
-        var tabNumberId = getTabNumber(jQueryTabId);
-        if(tabNumber &gt; 0 &amp;&amp; tabNumberId &gt; 0) {
-          var unsavedState = (savedContent[tabNumberId] !== getCurrentContent(tabNumberId));
-          setStar(unsavedState, tabNumberId);
-        }
-      }
       // Load the new tab data
       setCurrentPage(file);
       setCurrentSpace(folder);
       currentEditor = mode;
       resetAllParameters()
       Modules[currentEditor].setParameters(parameters);
-      tabId = getTabId(currentEditor, getCurrentSpace(false), getCurrentPage(false), Modules[currentEditor].getParameters());
-      jQueryTabId = '#'+tabId;
+      var tabId = getTabId(currentEditor, getCurrentSpace(false), getCurrentPage(false), Modules[currentEditor].getParameters());
+      var jQueryTabId = '#'+tabId;
       //Open the tab
       if(!$(jQueryTabId).length) { //Create a new tab
         createTab(currentEditor, getCurrentSpace(false), getCurrentPage(false), Modules[currentEditor].getParameters());
@@ -2689,7 +2708,7 @@ $(function(){
     tabModeClass = 'editor'+prettyModeName+'Tab';
     if(!$(jQueryId).length) {
       $(TAB_MAIN_CONTAINER).append('&lt;div id="'+id+'" class="editorTab '+tabModeClass+'" data-tabnumber="'+tabNumber+'"&gt;&lt;/div&gt;');
-      var tabButton = $('&lt;span class="editorTabButton" data-tabnumber="'+tabNumber+'" data-editor="'+mode+'" data-space="'+encodeURIComponent(folder)+'" data-page="'+encodeURIComponent(file)+'" '+addEditorParameters+' title="('+prettyModeName+') '+folder+'.'+file+'"&gt;'+$(iconModeId).html()+' &lt;strong class="unsavedTab"&gt;*&lt;/strong&gt;'+tabName+'&lt;/span&gt;').appendTo('#editorTabBar').on('mousedown', function(e) {
+      var tabButton = $('&lt;span class="editorTabButton" data-tabnumber="'+tabNumber+'" data-editor="'+mode+'" data-space="'+encodeURIComponent(folder)+'" data-page="'+encodeURIComponent(file)+'" '+addEditorParameters+' title="('+prettyModeName+') '+folder+'.'+file+'"&gt;'+$(iconModeId).html()+' &lt;strong class="unsavedTab"&gt;*&lt;/strong&gt; '+tabName+'&lt;/span&gt;').appendTo('#editorTabBar').on('mousedown', function(e) {
         e.preventDefault();
         if(e.which === 1) { // Left-click
           if(decodeURIComponent(file) !== getCurrentPage(false) || decodeURIComponent(folder) !== getCurrentSpace(false) || $(decodedParameters).not(currentModule.getParameters()).length !== 0 || $(currentModule.getParameters()).not(decodedParameters).length !== 0 || currentEditor !== mode) {
