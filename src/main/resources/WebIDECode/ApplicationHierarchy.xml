@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1446803199000</date>
+  <date>1447066086000</date>
   <contentUpdateDate>1446740651000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -775,12 +775,19 @@ $(function(){
           var tabNumberId = getTabNumber(jQueryTabId);
           var rawtitle = decodeURIComponent(getRawTitle(getCurrentSpace(false), getCurrentPage(false), locale));
           var parentPage = decodeURIComponent(getParentPage(getCurrentSpace(false), getCurrentPage(false), locale));
+          var isHidden = WikiEditor._getHidden(getCurrentSpace(false), getCurrentPage(false), locale);
           initOtherFieldsBlock($(jQueryTabId), jQueryTabId);
           var addTextareaWiki = '&lt;div class="editorWikiTabContent"&gt;&lt;div class="editorPropertyLabel"&gt;&lt;p class="editorWikiTitleLabel"&gt;Title&lt;/p&gt;&lt;/div&gt; &lt;input type="text" class="editorWikiTitle" value="'+rawtitle+'" /&gt;&lt;div class="editorPropertyLabel"&gt;&lt;p class="editorWikiTitleLabel"&gt;Content&lt;/p&gt;&lt;/div&gt;&lt;textarea id="content_'+tabId+'"&gt;&lt;/textarea&gt;&lt;/div&gt;';
           $(jQueryTabId).append(addTextareaWiki);
           $(jQueryTabId+' &gt; .editorWikiTabContent &gt; textarea').val(dataContent);
           var advancedFieldBlock = $(jQueryTabId+' .editorOtherFieldsBlockContent');
-          $(advancedFieldBlock).append('&lt;div class="editorPropertyLabel"&gt;&lt;p&gt;Parent&lt;/p&gt;&lt;/div&gt; &lt;input type="text" class="editorWikiParent" value="'+parentPage+'" size="45"/&gt;')
+          var addHidden = '';
+          var hiddenState = '0';
+          if(isHidden === "true") {
+            addHidden = ' checked="checked"';
+            hiddenState = '1';
+          }
+          $(advancedFieldBlock).append('&lt;div class="editorPropertyLabel"&gt;&lt;p&gt;Parent&lt;/p&gt;&lt;/div&gt; &lt;input type="text" class="editorWikiParent" value="'+parentPage+'" size="45"/&gt;&lt;br&gt;&lt;div class="editorPropertyLabel"&gt;&lt;p&gt;Hidden document&lt;/p&gt;&lt;/div&gt; &lt;input type="checkbox" class="editorWikiHidden" '+addHidden+'/&gt;&lt;input type="hidden" class="editorWikiHiddenSaved" value="'+hiddenState+'"/&gt;');
           if(syntaxHighlighting) {
             // Add the CodeMirror editor
             initCodeMirrorsCustom(currentEditor, tabId);
@@ -808,6 +815,7 @@ $(function(){
         var fileTitle = getCurrentTitle(jQueryTabId);
         var fileContent = getCurrentContent(tabNumberId);
         var fileParent = getCurrentParent(jQueryTabId);
+        var hiddenState = $(jQueryTabId+' .editorWikiHidden').is(':checked') ? 1 : 0;
         $.ajax({
           url: "/"+XWiki.webapppath+"rest/wikis/"+getDocumentReferenceData('wiki')+"/"+restSpaces+"/pages/"+page+restLocale,
           type: "PUT",
@@ -823,6 +831,9 @@ $(function(){
             continueSaveAll(false, xhr, space, page);
           }
         }).success(function(data){
+          if(hiddenState !== parseInt($(jQueryTabId+' .editorWikiHiddenSaved').val())) {
+            WikiEditor._setHidden(space, page, locale, hiddenState);
+          }
           if(changeSavedContent) {
             setSavedContent(tabNumberId);
           }
@@ -1140,6 +1151,34 @@ $(function(){
     _setCurrentLocale : function(locale) {
       currentLocale = locale;
     },
+  /**
+   * Get/set the value of the "hidden" field of the selected page
+   * _getHidden/_setHidden
+   * @input String space : space of the page
+   * @input String page : name of the page
+   * @input String locale : language of the page
+   * _setHidden
+   * @input Int state : 0 = visible, 1 = hidden
+   */
+    _getHidden : function(space, page, locale) {
+      var hiddenState = $('.editPage[data-space="'+space+'"][data-page="'+page+'"][data-locale="'+locale+'"]').attr('data-hidden');
+      return hiddenState || '';
+    },
+    _setHidden : function(space, page, locale, state) {
+      var jQueryTabId = '#'+getTabId(WikiEditor.editor, space, page, [locale]);
+      var form_token = getDocumentReferenceData('form_token');
+      $.ajax({
+        url: '/'+XWiki.webapppath+XWiki.servletpath+'save/'+getURLSpacesString(space)+'/'+page+'?language='+locale,
+        type: 'POST',
+        data: 'form_token='+form_token+'&amp;xhidden='+state,
+        success: function() {
+          $(jQueryTabId+' .editorWikiHiddenSaved').val(state);
+        },
+        error: function(xhr) {
+          $(jQueryTabId+' .editorWikiHidden').val($(jQueryTabId+' .editorWikiHiddenSaved').val());
+        }
+      });
+    }
   };
 
   //-------------------------------------

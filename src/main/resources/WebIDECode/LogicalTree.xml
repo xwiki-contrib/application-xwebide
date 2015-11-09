@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347285000</creationDate>
-  <date>1446735988000</date>
-  <contentUpdateDate>1446735988000</contentUpdateDate>
+  <date>1446822578000</date>
+  <contentUpdateDate>1446822578000</contentUpdateDate>
   <version>1.1</version>
   <title>LogicalTree</title>
   <defaultTemplate/>
@@ -152,7 +152,7 @@
         #if($sheetDocList.size() &gt; 1)
           #set($addName = " ($sheetDoc.name)")
         #end
-        *** $services.icon.render('pencil') [[Edit sheet$addName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceSheetEscaped' data-page='$!pageSheetEscaped' data-locale="default" data-rawtitle='$titleSheetEscaped' data-parent="$pageParentEscaped" class='editPage']]
+        *** $services.icon.render('pencil') [[Edit sheet$addName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceSheetEscaped' data-page='$!pageSheetEscaped' data-locale="default" data-rawtitle='$titleSheetEscaped' data-parent="$pageParentEscaped" data-hidden="$sheetDoc.isHidden()" class='editPage']]
         (% class="hierarchy-list" %)
         #foreach($jsxObject in $sheetDoc.getObjects('XWiki.JavaScriptExtension'))
           **** $services.icon.render('pencil') [[Edit sheet JS-$jsxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped' data-object="XWiki.JavaScriptExtension" data-objectnumber="$jsxObject.number" class='editObject']]
@@ -208,10 +208,8 @@
   #set($ok = $allTranslationsList.addAll($translationsList))
   #set($isInClassesList = $pagesInClassesList.contains($pageFullName)) ## Classes should not be displayed in the 'pages' tree
   #set($isGlobal = false)
-  #if($space == $codeSpace)
-    #if(($page == 'JS' &amp;&amp; $pageDoc.getObjects('XWiki.JavaScriptExtension', 'use', 'always').size()&gt;0) || ($page == 'CSS' &amp;&amp; $pageDoc.getObjects('XWiki.StyleSheetExtension', 'use', 'always').size()&gt;0) || $macrosList.size()&gt;0 || $translationsList.size()&gt;0)
-      #set($isGlobal = true)
-    #end
+  #if(($space == $codeSpace &amp;&amp; ($page == 'JS' &amp;&amp; $pageDoc.getObjects('XWiki.JavaScriptExtension', 'use', 'always').size()&gt;0) || ($page == 'CSS' &amp;&amp; $pageDoc.getObjects('XWiki.StyleSheetExtension', 'use', 'always').size()&gt;0)) || $macrosList.size()&gt;0 || $translationsList.size()&gt;0)
+    #set($isGlobal = true)
   #end
   ## Compute space elements
   #if($space != $oldSpace)
@@ -301,7 +299,7 @@
             #if($velocityCount == 1)
               #set($pageLocale = 'default')
             #end
-            $addStars**** $services.icon.render('pencil') [[Edit content$!pageLocaleDisplay&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="$pageLocale" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" data-parent="$pageParentEscaped" class='editPage']]
+            $addStars**** $services.icon.render('pencil') [[Edit content$!pageLocaleDisplay&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="$pageLocale" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" data-parent="$pageParentEscaped" data-hidden="$pageDoc.getTranslatedDocument($pageLocale).isHidden()" class='editPage']]
           #end
           #foreach($jsxObject in $jsxList)
             #if($jsxObject.getProperty('use').value == "onDemand" || $jsxObject.getProperty('use').value == "currentPage" || !$jsxObject.getProperty('use').value)
@@ -471,7 +469,7 @@
         #set($displayLanguage = "${language.substring(0, 1).toUpperCase()}${language.substring(1)}")
       #end
     #end
-    *** $services.icon.render('pencil') [[$displayLanguage&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="$pageLocale" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$titleEscaped" data-parent="$pageParentEscaped" class='editPage']]
+    *** $services.icon.render('pencil') [[$displayLanguage&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="$pageLocale" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$titleEscaped" data-parent="$pageParentEscaped" data-hidden="$objDoc.getTranslatedDocument($pageLocale).isHidden()" class='editPage']]
   #end
 #end
 #if($allTranslationsList.size() == 0)

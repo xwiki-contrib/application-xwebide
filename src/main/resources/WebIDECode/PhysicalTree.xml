@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347276000</creationDate>
-  <date>1446740043000</date>
-  <contentUpdateDate>1446740043000</contentUpdateDate>
+  <date>1446818409000</date>
+  <contentUpdateDate>1446818409000</contentUpdateDate>
   <version>1.1</version>
   <title>PhysicalTree</title>
   <defaultTemplate/>
@@ -212,7 +212,7 @@
         #if($velocityCount == 1)
           #set($pageLocale = 'default')
         #end
-        $addStars*** $services.icon.render('pencil') [[Edit content$!pageLocaleDisplay&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="$pageLocale" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" data-parent="$pageParentEscaped" class='editPage $!addPageActiveWikiClass']]
+        $addStars*** $services.icon.render('pencil') [[Edit content$!pageLocaleDisplay&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="$pageLocale" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" data-parent="$pageParentEscaped" data-hidden="$pageDoc.isHidden()" class='editPage $!addPageActiveWikiClass']]
       #end
       $addStars*** $services.icon.render('drive') [[Objects ($objectCount)&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' class='editObject $!addPageActiveObjectClass']]
       $addStars*** $services.icon.render('database') [[Class ($classCount)&gt;&gt;path:$pageDoc.getURL('edit', "editor=class#!XWebIDE&amp;!!$escapetool.url($masterDoc.space).replace('+', '%20')&amp;!!$escapetool.url($masterDoc.name).replace('+', '%20')")||class="editClass" data-page='$pageEscaped' data-space='$spaceEscaped']]
