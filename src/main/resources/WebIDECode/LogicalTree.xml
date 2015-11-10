@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347285000</creationDate>
-  <date>1447077821000</date>
-  <contentUpdateDate>1447077609000</contentUpdateDate>
+  <date>1447167994000</date>
+  <contentUpdateDate>1447167994000</contentUpdateDate>
   <version>1.1</version>
   <title>LogicalTree</title>
   <defaultTemplate/>
@@ -153,7 +153,9 @@
         #set($pageSheetEscaped = $escapetool.url($sheetDoc.name).replace("+", "%20"))
         #set($titleSheetEscaped = $escapetool.url($sheetDoc.title).replace("+", "%20"))
         #set($pageParentEscaped = $escapetool.url($sheetDoc.parent).replace("+", "%20"))
-        #if($sheetDocList.size() &gt; 1)
+        #if($sheetDoc.getObject("XWiki.SheetDescriptorClass"))
+          #set($addName = " ($sheetDoc.action)")
+        #elseif($sheetDocList.size() &gt; 1)
           #set($addName = " ($sheetDoc.name)")
         #end
         *** $services.icon.render('pencil') [[Edit sheet$addName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceSheetEscaped' data-page='$!pageSheetEscaped' data-locale="default" data-rawtitle='$titleSheetEscaped' data-parent="$pageParentEscaped" data-hidden="$sheetDoc.isHidden()" class='editPage']]
@@ -171,9 +173,8 @@
           **** $services.icon.render('add') [[Add sheet CSS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newCSSObject newLocalObject" data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped']]
         #end
       #end
-    #else
-      *** $services.icon.render('add') [[Add bound sheet&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newPage newSheet" data-page='${pageEscaped}Sheet' data-space='$spaceEscaped' data-locale="default"]]
     #end
+    *** $services.icon.render('add') [[Add bound sheet&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newPage newSheet" data-page='$escapetool.url($className).replace("+", "%20")' data-space='$spaceEscaped' data-locale="default" data-toggle="modal" data-target="#hierarchyPageModal"]]
     #if(!$classTemplateDoc.isNew())
       #set($ok = $pagesInClassesList.add($classTemplateDoc.fullName))
       *** $services.icon.render('drive') [[Edit template&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$escapetool.url($classTemplateDoc.space).replace("+", "%20")' data-page='$escapetool.url($classTemplateDoc.name).replace("+", "%20")' data-object="$pageFullNameEscaped" data-objectnumber="0" data-locale="default" class='editObject']]
@@ -204,6 +205,7 @@
   #set($page = $pageDoc.name)
   #set($jsxList = $pageDoc.getObjects('XWiki.JavaScriptExtension'))
   #set($ssxList = $pageDoc.getObjects('XWiki.StyleSheetExtension'))
+  #set($docSheetList = $pageDoc.getObjects('XWiki.DocumentSheetBinding'))
   #set($macrosList = $pageDoc.getObjects('XWiki.WikiMacroClass'))
   #set($translationsList = $pageDoc.getObjects('XWiki.TranslationDocumentClass'))
   #set($ok = $allJSList.addAll($jsxList))
@@ -315,11 +317,18 @@
               $addStars**** $services.icon.render('pencil') [[Edit CSS-$ssxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.StyleSheetExtension" data-objectnumber="$ssxObject.number" class='editObject']]
             #end
           #end
+          #foreach($docSheetObj in $docSheetList)
+            #set($sheetDoc = $xwiki.getDocument($docSheetObj.sheet))
+            $addStars**** $services.icon.render('pencil') [[Edit Sheet-$docSheetObj.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.DocumentSheetBinding" data-objectnumber="$docSheetObj.number" class='editObject']]
+          #end
           #if($jsxList.size() == 0)
             $addStars**** $services.icon.render('add') [[Add local JS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newJSObject newLocalObject" data-space='$spaceEscaped' data-page='$pageEscaped']]
           #end
           #if($ssxList.size() == 0)
             $addStars**** $services.icon.render('add') [[Add local CSS&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newCSSObject newLocalObject" data-space='$spaceEscaped' data-page='$pageEscaped']]
+          #end
+          #if($docSheetList.size() == 0)
+            $addStars**** $services.icon.render('add') [[Add bound sheet&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="newLocalObject newSheet" data-space='$spaceEscaped' data-page='$pageEscaped']]
           #end
         #end
       #end

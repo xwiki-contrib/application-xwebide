@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1435238189000</creationDate>
-  <date>1445518059000</date>
-  <contentUpdateDate>1445518059000</contentUpdateDate>
+  <date>1447329763000</date>
+  <contentUpdateDate>1447329763000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationObjects</title>
   <defaultTemplate/>
@@ -87,15 +87,27 @@ Add an object: &lt;select id="addClassList"&gt;
 {{/html}}
 #elseif($request.addObject &amp;&amp; $request.docFullName)
 #set($requestedDoc = $xwiki.getDocument($request.docFullName))
-#set($requestedObj = $requestedDoc.newObject($request.addObject))
 #if($request.isGlobal)
+  #set($requestedObj = $requestedDoc.newObject($request.addObject))
   #set($ok = $requestedObj.set('use', 'always'))
   #set($ok = $requestedObj.set('visibility', 'Current Wiki'))
 #end
 #if($request.properties)
   #set($jsonProp = $jsontool.parse($util.decodeURI($request.properties)))
-  #foreach($key in $jsonProp.keySet())
-    #set($ok = $requestedObj.set($key, $jsonProp.get($key)))
+  #if($request.addObject != 'XWiki.ClassSheetBinding' || !$requestedDoc.getObject('XWiki.ClassSheetBinding', 'sheet', $jsonProp.get('sheet')))
+    #if(!$requestedObj)
+      #set($requestedObj = $requestedDoc.newObject($request.addObject))
+    #end
+    #set($jsonProp = $jsontool.parse($util.decodeURI($request.properties)))
+    #foreach($key in $jsonProp.keySet())
+      #set($ok = $requestedObj.set($key, $jsonProp.get($key)))
+    #end
+  #else
+    (% id="editorAddObjectError" %)1
+  #end
+#else
+  #if(!$requestedObj)
+    #set($requestedObj = $requestedDoc.newObject($request.addObject))
   #end
 #end
 #set($discard = $requestedDoc.save())
