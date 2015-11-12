@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1447170025000</date>
-  <contentUpdateDate>1447160520000</contentUpdateDate>
+  <date>1447336722000</date>
+  <contentUpdateDate>1447334241000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -589,9 +589,6 @@ $(function(){
           shortcut.remove("Esc");
           shortcut.remove("Enter");
         });
-      });
-      $(".hierarchy-right").css({
-        "backgroundColor" : $("#hierarchyBlock").css('backgroundColor')
       });
       for (var editor in Modules) {
         Modules[editor].initMenu();
@@ -1309,18 +1306,6 @@ $(function(){
         menuNode = $(jQueryTabId+' .editorOtherFieldsBlockContent');
         if(ObjectEditor._getCurrentObject(false) === 'XWiki.WikiMacroClass') {
           $('&lt;input type="hidden" id="tab'+currentTabNumber+'_addClassList" value="XWiki.WikiMacroParameterClass" /&gt;&lt;button class="btn btn-success" id="tab'+currentTabNumber+'_editorObjectAddButton"&gt;Add a parameter&lt;/button&gt;&lt;button class="btn btn-default" id="tab'+currentTabNumber+'_editorExpandAllButton"&gt;Expand all&lt;/button&gt;&lt;button class="btn btn-default" id="tab'+currentTabNumber+'_editorCollapseAllButton"&gt;Collapse all&lt;/button&gt;&lt;br&gt;').appendTo(menuNode);
-        }
-        else if(ObjectEditor._getCurrentObject(false) === 'XWiki.JavaScriptExtension') {
-          $('&lt;input type="button" class="btn btn-success newJSObject newLocalObject" data-page="'+getCurrentPage(true)+'" data-space="'+getCurrentSpace(true)+'" value="Add another local JS" /&gt;&lt;br&gt;').appendTo(menuNode);
-          ObjectEditor.initMenu();
-        }
-        else if(ObjectEditor._getCurrentObject(false) === 'XWiki.StyleSheetExtension') {
-          $('&lt;input type="button" class="btn btn-success newCSSObject newLocalObject" data-page="'+getCurrentPage(true)+'" data-space="'+getCurrentSpace(true)+'" value="Add another local CSS" /&gt;&lt;br&gt;').appendTo(menuNode);
-          ObjectEditor.initMenu();
-        }
-        else if(ObjectEditor._getCurrentObject(false) === 'XWiki.DocumentSheetBinding') {
-          $('&lt;input type="button" class="btn btn-success newSheet newLocalObject" data-page="'+getCurrentPage(true)+'" data-space="'+getCurrentSpace(true)+'" value="Add another sheet" /&gt;&lt;br&gt;').appendTo(menuNode);
-          ObjectEditor.initMenu();
         }
         ObjectEditor._loadObjectsDetails(jQueryTabId, objectsList, 0, objectsListSize, '', menuNode, dataNode, null, loadAllTabs);
       }
@@ -3262,6 +3247,7 @@ $(function(){
 #hierarchyBlock {
   background-color: $theme.fieldGradientColor;
   min-width: 250px;
+  width: auto;
   float: left;
   position: relative;
   height: 100%;
@@ -3280,24 +3266,12 @@ $(function(){
   user-select: none;
 }
 #hierarchyMainList li {
-  white-space: nowrap;
+  clear: both;
   position: relative;
   -webkit-user-select: none;  /* Chrome all / Safari all */
   -moz-user-select: none;     /* Firefox all */
   -ms-user-select: none;      /* IE 10+ */
   user-select: none;
-}
-.hierarchy-right {
-  cursor: pointer;
-  position: absolute;
-  background-color: $theme.fieldGradientColor;
-  right: 0px;
-  top: 0px;
-  padding: 1px;
-}
-.hierarchy-right span{
-  padding: 1px;
-  margin-left: 1px
 }
 #hierarchyOpenBlock {
   cursor: pointer;
@@ -3327,6 +3301,7 @@ $(function(){
   margin: 0px;
 }
 .hierarchy-list p {
+  display: inline-block;
   margin: 0px !important;
 }
 .hierarchy-list img {
@@ -3416,26 +3391,42 @@ $(function(){
   width: 50%;
   box-sizing: border-box;
 }
+.hierarchy-large-button {
+  width: 100% !important;
+}
 #hierarchyAddNewElement &gt; button {
   width: 100%;
   box-sizing: border-box;
 }
-#hierarchyElementToAdd {
-  background: white;
-  position:absolute;
-  margin-top: 0px;
-  z-index: 100;
-  border:1px solid black;
-  right: 5px;
-  left: 5px;
-  padding: 10px;
-  box-sizing: border-box;
+.hierarchy-right {
+  visibility: hidden;
+  cursor: pointer;
+  float: right;
+  padding: 1px;
 }
-#hierarchyElementToAdd h4 {
+.hierarchy-right span{
+  padding: 1px;
+  margin-left: 1px
+}
+.hierarchyAddNewElement {
+  visibility: hidden;
   margin: 0px;
+  cursor: pointer;
+  float: right;
 }
-#hierarchyElementToAdd p {
-  margin: 0;
+.hierarchyAddNewElement ul {
+  z-index: 20;
+}
+#hierarchyContent li:hover &gt; .hierarchyAddNewElement, #hierarchyContent li:hover &gt; .hierarchy-right {
+  visibility: visible;
+}
+.hierarchyAddNewElement.open {
+  visibility: visible !important;
+}
+.hierarchyAddNewElementButton {
+  cursor: pointer;
+  padding: 3px;
+  z-index: 10;
 }
 /* Page state info */
 #hierarchySavingState, #hierarchyLoadingState, #hierarchyState {
@@ -3571,6 +3562,8 @@ $services.icon.render('step-forward')
 #else
   #set($spaceParentList = [$currentDoc.space])
 #end
+#set($beginAddButton = "{{html clean='false' wiki='true'}} &lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span class='hierarchyAddNewElementButton' class='dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'&gt;$services.icon.render('add')&lt;span class='sr-only'&gt;Toggle Dropdown&lt;/span&gt;&lt;/span&gt;&lt;ul class='dropdown-menu'&gt;")
+#set($endAddButton = '&lt;/ul&gt;&lt;/div&gt;{{/html}}')
 (% id="hierarchyContent" %) (((
 #if($masterDoc.hasAccessLevel('edit'))
   {{html clean=false}}&lt;form method="post" action="$masterDoc.getURL('view')" class="masterExportForm"&gt;&lt;input type="hidden" name="export" value="1" /&gt;#if($singlePage)&lt;input type="hidden" name="singlePage" value="$escapetool.url($currentDoc.fullName).replace('+', '%20')" /&gt;#end&lt;input class="btn btn-default hierarchy-export-button" type="submit" value="Export the project (XAR)" title="Export the project"/&gt;&lt;/form&gt;{{/html}}
