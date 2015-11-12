@@ -32,10 +32,10 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1435138565000</creationDate>
-  <date>1445944621000</date>
-  <contentUpdateDate>1445944621000</contentUpdateDate>
+  <date>1447338509000</date>
+  <contentUpdateDate>1447338509000</contentUpdateDate>
   <version>1.1</version>
-  <title>WebHome</title>
+  <title>XWiki Web IDE</title>
   <defaultTemplate/>
   <validationScript/>
   <comment/>
@@ -395,6 +395,7 @@ icon=icon:folder</parameters>
     </property>
   </object>
   <content>{{velocity}}
+#set($docextras = [])
 #if($request.projectName)
   #set($projectName = $request.projectName)
   #set($pageName = $xwiki.getUniquePageName('WebIDE', $util.clearName($projectName)))
@@ -402,6 +403,7 @@ icon=icon:folder</parameters>
   #set($pagesList = $request.pagesList)
   #set($codeSpace = $request.codeSpace)
   #set($newDoc = $xwiki.getDocument($pageName))
+  #set($ok = $newDoc.setTitle($projectName))
   #set($ok = $newDoc.setParent('WebIDE.WebHome'))
   #set($newObj = $newDoc.newObject("WebIDECode.ApplicationClass"))
   #set($discard = $newObj.set('projectName', $projectName))
@@ -469,7 +471,7 @@ icon=icon:folder</parameters>
   'projectName': {"displayName":"Project Name", "type":"text","size":10,"link":"view"},
   'doc.date': {"type":"text","size":10},
   'spaces': {"displayName":"Spaces included", "type":"text","size":10},
-  '_actions': {"sortable":false,"filterable":false,"html":true,"actions":["edit","delete"]}
+  '_actions': {"sortable":false,"filterable":false,"html":true,"actions":["rename","delete"]}
 })
 #set ($options = {
   'className': 'WebIDECode.ApplicationClass',
@@ -477,7 +479,8 @@ icon=icon:folder</parameters>
   'rowCount': 15,
   'maxPages': 10,
   'selectedColumn': 'projectName',
-  'defaultOrder': 'asc'
+  'defaultOrder': 'asc',
+  'extraParams': "&amp;space=WebIDE"
 })
 #set ($columns = ['projectName', 'doc.date', 'spaces', '_actions'])
 #livetable('webIDE' $columns $columnsProperties $options)
