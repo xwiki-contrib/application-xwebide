@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1447336722000</date>
-  <contentUpdateDate>1447334241000</contentUpdateDate>
+  <date>1447338591000</date>
+  <contentUpdateDate>1447338591000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -3536,7 +3536,7 @@ $services.icon.render('step-forward')
 #set($spacesListAdd = [])
 #set($pagesList = $sorttool.sort($masterObj.getProperty('pages').value))
 ## Manage the case where WebIDE is opened with a page without project
-#if($masterDoc.fullName == 'WebIDE.DefaultProject')
+#if($masterDoc.fullName == 'WebIDECode.DefaultProject')
   #set($singlePage = true)
   #set($spacesList = [])
   #set($pagesList = [$currentDoc.fullName])
