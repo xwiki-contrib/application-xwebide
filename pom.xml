@@ -27,12 +27,12 @@
   <parent>
     <groupId>org.xwiki.commons</groupId>
     <artifactId>xwiki-commons-pom</artifactId>
-    <version>6.4.4</version>
+    <version>6.2</version>
   </parent>
   <groupId>org.xwiki.contrib</groupId>
   <artifactId>application-webide</artifactId>
   <name>XWebIDE Application</name>
-  <version>0.9.1-SNAPSHOT</version>
+  <version>0.10-SNAPSHOT</version>
   <packaging>xar</packaging>
   <description>An IDE which allows user to create projects in XWiki.</description>
   <scm>
@@ -51,6 +51,7 @@
     <xwiki.clirr.skip>true</xwiki.clirr.skip>
     <xwiki.extension.name>XWebIDE Application</xwiki.extension.name>
     <xwiki.extension.category>application</xwiki.extension.category>
+    <xwiki.extension.features>yannflory:xwebide-application</xwiki.extension.features>
   </properties>
   <build>
     <!-- Needed to add support for the XAR packaging -->
