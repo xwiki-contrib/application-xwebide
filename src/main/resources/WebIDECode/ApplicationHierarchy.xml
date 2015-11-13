@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1447338591000</date>
-  <contentUpdateDate>1447338591000</contentUpdateDate>
+  <date>1447346355000</date>
+  <contentUpdateDate>1447346355000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -122,7 +122,13 @@
       <cache>forbid</cache>
     </property>
     <property>
-      <code>require(['jquery', 'xwiki-meta'], function ($, xm) {
+      <code>if(require.toUrl('xwiki-meta').substr(0,7) === '/xwiki/') {
+  var required = ['jquery', 'xwiki-meta'];
+}
+else {
+  var required = ['jquery'];
+}
+require(required , function ($, xm) {
 
 $(function(){
 
@@ -3496,10 +3502,10 @@ $(function(){
 #end
 #set($visibleCategory = $!visibleCategoryString.split("[,]"))
 (% class="hierarchy-hidden" id="hierarchyOpenBlock" title="Open menu"%)(((
-$services.icon.render('step-forward')
+{{html clean="false"}}&lt;span class="fa fa-step-forward"&gt;&lt;/span&gt;{{/html}}
 )))
 (% id="hierarchyCloseBlock" %)(((
-**Project :** $masterDoc.display('projectName', 'view') (% title="Hide menu" id="hierarchyClose" class="hierarchy-icon" %)$services.icon.render('step-backward') (% title="Refresh the menu" id="hierarchyRefresh" class="hierarchy-icon" %)$services.icon.render('refresh')
+**Project :** $masterDoc.display('projectName', 'view') (% title="Hide menu" id="hierarchyClose" class="hierarchy-icon" %){{html clean="false"}}&lt;span class="fa fa-step-backward"&gt;&lt;/span&gt;{{/html}} (% title="Refresh the menu" id="hierarchyRefresh" class="hierarchy-icon" %){{html clean="false"}}&lt;span class="fa fa-refresh"&gt;&lt;/span&gt;{{/html}}
 )))
 #set($nestedSpaces = false)
 #if($services.model.serialize($services.model.createDocumentReference("wiki", ["A", "B"], "page"), 'default') == 'wiki:A.B.page')
@@ -3562,7 +3568,7 @@ $services.icon.render('step-forward')
 #else
   #set($spaceParentList = [$currentDoc.space])
 #end
-#set($beginAddButton = "{{html clean='false' wiki='true'}} &lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span class='hierarchyAddNewElementButton' class='dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'&gt;$services.icon.render('add')&lt;span class='sr-only'&gt;Toggle Dropdown&lt;/span&gt;&lt;/span&gt;&lt;ul class='dropdown-menu'&gt;")
+#set($beginAddButton = "{{html clean='false' wiki='true'}} &lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span class='hierarchyAddNewElementButton' class='dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'&gt;&lt;span class='fa fa-plus'&gt;&lt;/span&gt;&lt;span class='sr-only'&gt;Toggle Dropdown&lt;/span&gt;&lt;/span&gt;&lt;ul class='dropdown-menu'&gt;")
 #set($endAddButton = '&lt;/ul&gt;&lt;/div&gt;{{/html}}')
 (% id="hierarchyContent" %) (((
 #if($masterDoc.hasAccessLevel('edit'))
