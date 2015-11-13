@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1435238189000</creationDate>
-  <date>1447329763000</date>
-  <contentUpdateDate>1447329763000</contentUpdateDate>
+  <date>1447421491000</date>
+  <contentUpdateDate>1447421491000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationObjects</title>
   <defaultTemplate/>
@@ -94,6 +94,9 @@ Add an object: &lt;select id="addClassList"&gt;
 #end
 #if($request.properties)
   #set($jsonProp = $jsontool.parse($util.decodeURI($request.properties)))
+  #if($request.addObject == 'XWiki.ClassSheetBinding')
+    #set($sheetDoc = $xwiki.getDocument("${requestedDoc.space}.$jsonProp.get('sheet')"))
+  #end
   #if($request.addObject != 'XWiki.ClassSheetBinding' || !$requestedDoc.getObject('XWiki.ClassSheetBinding', 'sheet', $jsonProp.get('sheet')))
     #if(!$requestedObj)
       #set($requestedObj = $requestedDoc.newObject($request.addObject))
@@ -102,7 +105,7 @@ Add an object: &lt;select id="addClassList"&gt;
     #foreach($key in $jsonProp.keySet())
       #set($ok = $requestedObj.set($key, $jsonProp.get($key)))
     #end
-  #else
+  #elseif(!$sheetDoc.isNew())
     (% id="editorAddObjectError" %)1
   #end
 #else

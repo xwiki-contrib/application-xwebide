@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347285000</creationDate>
-  <date>1447348152000</date>
-  <contentUpdateDate>1447348152000</contentUpdateDate>
+  <date>1447420484000</date>
+  <contentUpdateDate>1447420484000</contentUpdateDate>
   <version>1.1</version>
   <title>LogicalTree</title>
   <defaultTemplate/>
@@ -124,7 +124,7 @@
     #end
     #set($spaceEscaped = $escapetool.url($document.space).replace("+", "%20"))
     #set($pageEscaped = $escapetool.url($document.name).replace("+", "%20"))
-    #set($addLinks = "&lt;li&gt;&lt;a href='#' class='newPage newSheet' data-page='$escapetool.url($className).replace('+', '%20')' data-space='$spaceEscaped' data-locale='default' data-toggle='modal' data-target='#hierarchyPageModal'&gt;Add bound sheet&lt;/a&gt;&lt;/li&gt;")
+    #set($addLinks = "&lt;li&gt;&lt;a href='#' class='newPage newSheet' data-page='$pageEscaped' data-space='$spaceEscaped' data-locale='default' data-toggle='modal' data-target='#hierarchyPageModal'&gt;Add bound sheet&lt;/a&gt;&lt;/li&gt;")
     #if($classTemplateDoc.isNew())
       #set($addLinks = "${addLinks}&lt;li&gt;&lt;a href='#' class='newPage newTemplate' data-page='${pageEscaped}Template' data-space='$spaceEscaped' data-locale='default'&gt;Add template&lt;/a&gt;&lt;/li&gt;") ##'
     #end
@@ -135,26 +135,28 @@
       #foreach($sheetFullName in $sheetDocList)
         #set($addName = "")
         #set($sheetDoc = $xwiki.getDocument($sheetFullName))
-        #set($ok = $pagesInClassesList.add($sheetDoc.fullName))
-        #set($spaceSheetEscaped = $escapetool.url($sheetDoc.space).replace("+", "%20"))
-        #set($pageSheetEscaped = $escapetool.url($sheetDoc.name).replace("+", "%20"))
-        #set($titleSheetEscaped = $escapetool.url($sheetDoc.title).replace("+", "%20"))
-        #set($pageParentEscaped = $escapetool.url($sheetDoc.parent).replace("+", "%20"))
-        #if($sheetDoc.getObject("XWiki.SheetDescriptorClass"))
-          #set($addName = " ($sheetDoc.action)")
-        #elseif($sheetDocList.size() &gt; 1)
-          #set($addName = " ($sheetDoc.name)")
-        #end
-        #set($addLinks = "&lt;li&gt;&lt;a href='#' class='newJSObject newLocalObject' data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped'&gt;Add sheet JS&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='#' class='newCSSObject newLocalObject' data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped'&gt;Add sheet CSS&lt;/a&gt;&lt;/li&gt;") ##'
-        *** $beginAddButton$addLinks$endAddButton {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} [[Edit sheet$addName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceSheetEscaped' data-page='$!pageSheetEscaped' data-locale="default" data-rawtitle='$titleSheetEscaped' data-parent="$pageParentEscaped" data-hidden="$sheetDoc.isHidden()" class='editPage']]
-        #if($sheetDoc.getObjects('XWiki.JavaScriptExtension').size() != 0 || $sheetDoc.getObjects('XWiki.StyleSheetExtension').size() != 0)
-          (% class="hierarchy-list" %)
-        #end
-        #foreach($jsxObject in $sheetDoc.getObjects('XWiki.JavaScriptExtension'))
-          **** {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} [[Edit sheet JS-$jsxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped' data-object="XWiki.JavaScriptExtension" data-objectnumber="$jsxObject.number" class='editObject']]
-        #end
-        #foreach($ssxObject in $sheetDoc.getObjects('XWiki.StyleSheetExtension'))
-          **** {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} [[Edit sheet CSS-$ssxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped' data-object="XWiki.StyleSheetExtension" data-objectnumber="$ssxObject.number" class='editObject']]
+        #if(!$sheetDoc.isNew())
+          #set($ok = $pagesInClassesList.add($sheetDoc.fullName))
+          #set($spaceSheetEscaped = $escapetool.url($sheetDoc.space).replace("+", "%20"))
+          #set($pageSheetEscaped = $escapetool.url($sheetDoc.name).replace("+", "%20"))
+          #set($titleSheetEscaped = $escapetool.url($sheetDoc.title).replace("+", "%20"))
+          #set($pageParentEscaped = $escapetool.url($sheetDoc.parent).replace("+", "%20"))
+          #if($sheetDoc.getObject("XWiki.SheetDescriptorClass"))
+            #set($addName = " ($sheetDoc.action)")
+          #elseif($sheetDocList.size() &gt; 1)
+            #set($addName = " ($sheetDoc.name)")
+          #end
+          #set($addLinks = "&lt;li&gt;&lt;a href='#' class='newJSObject newLocalObject' data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped'&gt;Add sheet JS&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='#' class='newCSSObject newLocalObject' data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped'&gt;Add sheet CSS&lt;/a&gt;&lt;/li&gt;") ##'
+          *** $beginAddButton$addLinks$endAddButton {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} [[Edit sheet$addName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceSheetEscaped' data-page='$!pageSheetEscaped' data-locale="default" data-rawtitle='$titleSheetEscaped' data-parent="$pageParentEscaped" data-hidden="$sheetDoc.isHidden()" class='editPage']]
+          #if($sheetDoc.getObjects('XWiki.JavaScriptExtension').size() != 0 || $sheetDoc.getObjects('XWiki.StyleSheetExtension').size() != 0)
+            (% class="hierarchy-list" %)
+          #end
+          #foreach($jsxObject in $sheetDoc.getObjects('XWiki.JavaScriptExtension'))
+            **** {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} [[Edit sheet JS-$jsxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped' data-object="XWiki.JavaScriptExtension" data-objectnumber="$jsxObject.number" class='editObject']]
+          #end
+          #foreach($ssxObject in $sheetDoc.getObjects('XWiki.StyleSheetExtension'))
+            **** {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} [[Edit sheet CSS-$ssxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceSheetEscaped' data-page='$pageSheetEscaped' data-object="XWiki.StyleSheetExtension" data-objectnumber="$ssxObject.number" class='editObject']]
+          #end
         #end
       #end
     #end

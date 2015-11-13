@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1447347419000</date>
-  <contentUpdateDate>1447347419000</contentUpdateDate>
+  <date>1447422954000</date>
+  <contentUpdateDate>1447422954000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -1070,15 +1070,19 @@ Welcome to the XWiki WebIDE, you can use it to create, edit and export XWiki App
 #end
 __Get started__:
 * **Edit a page** in your project by clicking on one of the edit buttons in the lefthand panel - you can edit the page in different modes for editing the content and metadata
-* **Add a new folder** (also known as a Space) clicking the "add folder" button on the left
-* **Add new page** when you need to create a new empty page in the selected folder
-* **Add existing page** for times when you need to add a page which must be in a Space which is not part of your application's code
+* **Add a new folder** (also known as a Space) clicking the "add new" button on the left (Physical view) or the {{html clean="false"}}&lt;span class="fa fa-plus"&gt;&lt;/span&gt;{{/html}} in the "Pages" category (Logical view)
+* **Add a new page** when you need to create a new empty page clicking on the {{html clean="false"}}&lt;span class="fa fa-plus"&gt;&lt;/span&gt;{{/html}} in the selected folder
+* **Add an existing page** for times when you need to add a page which must be in a Space which is not part of your application's code
 * **Export your project** as a XWiki .xar file which can be imported to other wikis or published on extensions.xwiki.org.
 
 __Shortcuts for the wiki and object editors__:
 * **Save &amp; View** : Alt + S
 * **Save &amp; Continue** : Alt + Shift + S
 * **Discard &amp; View** : Alt + C
+* **View in a new tab** : Alt + Shift + C
+
+__Shortcuts in XWiki__:
+* **Open the Web IDE in the current page** : W
 
 __Improve your IDE Experience__:
 By installing the additional extensions you can improve the user interface of the XWiki WebIDE. To do so, use the [[Extension Manager&gt;&gt;XWiki.XWikiPreferences||queryString="editor=globaladmin&amp;section=XWiki.AddExtensions"]].
