@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1447942627000</date>
-  <contentUpdateDate>1447758245000</contentUpdateDate>
+  <date>1448013942000</date>
+  <contentUpdateDate>1447427645000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -1642,6 +1642,7 @@ $(function(){
       initCodeMirror(id+" textarea[name^='XWiki.XWikiSkins_'][name$='.js']", 'javascript');
       initCodeMirror(id+" textarea[name^='XWiki.XWikiSkins_'][name$='.vm']", 'velocity');
       initCodeMirror(id+" textarea[name^='XWiki.WikiMacroClass_'][name$='_code']", XWiki.docsyntax);
+      initCodeMirror(id+" textarea[name^='Panels.PanelClass_'][name$='_content']", XWiki.docsyntax);
     },
     initHash : function(hashArray) {
       if(hashArray.size() === 7) {
@@ -1682,8 +1683,8 @@ $(function(){
         e.preventDefault();
         var modal = true;
         var folder = $(this).attr('data-space') || '';
-        var file = $(this).attr('data-page') || '';
-        file = encodeURIComponent(file);
+        var file = encodeURIComponent($(this).attr('data-page')) || '';
+        $('#hierarchyObjectPageInput').attr('disabled', false);
         $('#hierarchyObjectSpace').html(folder);
         $('#hierarchyObjectPageInputDefault').val('');
         $('#hierarchyObjectPageInput').val('');
@@ -1691,6 +1692,8 @@ $(function(){
         var objType = 'JS';
         var objScope = 'local';
 
+        // Manage the case of each type of object that can be added from the logical view.
+        // Cf ObjectEditor.initModals() below to add extras properties to the object, if necessary, when the user validates
         if($(this).hasClass('newJSObject')) {
           $('#hierarchyObjectClassName').val('XWiki.JavaScriptExtension');
         }
@@ -1702,6 +1705,10 @@ $(function(){
           objType = 'Macro';
           $('#hierarchyObjectClassName').val('XWiki.WikiMacroClass');
         }
+        else if($(this).hasClass('newPanelObject')) {
+          objType = 'Panel';
+          $('#hierarchyObjectClassName').val('Panels.PanelClass');
+        }
         else if($(this).hasClass('newTranslationObject')) {
           objType = 'Translation';
           $('#hierarchyObjectClassName').val('XWiki.TranslationDocumentClass');
@@ -1709,6 +1716,11 @@ $(function(){
         else if($(this).hasClass('newSheet')) {
           objType = 'Sheet';
           $('#hierarchyObjectClassName').val('XWiki.DocumentSheetBinding');
+        }
+        else if($(this).hasClass('newUIXObject')) {
+          objType = 'UI Extension';
+          $('#hierarchyObjectPageInput').attr('disabled', true);
+          $('#hierarchyObjectClassName').val('XWiki.UIExtensionClass');
         }
 
         if($(this).hasClass('newGlobalObject')) {
@@ -1782,12 +1794,14 @@ $(function(){
       $('#hierarchyAddObject').click(function(e){
         $('body').removeClass('modal-open');
         e.preventDefault();
+        // Get page and object data
         var folder = $('#hierarchyObjectSpace').html();
         var file = !$('#hierarchyObjectPage').is(':empty') ? $('#hierarchyObjectPage').html() : ($('#hierarchyObjectPageInput').val() !== '' ?  $('#hierarchyObjectPageInput').val() : $('#hierarchyObjectPageInputDefault').val());
         var className = $('#hierarchyObjectClassName').val();
         if(folder &amp;&amp; file &amp;&amp; className &amp;&amp; folder.trim() &amp;&amp; file.trim() &amp;&amp; className.trim()) {
           var global = ($('#hierarchyAddObject').attr('data-scope') === 'global');
           var properties = null;
+          // Manage the different types of object that can be added from the logical view
           if(global &amp;&amp; className === 'XWiki.JavaScriptExtension') {
             properties = encodeURIComponent('{"name" : "'+file.replace(/"/g, '\"')+'"}');
             file = 'JS';
@@ -1804,6 +1818,10 @@ $(function(){
           else if(global &amp;&amp; className === 'XWiki.TranslationDocumentClass') {
             properties = encodeURIComponent('{"scope" : "WIKI"}');
           }
+          else if(global &amp;&amp; className === 'XWiki.UIExtensionClass') {
+            file = 'UIX';
+          }
+          // Add the object
           ObjectEditor.add(null, className, true, folder, file, global, true, properties);
         }
         else {

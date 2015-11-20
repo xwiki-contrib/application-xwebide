@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347285000</creationDate>
-  <date>1447926617000</date>
-  <contentUpdateDate>1447926617000</contentUpdateDate>
+  <date>1448014006000</date>
+  <contentUpdateDate>1448014006000</contentUpdateDate>
   <version>1.1</version>
   <title>LogicalTree</title>
   <defaultTemplate/>
@@ -51,7 +51,9 @@
 #set($allJSList = [])
 #set($allCSSList = [])
 #set($allMacrosList = [])
+#set($allPanelsList = [])
 #set($allTranslationsList = [])
+#set($allUIXList = [])
 ## Get a list of all the pages in the project
 #set($spacesList = $sorttool.sort($spacesList))
 #foreach($space in $spacesList)
@@ -222,20 +224,27 @@
   #set($pageDoc = $xwiki.getDocument($pageFullName))
   #set($space = $pageDoc.space)
   #set($page = $pageDoc.name)
+  ## Get some particular objects in the page to know how to display it
   #set($jsxList = $pageDoc.getObjects('XWiki.JavaScriptExtension'))
   #set($ssxList = $pageDoc.getObjects('XWiki.StyleSheetExtension'))
   #set($docSheetList = $pageDoc.getObjects('XWiki.DocumentSheetBinding'))
+  ## START - Remove from the "Pages" category elements that should be displayed separately
   #set($macrosList = $pageDoc.getObjects('XWiki.WikiMacroClass'))
+  #set($panelsList = $pageDoc.getObjects('Panels.PanelClass'))
   #set($translationsList = $pageDoc.getObjects('XWiki.TranslationDocumentClass'))
+  #set($uIXList = $pageDoc.getObjects('XWiki.UIExtensionClass'))
   #set($ok = $allJSList.addAll($jsxList))
   #set($ok = $allCSSList.addAll($ssxList))
   #set($ok = $allMacrosList.addAll($macrosList))
+  #set($ok = $allPanelsList.addAll($panelsList))
   #set($ok = $allTranslationsList.addAll($translationsList))
+  #set($ok = $allUIXList.addAll($uIXList))
   #set($isInClassesList = $pagesInClassesList.contains($pageFullName)) ## Classes should not be displayed in the 'pages' tree
   #set($isGlobal = false)
-  #if(($space == $codeSpace &amp;&amp; ($page == 'JS' &amp;&amp; $pageDoc.getObjects('XWiki.JavaScriptExtension', 'use', 'always').size()&gt;0) || ($page == 'CSS' &amp;&amp; $pageDoc.getObjects('XWiki.StyleSheetExtension', 'use', 'always').size()&gt;0)) || $macrosList.size()&gt;0 || $translationsList.size()&gt;0)
-    #set($isGlobal = true)
+  #if(($space == $codeSpace &amp;&amp; ($page == 'JS' &amp;&amp; $pageDoc.getObjects('XWiki.JavaScriptExtension', 'use', 'always').size()&gt;0) || ($page == 'CSS' &amp;&amp; $pageDoc.getObjects('XWiki.StyleSheetExtension', 'use', 'always').size()&gt;0)) || $macrosList.size()&gt;0 || $panelsList.size()&gt;0 || $translationsList.size()&gt;0)
+    #set($isGlobal = true) ## Means the page won't be displayed in the "Pages" category
   #end
+  ## END - Remove
   ## Compute space elements
   #if($space != $oldSpace)
     #set($oldSpace = $space)
@@ -492,59 +501,119 @@
 (% id='hierarchyCategory_macros' class='hierarchy-list${pageClassHidden}' %)
 #set($macrosCount = 0)
 #foreach($macroObject in $allMacrosList)
-  #if($macroObject.getProperty('visibility').value != 'Current User')
-    #set($macrosCount = $macrosCount + 1)
-    #set($objDoc = $xwiki.getDocument($macroObject.name))
-    #set($pageFullName = $objDoc.fullName)
-    #set($pageFullNameEscaped = $escapetool.url($objDoc.fullName).replace("+", "%20"))
-    #set($pageInPagesList = $pagesList.contains($pageFullName))
-    #set($spaceEscaped = $escapetool.url($objDoc.space).replace("+", "%20"))
-    #set($pageEscaped = $escapetool.url($objDoc.name).replace("+", "%20"))
-    #set($docName = $objDoc.name)
-    #if("$!macroObject.getProperty('name').value" != "")
-      #set($docName = $macroObject.getProperty('name').value)
-    #end
-    #set($addLinks = "&lt;li&gt;&lt;a href='#' class='newJSObject newLocalObject' data-space='$spaceEscaped' data-page='$pageEscaped'&gt;Add macro JS&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='#' class='newCSSObject newLocalObject' data-space='$spaceEscaped' data-page='$pageEscaped'&gt;Add macro CSS&lt;/a&gt;&lt;/li&gt;") ##'"
-    #set($renameButton = "")
-    #set($renameForm = "")
+  #set($macrosCount = $macrosCount + 1)
+  #set($objDoc = $xwiki.getDocument($macroObject.name))
+  #set($pageFullName = $objDoc.fullName)
+  #set($pageFullNameEscaped = $escapetool.url($objDoc.fullName).replace("+", "%20"))
+  #set($pageInPagesList = $pagesList.contains($pageFullName))
+  #set($spaceEscaped = $escapetool.url($objDoc.space).replace("+", "%20"))
+  #set($pageEscaped = $escapetool.url($objDoc.name).replace("+", "%20"))
+  #set($docName = $objDoc.name)
+  #if("$!macroObject.getProperty('name').value" != "")
+    #set($docName = $macroObject.getProperty('name').value)
+  #end
+  #set($addLinks = "&lt;li&gt;&lt;a href='#' class='newJSObject newLocalObject' data-space='$spaceEscaped' data-page='$pageEscaped'&gt;Add macro JS&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='#' class='newCSSObject newLocalObject' data-space='$spaceEscaped' data-page='$pageEscaped'&gt;Add macro CSS&lt;/a&gt;&lt;/li&gt;") ##'"
+  #set($renameButton = "")
+  #set($renameForm = "")
+  #set($removeLinks = "")
+  #set($removeBlock = "")
+  #if($objDoc.hasAccessLevel('edit'))
+    #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deletePage' data-space='$spaceEscaped' data-page='$pageEscaped' data-locale='default'&gt;Delete from the wiki&lt;/a&gt;&lt;/li&gt;") ##'"
+    #set($renameButton = "{{html clean=false}}&lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span title='Rename page $pageFullNameEscaped' data-pageid='$pageFullNameEscaped' class='hierarchyAddNewElementButton hierarchy-rename-page'&gt;&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;{{/html}}") ##'"
+    #set($renameForm = "{{html clean=false}}&lt;input type='text' data-pageinlist='$pageInPagesList' id='renamePage_$pageFullNameEscaped' style='display:none;' value='$pageFullName'/&gt;{{/html}}") ##'"
+  #end
+  #if("$!removeLinks" != "")
+    #set($removeBlock = "$beginRemoveButton$removeLinks$endRemoveButton")
+  #end
+  ** $beginAddButton$addLinks$endAddButton$!removeBlock$!renameButton$!renameForm {{html clean='false'}}&lt;span class='fa fa-hdd-o'&gt;&lt;/span&gt;{{/html}} [[$docName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.WikiMacroClass" data-objectnumber="$macroObject.number" class='editObject']]
+  #if($objDoc.getObjects('XWiki.StyleSheetExtension').size() != 0 || $objDoc.getObjects('XWiki.JavaScriptExtension').size() != 0)
+    (% class='hierarchy-list' %)
+  #end
+  #foreach($jsxObject in $objDoc.getObjects('XWiki.JavaScriptExtension'))
     #set($removeLinks = "")
     #set($removeBlock = "")
-    #if($objDoc.hasAccessLevel('edit'))
-      #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deletePage' data-space='$spaceEscaped' data-page='$pageEscaped' data-locale='default'&gt;Delete from the wiki&lt;/a&gt;&lt;/li&gt;") ##'"
-      #set($renameButton = "{{html clean=false}}&lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span title='Rename page $pageFullNameEscaped' data-pageid='$pageFullNameEscaped' class='hierarchyAddNewElementButton hierarchy-rename-page'&gt;&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;{{/html}}") ##'"
-      #set($renameForm = "{{html clean=false}}&lt;input type='text' data-pageinlist='$pageInPagesList' id='renamePage_$pageFullNameEscaped' style='display:none;' value='$pageFullName'/&gt;{{/html}}") ##'"
-    #end
+    #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deleteObject' data-space='$spaceEscaped' data-page='$pageEscaped' data-object='XWiki.JavaScriptExtension' data-objectnumber='$jsxObject.number'&gt;Delete from the macro&lt;/a&gt;&lt;/li&gt;") ##'"
     #if("$!removeLinks" != "")
       #set($removeBlock = "$beginRemoveButton$removeLinks$endRemoveButton")
     #end
-    ** $beginAddButton$addLinks$endAddButton$!removeBlock$!renameButton$!renameForm {{html clean='false'}}&lt;span class='fa fa-hdd-o'&gt;&lt;/span&gt;{{/html}} [[$docName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.WikiMacroClass" data-objectnumber="$macroObject.number" class='editObject']]
-    #if($objDoc.getObjects('XWiki.StyleSheetExtension').size() != 0 || $objDoc.getObjects('XWiki.JavaScriptExtension').size() != 0)
-      (% class='hierarchy-list' %)
+    *** {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} $!removeBlock [[Edit macro JS-$jsxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.JavaScriptExtension" data-objectnumber="$jsxObject.number" class='editObject']]
+  #end
+  #foreach($ssxObject in $objDoc.getObjects('XWiki.StyleSheetExtension'))
+    #set($removeLinks = "")
+    #set($removeBlock = "")
+    #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deleteObject' data-space='$spaceEscaped' data-page='$pageEscaped' data-object='XWiki.StyleSheetExtension' data-objectnumber='$ssxObject.number'&gt;Delete from the project&lt;/a&gt;&lt;/li&gt;") ##'"
+    #if("$!removeLinks" != "")
+      #set($removeBlock = "$beginRemoveButton$removeLinks$endRemoveButton")
     #end
-      #foreach($jsxObject in $objDoc.getObjects('XWiki.JavaScriptExtension'))
-        #set($removeLinks = "")
-        #set($removeBlock = "")
-        #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deleteObject' data-space='$spaceEscaped' data-page='$pageEscaped' data-object='XWiki.JavaScriptExtension' data-objectnumber='$jsxObject.number'&gt;Delete from the macro&lt;/a&gt;&lt;/li&gt;") ##'"
-        #if("$!removeLinks" != "")
-          #set($removeBlock = "$beginRemoveButton$removeLinks$endRemoveButton")
-        #end
-        *** {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} $!removeBlock [[Edit macro JS-$jsxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.JavaScriptExtension" data-objectnumber="$jsxObject.number" class='editObject']]
-      #end
-      #foreach($ssxObject in $objDoc.getObjects('XWiki.StyleSheetExtension'))
-        #set($removeLinks = "")
-        #set($removeBlock = "")
-        #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deleteObject' data-space='$spaceEscaped' data-page='$pageEscaped' data-object='XWiki.StyleSheetExtension' data-objectnumber='$ssxObject.number'&gt;Delete from the project&lt;/a&gt;&lt;/li&gt;") ##'"
-        #if("$!removeLinks" != "")
-          #set($removeBlock = "$beginRemoveButton$removeLinks$endRemoveButton")
-        #end
-        *** {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} $!removeBlock [[Edit macro CSS-$ssxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.StyleSheetExtension" data-objectnumber="$ssxObject.number" class='editObject']]
-      #end
+    *** {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} $!removeBlock [[Edit macro CSS-$ssxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.StyleSheetExtension" data-objectnumber="$ssxObject.number" class='editObject']]
   #end
 #end
-## Translations
 #if($macrosCount == 0)
  ** //Empty//
 #end
+## Panels
+#set($pageClassHidden = " hierarchy-hidden")
+#set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%){{html clean='false'}}&lt;span class='fa fa-caret-right'&gt;&lt;/span&gt;{{/html}}")
+#if($visibleCategory.contains("panels"))
+  #set($pageClassHidden = "")
+  #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%){{html clean='false'}}&lt;span class='fa fa-caret-down'&gt;&lt;/span&gt;{{/html}}")
+#end
+#set($addLinks = "&lt;li&gt;&lt;a href='#' class='newPanelObject newGlobalObject' data-space='$escapetool.url($codeSpace).replace('+', '%20')' data-page='' data-toggle='modal' data-target='#hierarchyObjectModal'&gt;Panel&lt;/a&gt;&lt;/li&gt;")
+* $beginAddButton$addLinks$endAddButton (% data-category="panels" class="hierarchy-toggleCategory" %)((($iconBulletToggle  (%%)**Panels**)))
+(% id='hierarchyCategory_panels' class='hierarchy-list${pageClassHidden}' %)
+#set($panelsCount = 0)
+#foreach($panelObject in $allPanelsList)
+  #set($panelsCount = $panelsCount + 1)
+  #set($objDoc = $xwiki.getDocument($panelObject.name))
+  #set($pageFullName = $objDoc.fullName)
+  #set($pageFullNameEscaped = $escapetool.url($objDoc.fullName).replace("+", "%20"))
+  #set($pageInPagesList = $pagesList.contains($pageFullName))
+  #set($spaceEscaped = $escapetool.url($objDoc.space).replace("+", "%20"))
+  #set($pageEscaped = $escapetool.url($objDoc.name).replace("+", "%20"))
+  #set($docName = $objDoc.name)
+  #if("$!panelObject.getProperty('name').value" != "")
+    #set($docName = $panelObject.getProperty('name').value)
+  #end
+  #set($addLinks = "&lt;li&gt;&lt;a href='#' class='newJSObject newLocalObject' data-space='$spaceEscaped' data-page='$pageEscaped'&gt;Add panel JS&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='#' class='newCSSObject newLocalObject' data-space='$spaceEscaped' data-page='$pageEscaped'&gt;Add panel CSS&lt;/a&gt;&lt;/li&gt;") ##'"
+  #set($renameButton = "")
+  #set($renameForm = "")
+  #set($removeLinks = "")
+  #set($removeBlock = "")
+  #if($objDoc.hasAccessLevel('edit'))
+    #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deletePage' data-space='$spaceEscaped' data-page='$pageEscaped' data-locale='default'&gt;Delete from the wiki&lt;/a&gt;&lt;/li&gt;") ##'"
+    #set($renameButton = "{{html clean=false}}&lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span title='Rename page $pageFullNameEscaped' data-pageid='$pageFullNameEscaped' class='hierarchyAddNewElementButton hierarchy-rename-page'&gt;&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;{{/html}}") ##'"
+    #set($renameForm = "{{html clean=false}}&lt;input type='text' data-pageinlist='$pageInPagesList' id='renamePage_$pageFullNameEscaped' style='display:none;' value='$pageFullName'/&gt;{{/html}}") ##'"
+  #end
+  #if("$!removeLinks" != "")
+    #set($removeBlock = "$beginRemoveButton$removeLinks$endRemoveButton")
+  #end
+  ** $beginAddButton$addLinks$endAddButton$!removeBlock$!renameButton$!renameForm {{html clean='false'}}&lt;span class='fa fa-hdd-o'&gt;&lt;/span&gt;{{/html}} [[$docName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="Panels.PanelClass" data-objectnumber="$panelObject.number" class='editObject']]
+  #if($objDoc.getObjects('XWiki.StyleSheetExtension').size() != 0 || $objDoc.getObjects('XWiki.JavaScriptExtension').size() != 0)
+    (% class='hierarchy-list' %)
+  #end
+  #foreach($jsxObject in $objDoc.getObjects('XWiki.JavaScriptExtension'))
+    #set($removeLinks = "")
+    #set($removeBlock = "")
+    #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deleteObject' data-space='$spaceEscaped' data-page='$pageEscaped' data-object='XWiki.JavaScriptExtension' data-objectnumber='$jsxObject.number'&gt;Delete from the panel&lt;/a&gt;&lt;/li&gt;") ##'"
+    #if("$!removeLinks" != "")
+      #set($removeBlock = "$beginRemoveButton$removeLinks$endRemoveButton")
+    #end
+    *** {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} $!removeBlock [[Edit panel JS-$jsxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.JavaScriptExtension" data-objectnumber="$jsxObject.number" class='editObject']]
+  #end
+  #foreach($ssxObject in $objDoc.getObjects('XWiki.StyleSheetExtension'))
+    #set($removeLinks = "")
+    #set($removeBlock = "")
+    #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deleteObject' data-space='$spaceEscaped' data-page='$pageEscaped' data-object='XWiki.StyleSheetExtension' data-objectnumber='$ssxObject.number'&gt;Delete from the panel&lt;/a&gt;&lt;/li&gt;") ##'"
+    #if("$!removeLinks" != "")
+      #set($removeBlock = "$beginRemoveButton$removeLinks$endRemoveButton")
+    #end
+    *** {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} $!removeBlock [[Edit panel CSS-$ssxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.StyleSheetExtension" data-objectnumber="$ssxObject.number" class='editObject']]
+  #end
+#end
+#if($panelsCount == 0)
+ ** //Empty//
+#end
+## Translations
 #set($pageClassHidden = " hierarchy-hidden")
 #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%){{html clean='false'}}&lt;span class='fa fa-caret-right'&gt;&lt;/span&gt;{{/html}}")
 #if($visibleCategory.contains("translations"))
@@ -613,6 +682,39 @@
   #end
 #end
 #if($allTranslationsList.size() == 0)
+ ** //Empty//
+#end
+## UI Extensions
+#set($pageClassHidden = " hierarchy-hidden")
+#set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%){{html clean='false'}}&lt;span class='fa fa-caret-right'&gt;&lt;/span&gt;{{/html}}")
+#if($visibleCategory.contains("uix"))
+  #set($pageClassHidden = "")
+  #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%){{html clean='false'}}&lt;span class='fa fa-caret-down'&gt;&lt;/span&gt;{{/html}}")
+#end
+#set($addLinks = "&lt;li&gt;&lt;a href='#' class='newUIXObject newGlobalObject' data-space='$escapetool.url($codeSpace).replace('+', '%20')' data-page='UIX' data-toggle='modal' data-target='#hierarchyObjectModal'&gt;UI Extensions&lt;/a&gt;&lt;/li&gt;")
+* $beginAddButton$addLinks$endAddButton (% data-category="uix" class="hierarchy-toggleCategory" %)((($iconBulletToggle  (%%)**UI Extensions**)))
+(% id='hierarchyCategory_uix' class='hierarchy-list${pageClassHidden}' %)
+#set($uixCount = 0)
+#foreach($uixObject in $allUIXList)
+  #set($uixCount = $uixCount + 1)
+  #set($objDoc = $xwiki.getDocument($uixObject.name))
+  #set($pageFullName = $objDoc.fullName)
+  #set($pageFullNameEscaped = $escapetool.url($objDoc.fullName).replace("+", "%20"))
+  #set($pageInPagesList = $pagesList.contains($pageFullName))
+  #set($spaceEscaped = $escapetool.url($objDoc.space).replace("+", "%20"))
+  #set($pageEscaped = $escapetool.url($objDoc.name).replace("+", "%20"))
+  #set($docName = $objDoc.name)
+  #set($removeLinks = "")
+  #set($removeBlock = "")
+  #if($objDoc.hasAccessLevel('edit'))
+    #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deleteObject' data-space='$spaceEscaped' data-page='$pageEscaped' data-object='XWiki.UIExtensionClass' data-objectnumber='$uixObject.number'&gt;Delete from the page&lt;/a&gt;&lt;/li&gt;") ##'"
+  #end
+  #if("$!removeLinks" != "")
+    #set($removeBlock = "$beginRemoveButton$removeLinks$endRemoveButton")
+  #end
+  ** $beginAddButton$addLinks$endAddButton$!removeBlock {{html clean='false'}}&lt;span class='fa fa-hdd-o'&gt;&lt;/span&gt;{{/html}} [[$docName - $uixObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.UIExtensionClass" data-objectnumber="$uixObject.number" class='editObject']]
+#end
+#if($uixCount == 0)
  ** //Empty//
 #end
 {{html clean=false}}
