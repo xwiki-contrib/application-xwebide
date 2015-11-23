@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1447422954000</date>
-  <contentUpdateDate>1447422954000</contentUpdateDate>
+  <date>1448277483000</date>
+  <contentUpdateDate>1448277459000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -558,8 +558,6 @@ $(function(){
   width: 100%;
   max-width: 100%;
   resize: both;
-  min-height: 350px;
-  height: 650px;
   box-sizing: border-box;
   display: block;
 }
@@ -647,6 +645,10 @@ $(function(){
   margin-top: 10px;
   margin-bottom: 10px;
 }
+.editorOtherFieldsBlock textarea {
+  height: auto;
+  min-height: auto;
+}
 .editorDisplayAdvancedFields { /*button*/
   cursor: pointer;
   padding: 10px;
@@ -657,6 +659,72 @@ $(function(){
 }
 #hierarchyCloseTabModalInfo {
   font-style: italic;
+}
+#hierarchyBottomActionsBar {
+  margin-top: 10px;
+}
+#hierarchyBottomActionsBar input {
+  margin-left: 10px;
+}
+
+/* FullScreen */
+#editorBlock.editor-fullscreen {
+  position : fixed;
+  left : 0px;
+  top : 0px;
+  right : 0px;
+  bottom : 0px;
+  z-index : 1000;
+  background-color : #FFFFFF;
+}
+.editor-fullscreen .editorOtherFieldsBlock {
+  max-height: 100%;
+  height: auto;
+  overflow-y: auto;
+}
+.editor-fullscreen .addObjectBlock {
+  position: fixed;
+  z-index: 20;
+  background-color: #FFFFFF;
+}
+.editor-fullscreen .editorObjectMenu {
+  position: fixed;
+  z-index: 21;
+  right: 20px;
+}
+.editor-fullscreen .addObjectBlock ~ .objectIDEform {
+  margin-top: 50px;
+}
+.editor-fullscreen #hierarchyBlock {
+  overflow : auto;
+  width: 17%;
+  max-width: 17%;
+  resize: none;
+}
+.editor-fullscreen #hierarchyBottomActionsBar {
+  position: fixed;
+  bottom: 0px;
+  left: 17%;
+  z-index: 100;
+  background-color: #FFFFFF;
+}
+.editor-fullscreen .editorWikiTabContent {
+  height: 100% !important;
+}
+.editor-fullscreen .editorObjectWithCode {
+  height: 100% !important;
+}
+.editor-fullscreen .editorObjectWithCode .editorDisplayedObject {
+  height: 100% !important;
+}
+.editor-fullscreen .editorCodeField {
+  height: 100% !important;
+}
+.editor-fullscreen .editorCodeField textarea, .editor-fullscreen .editorCodeField .CodeMirror {
+  height: 100% !important;
+}
+.editor-fullscreen .editorWikiTabContent textarea, .editor-fullscreen .editorWikiTabContent .CodeMirror {
+  height : calc(100% - 66px) !important;
 }</code>
     </property>
     <property>

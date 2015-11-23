@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1448013942000</date>
-  <contentUpdateDate>1447427645000</contentUpdateDate>
+  <date>1448277037000</date>
+  <contentUpdateDate>1448019759000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -576,19 +576,19 @@ $(function(){
         $(selector).show();
         $(selector).val(decodeURIComponent($(this).attr('data-pageid')));
         var renameFrom = $(selector).val();
-        $(selector2).hide();
+        $(selector2).parent().hide();
         $(selector).focus();
         $(selector).focusout(function() {
           $(selector).hide();
           $(selector).val(renameFrom);
-          $(selector2).show();
+          $(selector2).parent().show();
           shortcut.remove("Esc");
           shortcut.remove("Enter");
         });
         shortcut.add("Esc", function() {
           $(selector).hide();
           $(selector).val(renameFrom);
-          $(selector2).show();
+          $(selector2).parent().show();
           shortcut.remove("Esc");
           shortcut.remove("Enter");
         });
@@ -1416,10 +1416,14 @@ $(function(){
           dataContent = dataContentTmp.html();
           if(ObjectEditor._getCurrentObject(false)) {
             // Display the code field in the main block, and all other fields in the right-hand menu. If there is no code field, the object should be displayed in the main block. If the object is a macro with parameters (objectsListSize &gt; 1), it's parameters should be displayed in the right-hand menu :
-            if($(dataContent).find('.editorCodeField').length &gt; 0 || objectsListSize &gt; 1) {
+            if($(dataContent).find('.editorCodeField').length &gt; 0) {
               $(menuNode).append(dataContent);
               var currentMainBlock = $('&lt;div class="editorDisplayedObject"&gt;&lt;/div&gt;').appendTo(currentClassNode);
               $(menuNode).find('.editorCodeField').detach().appendTo(currentMainBlock);
+              $(dataNode).addClass('editorObjectWithCode');
+            }
+            else if(objectsListSize &gt; 1) {
+              $(menuNode).append(dataContent);
             }
             else {
               var currentMainBlock = $('&lt;div class="editorDisplayedObject"&gt;&lt;/div&gt;').appendTo(currentClassNode);
@@ -1452,7 +1456,7 @@ $(function(){
       // Initialize the events (click on link/buttons) for all the objects
       ObjectEditor._initEvents(true, jQueryTabId);
       // Objects should be hidden if there are more than 2
-      if(objectsListSize &lt; 3) {$('.editorObjectDetails').show();}
+      if(objectsListSize &lt; 3) {$(jQueryTabId+' .editorObjectDetails').show();}
       // Start the code mirror instances for objects with a textarea field
       if(WebIDE.syntaxHighlighting) {initCodeMirrorsCustom(ObjectEditor.editor, jQueryTabId);}
       var tabNumberId = getTabNumber(jQueryTabId);
@@ -1518,13 +1522,13 @@ $(function(){
         // Event : Expand/Collapse objects list
         $('#tab'+currentTabNumber+'_editorExpandAllButton').on('click', function(e) {
           e.preventDefault();
-          $(jQueryTabId+' .editorObjectDetails, .editorObjectClassDetails').show();
+          $(jQueryTabId+' .editorObjectDetails, '+jQueryTabId+' .editorObjectClassDetails').show();
           $(jQueryTabId+' .editorObjectDetails textarea').click();
         });
         $('#tab'+currentTabNumber+'_editorCollapseAllButton').on('click', function(e) {
           e.preventDefault();
-          $('.editorObjectClassDetails').show();
-          $('.editorObjectDetails').hide();
+          $(jQueryTabId+' .editorObjectClassDetails').show();
+          $(jQueryTabId+' .editorObjectDetails').hide();
         });
         // Event : Add an object
         $('#tab'+currentTabNumber+'_editorObjectAddButton').on('click', function(e) {
@@ -1643,6 +1647,7 @@ $(function(){
       initCodeMirror(id+" textarea[name^='XWiki.XWikiSkins_'][name$='.vm']", 'velocity');
       initCodeMirror(id+" textarea[name^='XWiki.WikiMacroClass_'][name$='_code']", XWiki.docsyntax);
       initCodeMirror(id+" textarea[name^='Panels.PanelClass_'][name$='_content']", XWiki.docsyntax);
+      initCodeMirror(id+" textarea[name^='XWiki.UIExtensionClass'][name$='_content']", XWiki.docsyntax);
     },
     initHash : function(hashArray) {
       if(hashArray.size() === 7) {
@@ -2151,6 +2156,7 @@ $(function(){
     wikiViewURL : '',
     ssxUrl : '',
     loadList : [],
+    fullscreen : false,
     restorePreviousSession : function() {
       // Open all tabs from last session
       var openedTabs = window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.tabs'];
@@ -2187,6 +2193,27 @@ $(function(){
         var tabToLoad = WebIDE.loadList.shift();
         goToNewPage(tabToLoad[0], tabToLoad[2], tabToLoad[1], tabToLoad[3], true);
       }
+    },
+    toggleFullScreen : function() {
+      WebIDE.fullscreen = !WebIDE.fullscreen;
+      if(WebIDE.fullscreen) { //Switch fullscreen ON
+        $('#editorBlock').addClass('editor-fullscreen');
+        $('#contentMainBlock').css({
+          "height" : ($(window).height()-$('#editorTabBar').outerHeight()-$('#hierarchyBottomActionsBar').outerHeight()-10)+"px"
+        });
+      }
+      else { //Switch fullscreen OFF
+        $('#editorBlock').removeClass('editor-fullscreen');
+        $('#contentMainBlock').css({
+          "height" : "auto"
+        });
+      }
+      $('.editorOtherFieldsBlockContent').hide();
+      $('.editorOtherFieldsBlockTitle').hide();
+      $('.editorOtherFieldsBlock').css({
+        'width' : 'auto',
+      });
+      $('.editorDisplayAdvancedFields').html($('#hierarchyClose').html());
     },
     init : function() {
       setCurrentPage(getDocumentReferenceData('page'));
@@ -2300,10 +2327,7 @@ $(function(){
         $('#hierarchyOpenBlock').hide();
         $('#hierarchyCloseBlock').show();
         $('#hierarchyContent').show();
-        $("#hierarchyBlock").css({
-          "minWidth": "250px",
-          "width": "auto"
-        });
+        $("#hierarchyBlock").removeAttr('style');
       });
       $('#hierarchyRefresh').on('click', Hierarchy.reload);
       $('#hierarchyChangeTree').on('click', Hierarchy.changeTreeView);
@@ -2846,7 +2870,12 @@ $(function(){
     var addTextareaWiki = '';
     var addEditorParameters = '';
     if(WebIDE.tabCount == 1) { //first tab creation
-      var tabButton = $('&lt;span class="btn btn-success"&gt;Save all tabs&lt;/span&gt;').appendTo('#editorTabBar').on('click', function(e) {
+      $('&lt;span class="btn btn-primary"&gt;&lt;span id="editorToggleFullscreen" class="fa fa-arrows-alt"&gt;&lt;/span&gt;&lt;/span&gt;').appendTo('#editorTabBar').on('click', function(e) {
+        e.preventDefault();
+        WebIDE.toggleFullScreen();
+        return false;
+      });
+      $('&lt;span class="btn btn-success"&gt;Save all tabs&lt;/span&gt;').appendTo('#editorTabBar').on('click', function(e) {
         e.preventDefault();
         saveAll();
         return false;
@@ -2892,13 +2921,13 @@ $(function(){
       $(jQueryTabId+' .editorOtherFieldsBlockContent').toggle();
       $(jQueryTabId+' .editorOtherFieldsBlockTitle').toggle();
       if($(jQueryTabId+' .editorOtherFieldsBlockContent').is(':visible')) {
-        $('.editorDisplayAdvancedFields').html($('#hierarchyOpenBlock').html());
+        $(jQueryTabId+' .editorDisplayAdvancedFields').html($('#hierarchyOpenBlock').html());
         $(jQueryTabId+' .editorOtherFieldsBlock').css({
           'width' : '400px',
         });
       }
       else {
-        $('.editorDisplayAdvancedFields').html($('#hierarchyClose').html());
+        $(jQueryTabId+' .editorDisplayAdvancedFields').html($('#hierarchyClose').html());
         $(jQueryTabId+' .editorOtherFieldsBlock').css({
           'width' : 'auto',
         });
@@ -3359,10 +3388,10 @@ $(function(){
   min-width: 250px;
   width: auto;
   float: left;
-  position: relative;
   height: 100%;
   resize: horizontal;
   box-sizing: border-box;
+  overflow: hidden;
 }
 /* Project Block */
 #hierarchyContent {
@@ -3549,12 +3578,6 @@ $(function(){
 #hierarchySavingState.red, #hierarchyLoadingState.red, #hierarchyState.red {
   background-color: red;
 }
-#hierarchyBottomActionsBar {
-  margin-top: 10px;
-}
-#hierarchyBottomActionsBar input {
-  margin-left: 10px;
-}
 #hierarchyExistingPageModalError, #hierarchyPageModalError, #hierarchyFolderModalError, #hierarchyObjectModalError {
   font-weight: bold;
   color: #8A0808;
@@ -3671,9 +3694,9 @@ $(function(){
 #else
   #set($spaceParentList = [$currentDoc.space])
 #end
-#set($beginAddButton = "{{html clean='false' wiki='true'}} &lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span class='hierarchyAddNewElementButton' class='dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'&gt;&lt;span class='fa fa-plus'&gt;&lt;/span&gt;&lt;span class='sr-only'&gt;Toggle Dropdown&lt;/span&gt;&lt;/span&gt;&lt;ul class='dropdown-menu'&gt;")
+#set($beginAddButton = "{{html clean='false' wiki='true'}} &lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span class='hierarchyAddNewElementButton' class='dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'&gt;&lt;span class='fa fa-plus'&gt;&lt;/span&gt;&lt;span class='sr-only'&gt;Toggle Dropdown&lt;/span&gt;&lt;/span&gt;&lt;ul class='dropdown-menu dropdown-menu-right'&gt;")
 #set($endAddButton = '&lt;/ul&gt;&lt;/div&gt;{{/html}}')
-#set($beginRemoveButton = "{{html clean='false' wiki='true'}} &lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span class='hierarchyAddNewElementButton' class='dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'&gt;&lt;span class='fa fa-times'&gt;&lt;/span&gt;&lt;span class='sr-only'&gt;Toggle Dropdown&lt;/span&gt;&lt;/span&gt;&lt;ul class='dropdown-menu'&gt;")
+#set($beginRemoveButton = "{{html clean='false' wiki='true'}} &lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span class='hierarchyAddNewElementButton' class='dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'&gt;&lt;span class='fa fa-times'&gt;&lt;/span&gt;&lt;span class='sr-only'&gt;Toggle Dropdown&lt;/span&gt;&lt;/span&gt;&lt;ul class='dropdown-menu dropdown-menu-right'&gt;")
 #set($endRemoveButton = '&lt;/ul&gt;&lt;/div&gt;{{/html}}')
 (% id="hierarchyContent" %) (((
 #if($masterDoc.hasAccessLevel('edit'))
