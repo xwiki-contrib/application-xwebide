@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1435238189000</creationDate>
-  <date>1448039266000</date>
-  <contentUpdateDate>1448039266000</contentUpdateDate>
+  <date>1448632885000</date>
+  <contentUpdateDate>1448632885000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationObjects</title>
   <defaultTemplate/>
@@ -94,19 +94,12 @@ Add an object: &lt;select id="addClassList"&gt;
 #end
 #if($request.properties)
   #set($jsonProp = $jsontool.parse($util.decodeURI($request.properties)))
-  #if($request.addObject == 'XWiki.ClassSheetBinding')
-    #set($sheetDoc = $xwiki.getDocument("${requestedDoc.space}.$jsonProp.get('sheet')"))
+  #if(!$requestedObj)
+    #set($requestedObj = $requestedDoc.newObject($request.addObject))
   #end
-  #if($request.addObject != 'XWiki.ClassSheetBinding' || !$requestedDoc.getObject('XWiki.ClassSheetBinding', 'sheet', $jsonProp.get('sheet')))
-    #if(!$requestedObj)
-      #set($requestedObj = $requestedDoc.newObject($request.addObject))
-    #end
-    #set($jsonProp = $jsontool.parse($util.decodeURI($request.properties)))
-    #foreach($key in $jsonProp.keySet())
-      #set($ok = $requestedObj.set($key, $jsonProp.get($key)))
-    #end
-  #elseif(!$sheetDoc.isNew())
-    (% id="editorAddObjectError" %)1
+  #set($jsonProp = $jsontool.parse($util.decodeURI($request.properties)))
+  #foreach($key in $jsonProp.keySet())
+    #set($ok = $requestedObj.set($key, $jsonProp.get($key)))
   #end
 #else
   #if(!$requestedObj)
@@ -123,8 +116,12 @@ Add an object: &lt;select id="addClassList"&gt;
 #end
 )))
 #elseif($request.updateToken)
-#set($requestedDoc = $xwiki.getDocument($request.docFullName))
-(% id="currentToken" %)((($services.csrf.getToken())))
+  #set($requestedDoc = $xwiki.getDocument($request.docFullName))
+  (% id="currentToken" %)((($services.csrf.getToken())))
+#elseif($request.removePage)
+  #set($pageReference = $services.model.createDocumentReference('', $request.docSpace, $request.docPage))
+  #set($pageDoc = $xwiki.getDocument($pageReference))
+  #set($ok = $pageDoc.delete())
 #end
 {{/velocity}}</content>
 </xwikidoc>

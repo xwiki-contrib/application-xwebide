@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1448277037000</date>
-  <contentUpdateDate>1448019759000</contentUpdateDate>
+  <date>1448882074000</date>
+  <contentUpdateDate>1448879351000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -434,19 +434,6 @@ $(function(){
 
     // Contains all events that have to be registered again each time the hierarchy is updated (mostly "click" events on elements in the hierarchy)
     init : function() {
-      // Check for unsaved content
-      $('#contentMainBlock').on('keyup click', function(){
-        if($.inArray(WebIDE.currentEditor, Object.keys(Modules)) &gt;= 0 &amp;&amp; !WebIDE.LOADING &amp;&amp; !WebIDE.SAVING) {
-          // Display a star in the old tab button if there is unsaved content when we leave it
-          var tabId = getTabId(WebIDE.currentEditor, getCurrentSpace(false), getCurrentPage(false), Modules[WebIDE.currentEditor].getParameters());
-          var jQueryTabId = '#'+tabId;
-          var tabNumberId = getTabNumber(jQueryTabId);
-          if(WebIDE.tabCount &gt; 0 &amp;&amp; tabNumberId &gt; 0) {
-            var unsavedState = (WebIDESavedContent[tabNumberId] !== getCurrentContent(tabNumberId));
-            setStar(unsavedState, tabNumberId);
-          }
-        }
-      });
       // Display or hide the content of a folder by clicking on its name
       $('.hierarchy-toggleFolder').click(function(){
         var spaceToggle = $(this).attr('data-space');
@@ -681,6 +668,7 @@ $(function(){
           });
         }
       });
+
       // Save or discard the content when a tab is closed ? :
       $('#hierarchySaveAndCloseModal, #hierarchyDiscardAndCloseModal').click(function(e){
         e.preventDefault();
@@ -788,24 +776,24 @@ $(function(){
    */
   //---------- WikiEditor Module ----------
   /**
-   * ----- Global variables -----
+   * ----- Internal variable -----
    * currentLocale
-   *   The language of the page displayed in the current tab
+   *   The language of the page edited in the current tab
    * ----- Internal methods -----
    * _addModalShortcut()
    *   Add shortcuts when the "page" modal is opened
    * _setCurrentLocale()
    *   Set the value of currentLocale
    */
-  var currentLocale;
   var WikiEditor = {
     editor : 'wiki',
+    currentLocale: '',
     load : function(loadAllTabs) {
       if(WebIDE.currentEditor === WikiEditor.editor) {
         setLoadingState(true);
         var urlSpaces = getCurrentSpace(false, true);
         var urlPage = getCurrentPage(false);
-        var locale = (currentLocale &amp;&amp; currentLocale !== '') ? currentLocale : 'default';
+        var locale = (WikiEditor.currentLocale &amp;&amp; WikiEditor.currentLocale !== '') ? WikiEditor.currentLocale : 'default';
         $.ajax({
           url: WebIDE.wikiViewURL+urlSpaces+"/"+urlPage+"?xpage=plain&amp;raw=2&amp;language="+locale,
           type: "GET",
@@ -891,7 +879,7 @@ $(function(){
       }
     },
     getParameters : function() {
-      var locale = currentLocale || 'default';
+      var locale = WikiEditor.currentLocale || 'default';
       return [locale];
     },
     setParameters : function(parameters) {
@@ -938,7 +926,7 @@ $(function(){
         $('#editorDeletedPageModalInfo').html(getCurrentSpace(false)+' - '+getCurrentPage(false));
         $('#editorDeletePageConfirmed').attr('data-page', getCurrentPage(false));
         $('#editorDeletePageConfirmed').attr('data-space', getCurrentSpace(false));
-        var locale = currentLocale || 'default';
+        var locale = WikiEditor.currentLocale || 'default';
         $('#editorDeletePageConfirmed').attr('data-locale', locale);
         if(WebIDE.bootstrap()) {
           $('#editorDeletePageModal').modal('show');
@@ -958,9 +946,6 @@ $(function(){
         var modal = true;
         $('#hierarchyAddPageTypeBlock').hide();
         $('#hierarchyAddPageLocaleBlock').hide();
-        $('#hierarchyAddPageSheetBlock').hide();
-        $('#hierarchyPageSheet').off('change');
-        $('#hierarchyPageSheet').val('');
         $('#hierarchyNewPageName').attr('disabled', false);
         $('#hierarchyPageFolder').attr('disabled', false);
         var folder = $(this).attr('data-space') || '';
@@ -970,38 +955,7 @@ $(function(){
         $('#hierarchyPageFolder').val(folder);
         $('#hierarchyNewPageName').val(file);
 
-        if($(this).hasClass('newClass')) {
-          $('#hierarchyAddPageTitle').html('Add new class');
-          $('#hierarchyAddPageLabel').html('Class name');
-          $('#hierarchyAddPage').attr('data-type', 'class');
-        }
-        else if($(this).hasClass('newSheet')) {
-          $('#hierarchyAddPageSheetBlock').show();
-          $('#hierarchyPageFolder').attr('disabled', true);
-          var classFile = file; // e.g.: ApplicationClass
-          file = file.substr(0, file.length - 5); // e.g.: Application
-          $('#hierarchyNewPageName').val(file+"Sheet");
-          var action = '';
-          var type = action+'sheet';
-          $('#hierarchyAddPage').attr('data-type', type);
-          var actionName = '';
-          $('#hierarchyPageSheet').on('change', function() {
-            action = $('#hierarchyPageSheet').val();
-            type = action+'sheet';
-            $('#hierarchyAddPage').attr('data-type', type);
-            actionName = (action === '') ? '' : action.charAt(0).toUpperCase() + action.slice(1);
-            $('#hierarchyNewPageName').val(file+actionName+"Sheet");
-          });
-          $('#hierarchyAddPage').attr('data-classname', classFile);
-        }
-        else if($(this).hasClass('newTemplate')) {
-          if(file.substr(file.length - 13) === 'ClassTemplate') {
-            var classFile = folder+'.'+file.substr(0, file.length - 8);
-            ObjectEditor.add(null, classFile, true, folder, file, false, null);
-          }
-          modal = false;
-        }
-        else if($(this).hasClass('newLanguage')) {
+        if($(this).hasClass('newLanguage')) {
           $('#hierarchyAddPageTitle').html('Add new language');
           $('#hierarchyAddPageLabel').html('Page');
           $('#hierarchyAddPage').attr('data-type', 'language');
@@ -1078,26 +1032,12 @@ $(function(){
           if(type === 'page' &amp;&amp; $('input[type=radio][name=hierarchyAddPageType]:checked').val() === 'item') {
             type = 'item';
             itemvalue = $('#hierarchyAddPageItem').val();
-            ObjectEditor.add(null, itemvalue, true, folder, file, false, null);
           }
-          // Check if if is a translation
+          // Check if it is a translation
           else if(type === 'language') {
             itemvalue = $('#hierarchyAddPageLocale').val();
-            WikiEditor.add(folder, file, type, itemvalue);
           }
-          else if(type === 'class') {
-            var properties = '{"sheet" : "XWiki.ClassSheet"}';
-            ObjectEditor.add(null, 'XWiki.DocumentSheetBinding', true, folder, file, false, false, encodeURIComponent(properties), type);
-          }
-          else if(type === 'editsheet' || type === 'viewsheet' || type === 'inlinesheet' || type === 'sheet') {
-            var classFile = $('#hierarchyAddPage').attr('data-classname') || '';
-            var properties = '{"sheet" : "'+file+'"}';
-            ObjectEditor.add(null, 'XWiki.ClassSheetBinding', true, folder, classFile, false, false, encodeURIComponent(properties), type);
-          }
-          else {
-            // Create the page :
-            WikiEditor.add(folder, file, type, itemvalue);
-          }
+          WikiEditor.add(folder, file, type, itemvalue);
         }
         else {
           $('#hierarchyPageModalError').html('ERROR : You have to fill all the fields!').show().delay(4000).queue(function(n) {
@@ -1171,8 +1111,20 @@ $(function(){
       var restSpaces = getRestSpacesString(folder);
       setHierarchyState('Adding page...');
       var addRestLanguage = '';
+      var ajaxProperties;
       if(type === 'language') {
         addRestLanguage = '/translations/'+itemValue;
+      }
+      else if(type === 'item') { // Item page must receive an object of a selected class at the end!
+        var restSpaces = getRestSpacesString(folder);
+        var restPage = file;
+        ajaxProperties = {
+          url: "/"+XWiki.webapppath+"rest/wikis/"+getDocumentReferenceData('wiki')+"/"+restSpaces+"/pages/"+restPage+"/objects",
+          method: "POST",
+          contentType: "application/x-www-form-urlencoded",
+          accept: "application/xml",
+          data: "className="+encodeURIComponent(itemValue),
+        };
       }
       $.ajax({
         url: "/"+XWiki.webapppath+"rest/wikis/"+getDocumentReferenceData('wiki')+"/"+restSpaces+"/pages/"+file+addRestLanguage,
@@ -1192,15 +1144,32 @@ $(function(){
           accept: "application/xml",
           data: "title="+file+"&amp;content=&amp;parent="+getCurrentSpace(true)+"."+getCurrentPage(true),
         }).success(function(){
-          $('#hierarchyNewPageName').val('');
-          if(WebIDE.bootstrap()) {
-            $('#hierarchyPageModal').modal('hide');
+          function callback() {
+            $('#hierarchyNewPageName').val('');
+            if(WebIDE.bootstrap()) {
+              $('#hierarchyPageModal').modal('hide');
+            }
+            else {
+              closeModalNoBootstrap();
+            }
+            setHierarchyState('Page added', 2500);
+            Hierarchy.reload();
+          }
+          if(type !== 'item') {
+            callback();
           }
           else {
-            closeModalNoBootstrap();
+            $.ajax(ajaxProperties).success(callback).error(function(xhr) {
+              $('#hierarchyNewPageName').val('');
+              if(WebIDE.bootstrap()) {
+                $('#hierarchyPageModal').modal('hide');
+              }
+              else {
+                closeModalNoBootstrap();
+              }
+              setHierarchyState(xhr.statusText, 4000, 'red');
+            });
           }
-          setHierarchyState('Page added', 2500);
-          Hierarchy.reload();
         }).error(function(xhr){
           $('#hierarchyNewPageName').val('');
           if(WebIDE.bootstrap()) {
@@ -1227,7 +1196,7 @@ $(function(){
    * @input String locale: the value currently used in the editor
    */
     _setCurrentLocale : function(locale) {
-      currentLocale = locale;
+      WikiEditor.currentLocale = locale;
     },
   /**
    * Get/set the value of the "hidden" field of the selected page
@@ -1274,7 +1243,7 @@ $(function(){
    */
   //---------- ObjectEditor Module ----------
   /**
-   * ----- Global variables -----
+   * ----- Internal variables -----
    * currentObject
    *   The class of the object displayed in the current tab
    * currentNumber
@@ -1282,13 +1251,13 @@ $(function(){
    * ----- Internal methods -----
    * _addModalShortcut()
    *   Add shortcuts when the "page" modal is opened
-   * _setCurrentLocale()
-   *   Set the value of currentLocale
+   * _setCurrentObject(objName)
+   * _setCurrentNumber(objNumber)
    */
-  var currentObject;
-  var currentNumber;
   var ObjectEditor = {
     editor : 'object',
+    currentObject : '',
+    currentNumber : '',
     /**
      * Get the list of object in the current page
      */
@@ -1297,7 +1266,7 @@ $(function(){
         setLoadingState(true);
         var selectedObjectURL = '';
         if(ObjectEditor._getCurrentObject(false) &amp;&amp; ObjectEditor._getCurrentObject(false) !== 'XWiki.WikiMacroClass') {
-          selectedObjectURL = '/'+ObjectEditor._getCurrentObject(false)+'/'+currentNumber;
+          selectedObjectURL = '/'+ObjectEditor._getCurrentObject(false)+'/'+ObjectEditor.currentNumber;
         }
         var restSpaces = getCurrentSpace(false, false, true);
         $.ajax({
@@ -1588,7 +1557,7 @@ $(function(){
       }
     },
     getParameters : function() {
-      return [ObjectEditor._getCurrentObject(false), currentNumber];
+      return [ObjectEditor._getCurrentObject(false), ObjectEditor.currentNumber];
     },
     setParameters : function(parameters) {
       ObjectEditor._setCurrentObject(parameters[0]);
@@ -1659,14 +1628,14 @@ $(function(){
      * If the editor is the classic object editor, make the button delete the whole page.
      */
     setDeleteButton : function() {
-      if(ObjectEditor._getCurrentObject(false)) {
-        $('#hierarchyDeleteButtonIDE').attr('class', 'btn btn-danger deleteSingleObject');
+      if(ObjectEditor._getCurrentObject(false) &amp;&amp; ObjectEditor._getCurrentObject(false) !== 'Panels.PanelClass' &amp;&amp; ObjectEditor._getCurrentObject(false) !== 'XWiki.WikiMacroClass') { // Single object editor : delete only the object displayed in the page
+        $('#hierarchyDeleteButtonIDE').attr('class', 'btn btn-danger');
         $('#hierarchyDeleteButtonIDE').val('Delete this object from the page');
         $('#hierarchyDeleteButtonIDE').off('click');
         $('#hierarchyDeleteButtonIDE').on('click', function() {
-          $('#editorDeletedObjectModalInfo').html(ObjectEditor._getCurrentObject(false)+' - '+currentNumber);
+          $('#editorDeletedObjectModalInfo').html(ObjectEditor._getCurrentObject(false)+' - '+ObjectEditor.currentNumber);
           $('#editorDeleteObjectConfirmed').attr('data-classname', ObjectEditor._getCurrentObject(false));
-          $('#editorDeleteObjectConfirmed').attr('data-number', currentNumber);
+          $('#editorDeleteObjectConfirmed').attr('data-number', ObjectEditor.currentNumber);
           if(WebIDE.bootstrap()) {
             $('#editorDeleteObjectModal').modal('show');
           }
@@ -1675,8 +1644,14 @@ $(function(){
           }
         });
       }
-      else {
-        WikiEditor.setDeleteButton();
+      else { // Multiple object editor : delete the whole page
+        $('#hierarchyDeleteButtonIDE').attr('class', 'btn btn-danger');
+        $('#hierarchyDeleteButtonIDE').val('Delete this page from the wiki');
+        $('#hierarchyDeleteButtonIDE').off('click');
+        $('#hierarchyDeleteButtonIDE').on('click', function() {
+          $('#editorDeleteMultipleObjectsModalInfo').html(getCurrentSpace()+'.'+getCurrentPage());
+          $('#editorDeleteMultipleObjectsModal').modal('show');
+        });
       }
     },
     /**
@@ -1806,6 +1781,7 @@ $(function(){
         if(folder &amp;&amp; file &amp;&amp; className &amp;&amp; folder.trim() &amp;&amp; file.trim() &amp;&amp; className.trim()) {
           var global = ($('#hierarchyAddObject').attr('data-scope') === 'global');
           var properties = null;
+          var redirect = true;
           // Manage the different types of object that can be added from the logical view
           if(global &amp;&amp; className === 'XWiki.JavaScriptExtension') {
             properties = encodeURIComponent('{"name" : "'+file.replace(/"/g, '\"')+'"}');
@@ -1822,12 +1798,13 @@ $(function(){
           }
           else if(global &amp;&amp; className === 'XWiki.TranslationDocumentClass') {
             properties = encodeURIComponent('{"scope" : "WIKI"}');
+            redirect = false; // Translation must be opened by the wiki editor
           }
           else if(global &amp;&amp; className === 'XWiki.UIExtensionClass') {
             file = 'UIX';
           }
           // Add the object
-          ObjectEditor.add(null, className, true, folder, file, global, true, properties);
+          ObjectEditor.add(null, className, true, folder, file, global, redirect, properties);
         }
         else {
           $('#hierarchyObjectModalError').html('ERROR : You have to fill all the fields!').show().delay(4000).queue(function(n) {
@@ -1847,10 +1824,17 @@ $(function(){
         $(this).removeAttr('data-classname');
         $(this).removeAttr('data-number');
       });
+      $('#editorDeleteMultipleObjectConfirmed').on('click', function(e) {
+        $('body').removeClass('modal-open');
+        e.preventDefault();
+        var page = getCurrentPage(false);
+        var space = getCurrentSpace(false);
+        ObjectEditor.remove(space, page);
+      });
     },
     _getCurrentObject : function(escaped) {
-      if(escaped) {return (currentObject === null) ? null : getEscapedValue(currentObject);}
-      else {return currentObject;}
+      if(escaped) {return (ObjectEditor.currentObject === null) ? null : getEscapedValue(ObjectEditor.currentObject);}
+      else {return ObjectEditor.currentObject;}
     },
     _addModalShortcut : function() {
       $('#hierarchyObjectPageInput').focus();
@@ -1872,7 +1856,6 @@ $(function(){
         var isSelectedObject = '';
         var isGlobal = '';
         var addProperties = '';
-        var error = null;
         if(!newTab) {
           var currentTabNumber = getTabNumber(jQueryTabId);
           var unsavedStateBefore = (WebIDESavedContent[currentTabNumber] !== getCurrentContent(currentTabNumber));
@@ -1896,50 +1879,12 @@ $(function(){
           }).success(function(dataContent) {
             setSavingState(false, 'Saved', 2500);
             var number = $('&lt;div/&gt;').append(dataContent).find('div[data-number]').attr('data-number');
-            error = $('&lt;div/&gt;').append(dataContent).find('#editorAddObjectError').length;
-            if(error &amp;&amp; type) {
-              $('#hierarchyPageModalError').html('ERROR : A page with the same name already exist').show().delay(4000).queue(function(n) {
-                $(this).hide().html('');
-                n();
-              });
-              //$('body').removeClass('modal-open');
-            }
-            else if(newTab) { // Add an object from the menu
+            if(newTab) { // Add an object from the menu
               setLoadingState(false, 'Loaded', 2500);
               if(redirect) { // Create an object and redirect to a new tab with that object
-                if(global &amp;&amp; className === 'XWiki.TranslationDocumentClass') {
-                  goToNewPage(WikiEditor.editor, page, space, ['default']);
-                }
-                else {
-                  goToNewPage(ObjectEditor.editor, page, space, [className, number]);
-                }
-                Hierarchy.reload();
+                goToNewPage(ObjectEditor.editor, page, space, [className, number]);
               }
-              else if(type &amp;&amp; type === 'class') { // Create a class with the logical view and add the ClassSheet : redirect to the class editor
-                window.location.href = '/'+XWiki.webapppath+''+XWiki.servletpath+'edit/'+getURLSpacesString(space)+'/'+page+'?editor=class#!XWebIDE';
-              }
-              else if(type &amp;&amp; properties &amp;&amp; type === 'editsheet') {
-                var sheetName = $.parseJSON(decodeURIComponent(properties)).sheet;
-                properties = '{"action" : "EDIT"}';
-                ObjectEditor.add(null, 'XWiki.SheetDescriptorClass', true, space, sheetName, false, false, encodeURIComponent(properties));
-              }
-              else if(type &amp;&amp; properties &amp;&amp; type === 'viewsheet') {
-                var sheetName = $.parseJSON(decodeURIComponent(properties)).sheet;
-                properties = '{"action" : "VIEW"}';
-                ObjectEditor.add(null, 'XWiki.SheetDescriptorClass', true, space, sheetName, false, false, encodeURIComponent(properties));
-              }
-              else if(type &amp;&amp; properties &amp;&amp; type === 'inlinesheet') {
-                var sheetName = $.parseJSON(decodeURIComponent(properties)).sheet;
-                properties = '{"action" : "INLINE"}';
-                ObjectEditor.add(null, 'XWiki.SheetDescriptorClass', true, space, sheetName, false, false, encodeURIComponent(properties));
-              }
-              else if(type &amp;&amp; properties &amp;&amp; type === 'sheet') {
-                var sheetName = $.parseJSON(decodeURIComponent(properties)).sheet;
-                WikiEditor.add(space, sheetName);
-              }
-              else {
-                Hierarchy.reload();
-              }
+              Hierarchy.reload();
             }
             else { // Add an object from an object editor tab
               var divSelector = 'div[id="tab'+currentTabNumber+'_editorObjects-'+className+'"]';
@@ -1982,13 +1927,8 @@ $(function(){
               }
             }
           }).complete(function() {
-            if(WebIDE.bootstrap() &amp;&amp; !error) {
-              $('#hierarchyObjectModal').modal('hide');
-              $('#hierarchyPageModal').modal('hide');
-            }
-            else if(!error) {
-              closeModalNoBootstrap();
-            }
+            $('#hierarchyObjectModal').modal('hide');
+            $('#hierarchyPageModal').modal('hide');
             // If all the content was initially saved, update the new "savedContent" value (the new object is automatically saved)
             if(!newTab &amp;&amp; !unsavedStateBefore) {
               setSavedContent(currentTabNumber);
@@ -2009,21 +1949,37 @@ $(function(){
       if(!WebIDE.SAVING &amp;&amp; !WebIDE.LOADING) {
         setSavingState(true, 'Deleting object...');
         setLoadingState(true, 'Removing text...');
+        // Find the current tab number
         var jQueryTabId = '#'+getTabId(ObjectEditor.editor, getCurrentSpace(), getCurrentPage(), ObjectEditor.getParameters());
         var currentTabNumber = getTabNumber(jQueryTabId);
+        // Check if the deleted element is opened in another tab and find the related tab number.
+        // If className == undefined, the users wants to delete the whole current page and so the related tab number is the current tab number. (Prevent issues with macros and panels)
         var jQueryTabIdObj = '#'+getTabId(ObjectEditor.editor, space, page, [className, number]);
-        var objectTabNumber = getTabNumber(jQueryTabIdObj);
+        var objectTabNumber = (!className) ? currentTabNumber : getTabNumber(jQueryTabIdObj);
+        // Check if the tab was saved before removing the object (the savedContent value will have to be updated at the end if that's the case)
         var unsavedStateBefore = (WebIDESavedContent[currentTabNumber] !== getCurrentContent(currentTabNumber));
+        // Determine if the object deleted is in the tab (multiple or single object editor)
+        var isCurrentSingleObject = (ObjectEditor._getCurrentObject(false) &amp;&amp; currentTabNumber&gt;0 &amp;&amp; currentTabNumber === objectTabNumber);
+        var isInCurrentTab = (isCurrentSingleObject || (WebIDE.currentEditor === ObjectEditor.editor &amp;&amp; page === getCurrentPage() &amp;&amp; space === getCurrentSpace() &amp;&amp; !ObjectEditor._getCurrentObject(false)));
+        // Ajax queyr data
         var restCurrentSpaces = getRestSpacesString(space);
-        var isCurrentTab = (WebIDE.currentEditor === ObjectEditor.editor &amp;&amp; page === getCurrentPage() &amp;&amp; space === getCurrentSpace() &amp;&amp; ((className === ObjectEditor._getCurrentObject(false) &amp;&amp; number === currentNumber) || !ObjectEditor._getCurrentObject(false)));
-        var singleObject = (page === getCurrentPage() &amp;&amp; space === getCurrentSpace() &amp;&amp; className === ObjectEditor._getCurrentObject(false) &amp;&amp; number === currentNumber);
+        var ajaxUrl = '';
+        var httpMethod = '';
+        if(!className) { // Remove the whole page from the wiki (Multiple object editor, Panels, Macros...)
+          ajaxUrl = WebIDE.wikiViewURL+"WebIDECode/ApplicationObjects?xpage=plain&amp;removePage=1&amp;docSpace="+space+'&amp;docPage='+page;
+          httpMethod = "GET";
+        }
+        else { // Remvoe only one object from the page
+          ajaxUrl = '/'+XWiki.webapppath+'rest/wikis/'+getDocumentReferenceData('wiki')+'/'+restCurrentSpaces+'/pages/'+page+'/objects/'+className+'/'+number;
+          httpMethod = "DELETE";
+        }
         $.ajax({
-          url: '/'+XWiki.webapppath+'rest/wikis/'+getDocumentReferenceData('wiki')+'/'+restCurrentSpaces+'/pages/'+page+'/objects/'+className+'/'+number,
-          type: "DELETE",
+          url: ajaxUrl,
+          type: httpMethod,
         }).success(function(dataContent){
           setSavingState(false, 'Deleted', 2500);
           // Case 1: object editor of the concerned page = remove the object from the current tab
-          if(isCurrentTab &amp;&amp; !ObjectEditor._getCurrentObject(false)) {
+          if(isInCurrentTab &amp;&amp; !isCurrentSingleObject &amp;&amp; className) { // Current tab + Current Multiple Objects editor + Only 1 object removed
             var divSelectorInternal = 'div[id="tab'+currentTabNumber+'_editorObject-'+className+'-'+number+'"]';
             $(divSelectorInternal).parent().remove();
             $('#tab'+currentTabNumber+'_editorObjectMenu a[data-classname="'+className+'"][data-number="'+number+'"]').next('br').remove();
@@ -2037,13 +1993,14 @@ $(function(){
           // Case 2: object not displayed in the current tab or tab with that object only = remove the tab
           else {
             if(objectTabNumber &gt; 0) {
-              var element = $('.editorTabButton[data-tabnumber="'+currentTabNumber+'"]');
-              removeTab(element, currentTabNumber);
+              var element = $('.editorTabButton[data-tabnumber="'+objectTabNumber+'"]');
+              removeTab(element, objectTabNumber);
             }
             Hierarchy.reload();
           }
           if(WebIDE.bootstrap()) {
             $('#editorDeleteObjectModal').modal('hide');
+            $('#editorDeleteMultipleObjectsModal').modal('hide');
           }
           else {
             closeModalNoBootstrap();
@@ -2052,7 +2009,7 @@ $(function(){
           setSavingState(true, xhr.statusText, 5000, 'red');
         }).complete(function() {
           $('#editorDeletedObjectModalInfo').html('');
-          if(isCurrentTab &amp;&amp; !ObjectEditor._getCurrentObject(false)) {
+          if(isInCurrentTab &amp;&amp; !isCurrentSingleObject &amp;&amp; className) {
             // If all the content was initially saved, update the new "saved" value (the removed object is automatically saved)
             if(!unsavedStateBefore) {
               setSavedContent(currentTabNumber);
@@ -2113,17 +2070,388 @@ $(function(){
      * @input String file/folder/objName/objNumber: the value currently used in the editor
      */
     _setCurrentObject : function(objName) {
-      currentObject = objName;
+      ObjectEditor.currentObject = objName;
     },
     _setCurrentNumber : function(objNumber) {
-      currentNumber = objNumber;
+      ObjectEditor.currentNumber = objNumber;
     }
   };
 
+  //---------- ClassEditor Module ----------
+  var AWMClassEditor = {
+    editor : 'awm',
+    load : function(loadAllTabs) {
+      if(WebIDE.currentEditor === AWMClassEditor.editor) {
+        setLoadingState(true);
+        var tabId = getTabId(WebIDE.currentEditor, getCurrentSpace(false), getCurrentPage(false), AWMClassEditor.getParameters());
+        var jQueryTabId = '#'+tabId;
+        var tabNumberId = getTabNumber(jQueryTabId);
+        initOtherFieldsBlock($(jQueryTabId), jQueryTabId);
+        var advancedFieldBlock = $(jQueryTabId+' .editorOtherFieldsBlockContent');
+        var classEditorStorage = window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.classEditor'] || 'basic';
+        classEditorStorage = (classEditorStorage === 'advanced') ? 'advanced' : 'basic';
+        var urlIframe = (classEditorStorage === 'basic') ? "/xwiki/bin/edit/"+getCurrentSpace(false)+"/"+getCurrentPage(false)+"?editor=inline&amp;sheet=AppWithinMinutes.ClassEditSheet" : "/xwiki/bin/edit/"+getCurrentSpace(false)+"/"+getCurrentPage(false)+"?editor=class";
+        var ifrm = $('&lt;iframe allowtransparency="true" id="tab'+tabNumberId+'_awm" data-type="'+classEditorStorage+'" name="tab'+tabNumberId+'_awm" class="editorIframe"/&gt;').attr('src', urlIframe).appendTo($('&lt;div class="editorClassTabContent"&gt;&lt;/div&gt;').appendTo(jQueryTabId));
+        AWMClassEditor._initIframe(ifrm, tabNumberId);
+        $('&lt;input type="button" class="btn btn-default editorAWMSwitch" value="Switch basic/advanced"/&gt;').appendTo(advancedFieldBlock).on('click', function() {
+          if(WebIDESavedContent[tabNumberId] != getCurrentContent(tabNumberId)) {$('#editorSwitchClassModal').modal('show');}
+          else{AWMClassEditor._switchClassEditor(ifrm, tabNumberId);}
+        });
+        setLoadingState(false, 'Loaded', 2500);
+        if(loadAllTabs) {
+          WebIDE.continueLoadAll();
+        }
+      }
+    },
+    _switchClassEditor : function(ifrm, tabNumberId) {
+      var oldType = $(ifrm).attr('data-type');
+      if(oldType === 'basic') {
+        $(ifrm).attr('src', "/xwiki/bin/edit/"+getCurrentSpace(false)+"/"+getCurrentPage(false)+"?editor=class")
+        $(ifrm).attr('data-type', 'advanced');
+        window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.classEditor'] = 'advanced';
+      }
+      else {
+        $(ifrm).attr('src', "/xwiki/bin/edit/"+getCurrentSpace(false)+"/"+getCurrentPage(false)+"?editor=inline&amp;sheet=AppWithinMinutes.ClassEditSheet")
+        $(ifrm).attr('data-type', 'basic');
+        window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.classEditor'] = 'basic';
+      }
+      AWMClassEditor._initIframe(ifrm, tabNumberId);
+    },
+    save : function(tabNumberId, changeSavedContent, continueEditing, saveAll) {
+      if(!WebIDE.SAVING || saveAll) {
+        var tabButtonElement = $('.editorTabButton[data-tabnumber="'+tabNumberId+'"]');
+        var page = decodeURIComponent($(tabButtonElement).attr('data-page'));
+        var space = decodeURIComponent($(tabButtonElement).attr('data-space'));
+        var tabId = getTabId(WebIDE.currentEditor, space, page, []);
+        var jQueryTabId = '#'+tabId;
+        var ifrm = $(jQueryTabId+' iframe');
+        $(ifrm).contents().find('input[name="xaction_saveandcontinue"], input[name="action_saveandcontinue"]').click();
+        if(changeSavedContent) {
+          setSavedContent(tabNumberId);
+        }
+        setStar(false, tabNumberId);
+        if(!saveAll) {
+          //setSavingState(false, 'Saved', 2500);
+          if(continueEditing) return true;
+          else window.location.href = WebIDE.wikiViewURL+space+'/'+page;
+        }
+        else {
+          continueSaveAll(true);
+        }
+      }
+    },
+    getParameters : function() {
+      return [];
+    },
+    setParameters : function(parameters) {
+      return true;
+    },
+    resetParameters : function() {
+      return true;
+    },
+    getTabButtonParameters : function(parameters) {
+      return '';
+    },
+    getParametersFromTab : function(tabButton) {
+      return [];
+    },
+    getMenuElement : function(folder, file, parameters) {
+      return $('.editAWM[data-space="'+folder+'"][data-page="'+file+'"]')
+    },
+    getTabName : function(folder, file, parameters) {
+      return file+' ('+folder+'.'+file+')';
+    },
+    getCurrentContent : function (tabElement) {
+      var arrayVal = AWMClassEditor._getObjectInputFields(tabElement);
+      var content = "";
+      arrayVal.each(function(elemt, index) {
+        content += $(index).val();
+      });
+      return content;
+    },
+    initCodeMirror : function(tabId) {
+      return true;
+    },
+    initHash : function(hashArray) {
+      return true;
+    },
+    setDeleteButton : function() {
+      //TODO: delete the page
+    },
+    /**
+     * Contains all events that have to be registered again each time the hierarchy is updated (mostly "click" events on elements in the hierarchy) :
+     */
+    initMenu : function() {
+      // User wants to edit a new page
+      $('.editAWM').click(function(e){
+        e.preventDefault();
+        if(!WebIDE.SAVING &amp;&amp; !WebIDE.LOADING) {
+          var folder = $(this).attr('data-space');
+          var file = $(this).attr('data-page');
+          goToNewPage(AWMClassEditor.editor, file, folder, []);
+        }
+      });
+      $('.newAWMClass').click(function(e){
+        e.preventDefault();
+        $('#hierarchyAddSheetBlock').hide();
+        var folder = $(this).attr('data-space') || '';
+        var file = $(this).attr('data-page') || '';
+        file = encodeURIComponent(file);
+
+        $('#hierarchyClassSpace').html(folder);
+        $('#hierarchyClassInput').val('');
+
+        if($(this).hasClass('newClass')) {
+          $('#hierarchyAddClass').attr('data-type', 'class');
+        }
+        else if($(this).hasClass('newSheet')) {
+          $('#hierarchyAddSheetBlock').show();
+          $('#hierarchyClassSheet').val('');
+          var classFile = file; // e.g.: ApplicationClass
+          file = file.substr(0, file.length - 5); // e.g.: Application
+          $('#hierarchyClassInput').val(file+"Sheet");
+          $('#hierarchyAddClass').attr('data-type', 'sheet');
+          $('#hierarchyAddClass').attr('data-classname', classFile);
+          $('#hierarchyClassSheet').on('change', function() {
+            var action = $(this).val();
+            var actionName = (action === '') ? '' : action.charAt(0).toUpperCase() + action.slice(1);
+            $('#hierarchyClassInput').val(file+actionName+"Sheet");
+          });
+        }
+        else if($(this).hasClass('newTemplate')) {
+          var classFile = folder+'.'+file;
+          AWMClassEditor.add(classFile, 'template');
+        }
+      });
+      // User wants to delete a page
+      $('.deleteAWM').click(function(e){
+        e.preventDefault();
+        if(!WebIDE.SAVING &amp;&amp; !WebIDE.LOADING) {
+          var folder = $(this).attr('data-space');
+          var file = $(this).attr('data-page');
+          $('#editorDeletedClassModalInfo').html(folder+'.'+file);
+          $('#editorDeleteClassConfirmed').attr('data-page', file);
+          $('#editorDeleteClassConfirmed').attr('data-space', folder);
+          if(WebIDE.bootstrap()) {
+            $('#editorDeleteClassModal').modal('show');
+          }
+          else {
+            openModalNoBootstrap('#editorDeleteClassModal');
+          }
+        }
+      });
+    },
+   /**
+    * Initialize the modals (with or without Bootstrap) and their one-time events (shown, hidden, clicks)
+    */
+    initModals : function() {
+      $('#hierarchyAddClass').on('click', function(e){
+        $('body').removeClass('modal-open');
+        e.preventDefault();
+        var folder = $('#hierarchyClassSpace').text();
+        var file = encodeURIComponent($('#hierarchyClassInput').val());
+        var sheetName;
+        var sheetType;
+        var className;
+        var type; // Check if it is a class or a sheet:
+        if($(this).attr('data-type')) {
+            type = $('#hierarchyAddClass').attr('data-type');
+          }
+        if(folder &amp;&amp; file &amp;&amp; type &amp;&amp; folder.trim() &amp;&amp; file.trim()) {
+          if(type === 'sheet') {
+            className = folder+'.'+$('#hierarchyAddClass').attr('data-className');
+            sheetName = file;
+            sheetType = $('#hierarchyClassSheet').val();
+          }
+          else if(type === 'class') {
+            className = folder+'.'+file;
+          }
+          AWMClassEditor.add(className, type, sheetType, sheetName);
+        }
+        else {
+          $('#hierarchyClassModalError').html('ERROR : You have to fill all the fields!').show().delay(4000).queue(function(n) {
+            $(this).hide().html('');
+            n();
+          });
+        }
+      });
+      $('#hierarchySaveAndSwitchClassModal, #hierarchyDiscardAndAndSwitchClassModal').click(function(e){
+        e.preventDefault();
+        if(!WebIDE.SAVING &amp;&amp; !WebIDE.LOADING) {
+          var tabId = getTabId(WebIDE.currentEditor, getCurrentSpace(), getCurrentPage(), AWMClassEditor.getParameters());
+          var jQueryTabId = '#'+tabId;
+          var ifrm = $(jQueryTabId+' iframe');
+          var tabNumberId = getTabNumber(jQueryTabId);
+          $('body').removeClass('modal-open');
+          $('#editorSwitchClassModal').modal('hide');
+          if($(this).attr('id') === 'hierarchySaveAndSwitchClassModal') {
+            AWMClassEditor.switchEditor = true;
+            Modules[AWMClassEditor.editor].save(tabNumberId, false, true, false);
+          }
+          else {
+            AWMClassEditor._switchClassEditor(ifrm, tabNumberId);
+          }
+        }
+      });
+      $('#editorDeleteClassConfirmed').click(function(e){
+        $('body').removeClass('modal-open');
+        e.preventDefault();
+        var removeSheet = $('#editorDeleteClassSheet').is(':checked');
+        var removeTemplate = $('#editorDeleteClassTemplate').is(':checked');
+        AWMClassEditor.remove($(this).attr('data-space'), $(this).attr('data-page'), removeSheet, removeTemplate);
+      });
+    },
+   /**
+    * Delete a class from the wiki :
+    */
+    remove : function(space, page, removeSheet, removeTemplate) {
+      if(!WebIDE.LOADING) {
+        setLoadingState(true, 'Deleting...');
+        var addRemoveSheet = '';
+        var addRemoveTemplate = '';
+        if(removeSheet) {
+          addRemoveSheet = '&amp;removeSheet=1';
+        }
+        if(removeTemplate) {
+          addRemoveTemplate = '&amp;removeTemplate=1';
+        }
+        $.ajax({
+          url: WebIDE.wikiViewURL+"WebIDECode/ClassCreation?outputSyntax=plain&amp;xpage=plain&amp;removeClass=1&amp;space="+space+"&amp;page="+page+""+addRemoveSheet+addRemoveTemplate,
+          type: "GET",
+          contentType: "application/json",
+        }).success(function(data){
+          var dataJson = $.parseJSON(data);
+          $(dataJson.delete).each(function(index, elmt){
+            var selector = '_'+encodeURIComponent(elmt.space).replace(/\./g, '2E').replace(/%/g, '')+'_'+encodeURIComponent(elmt.name).replace(/\./g, '2E').replace(/%/g, '');
+            var elements = $('.editorTab[id*="'+selector+'"]');
+            elements.each(function(i, innerElmt) {
+              var tabNumberId = $(innerElmt).attr('data-tabnumber');
+              var element = $('.editorTabButton[data-tabnumber="'+tabNumberId+'"]');
+              removeTab(element, tabNumberId);
+            });
+          });
+          $('#editorDeleteClassModal').modal('hide');
+          Hierarchy.reload();
+          setLoadingState(false, 'Deleted', 2500);
+        }).error(function(xhr){
+          setLoadingState(false, 'Error: '+xhr.statusText, 4000, 'red');
+        });
+      }
+    },
+   /**
+    * Add a clas in the project :
+    */
+    add : function(className, type, sheetType, sheetName) {
+      if(!WebIDE.SAVING &amp;&amp; !WebIDE.LOADING) {
+        setSavingState(true);
+        if(className &amp;&amp; className != "") {
+          var error = 0;
+          var addSheetParameters = '';
+          if((sheetType || sheetType === '') &amp;&amp; sheetName) {
+            addSheetParameters = '&amp;sheetType='+sheetType+'&amp;sheetName='+sheetName;
+          }
+          $.ajax({
+            url: WebIDE.wikiViewURL+"WebIDECode/ClassCreation?xpage=plain&amp;className="+className+"&amp;type="+type+addSheetParameters,
+            type: "GET"
+          }).error(function(xhr) {
+            setSavingState(false, 'Unable to add '+type+': '+xhr.statusText, 4000, 'red');
+          }).success(function(dataContent) {
+            error = $('&lt;div/&gt;').append(dataContent).find('#editorAddClassError').length;
+            if(error) {
+              $('#hierarchyClassModalError').html('ERROR : A page with the same name already exist').show().delay(4000).queue(function(n) {
+                $(this).hide().html('');
+                n();
+              });
+              setSavingState(false, 'Unable to add '+type+': Existing name', 4000, 'red');
+            }
+            else {
+              setSavingState(false, 'Saved', 2500);
+              Hierarchy.reload();
+            }
+          }).complete(function() {
+            if(!error) {
+              $('#hierarchyClassModal').modal('hide');
+            }
+          });
+        }
+      }
+    },
+    _initIframe : function(ifrm,tabNumberId) {
+      $(ifrm).off('load');
+      $(ifrm).on('load', function() {
+        // Hide some UI elements from the iframe and show only the main edit area
+        $(ifrm).contents().find('body').css({"overflow" : "hidden", "min-height":"300px"});
+        $(ifrm).contents().find('body').addClass('main');
+        $(ifrm).contents().find('#menuview, #rightPanels, #leftPanels, .bottombuttons, #hierarchy, #footerglobal, .row').hide();
+        $(ifrm).contents().find('#classname').parent().remove();
+        $(ifrm).contents().find('#options').hide(); // Basic mode only
+        $(ifrm).contents().find('.switch-xclass, .xclass-title, #editPanels').hide(); // Advanced mode only
+        $(ifrm).contents().find('div.main').css({
+          "left" : "0%",
+          "width" : "100%",
+          "box-shadow" : "none"
+        });
+        var initIframeHeight = $(ifrm).contents().find('body').height();
+        $(ifrm).css({
+          "height" : initIframeHeight+"px"
+        });
+        onElementHeightChange(document.getElementById('tab'+tabNumberId+'_awm').contentDocument.body, function() {
+          $(ifrm).css({
+            "height" : $(ifrm).contents().find('body').height()+"px"
+          });
+        });
+        // Remove the iframe's keyboard shortcuts to prevent the user from browsing the wiki in the iframe. Keep only Save&amp;Continue (Alt+Shift+S)
+        window.setTimeout(function() {
+          for (binding in document.getElementById('tab'+tabNumberId+'_awm').contentWindow.shortcut.all_shortcuts) {
+            document.getElementById('tab'+tabNumberId+'_awm').contentWindow.shortcut.remove(binding);
+          }
+          document.getElementById('tab'+tabNumberId+'_awm').contentWindow.shortcut.add("Alt+Shift+S", function() {
+            $('#hierarchySaveButtonIDE').click();
+          });
+        }, 250);
+        // Capture the save/saved events to display the notifications in the WebIDE
+        // Hide the default notification container (in the iframe)
+        $('#tab'+tabNumberId+'_awm').contents().find('body').on('DOMNodeInserted', function(e) {
+          $(ifrm).contents().find('.xnotification-container').css({
+            "visibility" : "hidden"
+          });
+        });
+        document.getElementById('tab'+tabNumberId+'_awm').contentDocument.observe("xwiki:actions:save", function(event){
+          setSavingState(true);
+        });
+        document.getElementById('tab'+tabNumberId+'_awm').contentDocument.observe("xwiki:document:saved", function(event){
+          if(AWMClassEditor.switchEditor) {
+            AWMClassEditor.switchEditor = false;
+            AWMClassEditor._switchClassEditor(ifrm, tabNumberId);
+          }
+          setSavingState(false, 'Saved', 2500);
+        });
+        $(ifrm).contents().find('body').on('keyup', function(){
+          var unsavedState = (WebIDESavedContent[tabNumberId] !== getCurrentContent(tabNumberId));
+          setStar(unsavedState, tabNumberId);
+        });
+        setSavedContent(tabNumberId);
+        return false;
+      });
+    },
+    switchEditor : false,
+    /**
+     * Get all the inputs (input, textarea, select, etc.) in the object editor, except those created by CodeMirror
+     * @input DOM tabElement: a div element containing the data of a tab
+     * @return List[DOM elements] The list of editable elements in the selected object editor tab
+     */
+    _getObjectInputFields : function(tabElement) {
+      var tabNumberId = $(tabElement).attr('data-tabnumber');
+      var ifrm = document.getElementById('tab'+tabNumberId+'_awm');
+      return $(ifrm).contents().find('form.withLock').find('textarea, input, select')
+    }
+  };
+  
   // Modules
   var Modules = {
     'wiki' : WikiEditor,
     'object' : ObjectEditor,
+    'awm' : AWMClassEditor
     //'view' : ViewEditor
   };
   var WebIDE = {
@@ -2198,12 +2526,14 @@ $(function(){
       WebIDE.fullscreen = !WebIDE.fullscreen;
       if(WebIDE.fullscreen) { //Switch fullscreen ON
         $('#editorBlock').addClass('editor-fullscreen');
+        $('#footerglobal').hide();
         $('#contentMainBlock').css({
           "height" : ($(window).height()-$('#editorTabBar').outerHeight()-$('#hierarchyBottomActionsBar').outerHeight()-10)+"px"
         });
       }
       else { //Switch fullscreen OFF
         $('#editorBlock').removeClass('editor-fullscreen');
+        $('#footerglobal').show();
         $('#contentMainBlock').css({
           "height" : "auto"
         });
@@ -2214,6 +2544,14 @@ $(function(){
         'width' : 'auto',
       });
       $('.editorDisplayAdvancedFields').html($('#hierarchyClose').html());
+      $(window).resize(WebIDE.fixContentBlockHeight);
+    },
+    fixContentBlockHeight : function() {
+      if(WebIDE.fullscreen) {
+        $('#contentMainBlock').css({
+          "height" : ($(window).height()-$('#editorTabBar').outerHeight()-$('#hierarchyBottomActionsBar').outerHeight()-10)+"px"
+        });
+      }
     },
     init : function() {
       setCurrentPage(getDocumentReferenceData('page'));
@@ -2310,6 +2648,20 @@ $(function(){
             cmInstance.setOption('lineWrapping', true);
             var parentTab = $(e.target).closest('.editorTab');
           }, 50);
+        }
+      });
+
+      // Check for unsaved content
+      $('#contentMainBlock').on('keyup click', function(){
+        if($.inArray(WebIDE.currentEditor, Object.keys(Modules)) &gt;= 0 &amp;&amp; !WebIDE.LOADING &amp;&amp; !WebIDE.SAVING) {
+          // Display a star in the old tab button if there is unsaved content when we leave it
+          var tabId = getTabId(WebIDE.currentEditor, getCurrentSpace(false), getCurrentPage(false), Modules[WebIDE.currentEditor].getParameters());
+          var jQueryTabId = '#'+tabId;
+          var tabNumberId = getTabNumber(jQueryTabId);
+          if(WebIDE.tabCount &gt; 0 &amp;&amp; tabNumberId &gt; 0) {
+            var unsavedState = (WebIDESavedContent[tabNumberId] !== getCurrentContent(tabNumberId));
+            setStar(unsavedState, tabNumberId);
+          }
         }
       });
 
@@ -2779,7 +3131,6 @@ $(function(){
    */
   function setDocumentReferenceData() {
     if(XWiki.editor == 'class') {
-      console.log(xm);
       xm = {
         wiki: getDocumentReferenceData('wiki'),
         space: $('#hierarchyMasterDocSpace').val(),
@@ -2789,7 +3140,6 @@ $(function(){
         restURL: '/'+XWiki.webapppath+'rest/wikis/'+getDocumentReferenceData("wiki")+'/'+getRestSpacesString($('#hierarchyMasterDocSpace').val())+'/pages/'+$('#hierarchyMasterDocName').val(),
         documentReference: getDocumentReferenceData('wiki')+':'+$('#hierarchyMasterDocSpace').val()+'.'+$('#hierarchyMasterDocName').val()
       };
-      console.log(xm);
     }
   }
 
@@ -2904,6 +3254,7 @@ $(function(){
         return false;
       });
       setActiveTab(mode, file, folder, parameters);
+      WebIDE.fixContentBlockHeight();
     }
   }
 
@@ -2915,21 +3266,21 @@ $(function(){
   function initOtherFieldsBlock(dataNode, jQueryTabId) {
     var menuNodeBlock = $('&lt;div class="editorOtherFieldsBlock"&gt;&lt;/div&gt;').appendTo(dataNode);
     $('&lt;div class="editorOtherFieldsBlockContent"&gt;&lt;/div&gt;').appendTo(menuNodeBlock);
-    $(jQueryTabId+' .editorOtherFieldsBlock').css({'backgroundColor' : $('#hierarchyBlock').css('backgroundColor')});
-    $('&lt;span class="editorDisplayAdvancedFields"&gt;'+$('#hierarchyOpenBlock').html()+'&lt;/span&gt; &lt;strong class="editorOtherFieldsBlockTitle"&gt;Advanced fields&lt;/strong&gt;').prependTo(jQueryTabId+' .editorOtherFieldsBlock');
-    $(jQueryTabId+' .editorDisplayAdvancedFields').click(function() {
-      $(jQueryTabId+' .editorOtherFieldsBlockContent').toggle();
-      $(jQueryTabId+' .editorOtherFieldsBlockTitle').toggle();
-      if($(jQueryTabId+' .editorOtherFieldsBlockContent').is(':visible')) {
-        $(jQueryTabId+' .editorDisplayAdvancedFields').html($('#hierarchyOpenBlock').html());
-        $(jQueryTabId+' .editorOtherFieldsBlock').css({
-          'width' : '400px',
+    $(menuNodeBlock).css({'backgroundColor' : $('#hierarchyBlock').css('backgroundColor')});
+    $('&lt;span class="editorDisplayAdvancedFields"&gt;'+$('#hierarchyOpenBlock').html()+'&lt;/span&gt; &lt;strong class="editorOtherFieldsBlockTitle"&gt;Advanced fields&lt;/strong&gt;').prependTo(menuNodeBlock);
+    $(menuNodeBlock).find('.editorDisplayAdvancedFields').click(function() {
+      $(menuNodeBlock).find('.editorOtherFieldsBlockContent').toggle();
+      $(menuNodeBlock).find('.editorOtherFieldsBlockTitle').toggle();
+      if($(menuNodeBlock).find('.editorOtherFieldsBlockContent').is(':visible')) {
+        $(menuNodeBlock).find('.editorDisplayAdvancedFields').html($('#hierarchyOpenBlock').html());
+        $(menuNodeBlock).css({
+          'width' : '400px'
         });
       }
       else {
-        $(jQueryTabId+' .editorDisplayAdvancedFields').html($('#hierarchyClose').html());
-        $(jQueryTabId+' .editorOtherFieldsBlock').css({
-          'width' : 'auto',
+        $(menuNodeBlock).find('.editorDisplayAdvancedFields').html($('#hierarchyClose').html());
+        $(menuNodeBlock).css({
+          'width' : 'auto'
         });
       }
     });
@@ -2978,6 +3329,7 @@ $(function(){
       var parameters = Modules[tabMode].getParametersFromTab(firstTab);
       goToNewPage(tabMode, tabFile, tabFolder, parameters);
     }
+    WebIDE.fixContentBlockHeight();
   }
 
   /**
@@ -3270,7 +3622,25 @@ $(function(){
     }
     return "";
   }
+  /**
+   * Call a function everytime the height of a specified element change
+   * @input DOM elm : the observed element
+   * @input function callback : the function to call when the "event" is triggered
+   */
+  function onElementHeightChange(elm, callback){
+    var lastHeight = elm.clientHeight, newHeight;
+    (function run(){
+      newHeight = elm.clientHeight;
+      if( lastHeight != newHeight )
+        callback();
+      lastHeight = newHeight;
 
+      if( elm.onElementHeightChangeTimer )
+        clearTimeout(elm.onElementHeightChangeTimer);
+
+      elm.onElementHeightChangeTimer = setTimeout(run, 500);
+    })();
+  }
 });
 });</code>
     </property>
@@ -3578,7 +3948,7 @@ $(function(){
 #hierarchySavingState.red, #hierarchyLoadingState.red, #hierarchyState.red {
   background-color: red;
 }
-#hierarchyExistingPageModalError, #hierarchyPageModalError, #hierarchyFolderModalError, #hierarchyObjectModalError {
+#hierarchyExistingPageModalError, #hierarchyPageModalError, #hierarchyFolderModalError, #hierarchyObjectModalError, #hierarchyClassModalError {
   font-weight: bold;
   color: #8A0808;
 }</code>
@@ -3733,6 +4103,21 @@ $(function(){
       &lt;/div&gt;
     &lt;/div&gt;
   &lt;/div&gt;
+  &lt;div class="modal fade text-left hierarchy-hidden" id="hierarchyExistingPageModal" tabindex="-1" role="dialog" aria-hidden="true"&gt;
+    &lt;div class="modal-dialog"&gt;
+      &lt;div class="modal-content"&gt;
+        &lt;div class="modal-header"&gt;
+          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
+          &lt;h4 class="modal-title"&gt;Add Existing Page&lt;/h4&gt;
+        &lt;/div&gt;
+        &lt;div class="modal-body"&gt;
+          Page Full Name : &lt;input type="text" id="hierarchyExistingPageName" /&gt;
+          &lt;button id="hierarchyAddExistingPage" class="btn btn-success"&gt;Add the page&lt;/button&gt;
+          &lt;p id="hierarchyExistingPageModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
   &lt;div class="modal fade text-left hierarchy-hidden" id="hierarchyPageModal" tabindex="-1" role="dialog" aria-hidden="true"&gt;
     &lt;div class="modal-dialog"&gt;
       &lt;div class="modal-content"&gt;
@@ -3748,14 +4133,6 @@ $(function(){
             #end
           #end
           &lt;/select&gt;&lt;br&gt;
-          &lt;div id="hierarchyAddPageSheetBlock"&gt;
-            Sheet action : &lt;select id="hierarchyPageSheet"&gt;
-              &lt;option value=""&gt;&lt;/option&gt;
-              &lt;option value="view"&gt;View&lt;/option&gt;
-              &lt;option value="edit"&gt;Edit&lt;/option&gt;
-              &lt;option value="inline"&gt;Inline&lt;/option&gt;
-            &lt;/select&gt;
-          &lt;/div&gt;
           &lt;span id="hierarchyAddPageLabel"&gt;Page&lt;/span&gt; : &lt;input type="text" id="hierarchyNewPageName" /&gt;&lt;br&gt;
           &lt;div id="hierarchyAddPageTypeBlock"&gt;Type: &lt;input type="radio" name="hierarchyAddPageType" id="hierarchyAddPageTypeContent" value="content" checked="checked"/&gt; &lt;label for="hierarchyAddPageTypeContent"&gt;Content page &lt;/label&gt; &lt;input type="radio" name="hierarchyAddPageType" id="hierarchyAddPageTypeItem" value="item"/&gt; &lt;label for="hierarchyAddPageTypeItem"&gt;Item page&lt;/label&gt;&lt;br&gt;
             &lt;p&gt;**Content page**: Page where you can edit the content and add JS, CSS, etc...&lt;br&gt;
@@ -3796,17 +4173,26 @@ $(function(){
       &lt;/div&gt;
     &lt;/div&gt;
   &lt;/div&gt;
-  &lt;div class="modal fade text-left hierarchy-hidden" id="hierarchyExistingPageModal" tabindex="-1" role="dialog" aria-hidden="true"&gt;
+  &lt;div class="modal fade text-left hierarchy-hidden" id="hierarchyClassModal" tabindex="-1" role="dialog" aria-hidden="true"&gt;
     &lt;div class="modal-dialog"&gt;
       &lt;div class="modal-content"&gt;
         &lt;div class="modal-header"&gt;
           &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;Add Existing Page&lt;/h4&gt;
+          &lt;h4 class="modal-title"&gt;Add class&lt;/h4&gt;
         &lt;/div&gt;
         &lt;div class="modal-body"&gt;
-          Page Full Name : &lt;input type="text" id="hierarchyExistingPageName" /&gt;
-          &lt;button id="hierarchyAddExistingPage" class="btn btn-success"&gt;Add the page&lt;/button&gt;
-          &lt;p id="hierarchyExistingPageModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
+          Space : &lt;span id="hierarchyClassSpace"&gt;&lt;/span&gt;&lt;br&gt;
+          Name : &lt;input type="text" id="hierarchyClassInput" value=""/&gt;&lt;br&gt;
+          &lt;div id="hierarchyAddSheetBlock"&gt;
+            Sheet action : &lt;select id="hierarchyClassSheet"&gt;
+              &lt;option value=""&gt;&lt;/option&gt;
+              &lt;option value="view"&gt;View&lt;/option&gt;
+              &lt;option value="edit"&gt;Edit&lt;/option&gt;
+              &lt;option value="inline"&gt;Inline&lt;/option&gt;
+            &lt;/select&gt;
+          &lt;/div&gt;
+          &lt;button id="hierarchyAddClass" class="btn btn-success"&gt;Add the class&lt;/button&gt;
+          &lt;p id="hierarchyClassModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
         &lt;/div&gt;
       &lt;/div&gt;
     &lt;/div&gt;
@@ -3836,8 +4222,24 @@ $(function(){
         &lt;/div&gt;
         &lt;div class="modal-body"&gt;
           &lt;p&gt;
-            Are you sure you want to delete that object &lt;span id="editorDeletedObjectModalInfo"&gt;&lt;/span&gt;&lt;br /&gt;
+            Are you sure you want to delete that object : &lt;span id="editorDeletedObjectModalInfo"&gt;&lt;/span&gt;&lt;br /&gt;
             &lt;button id="editorDeleteObjectConfirmed" class="btn btn-danger"&gt;Delete the object&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;Cancel&lt;/button&gt;
+          &lt;/p&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="modal fade text-left hierarchy-hidden" id="editorDeleteMultipleObjectsModal" tabindex="-1" role="dialog" aria-hidden="true"&gt;
+    &lt;div class="modal-dialog"&gt;
+      &lt;div class="modal-content"&gt;
+        &lt;div class="modal-header"&gt;
+          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
+          &lt;h4 class="modal-title"&gt;Delete a page&lt;/h4&gt;
+        &lt;/div&gt;
+        &lt;div class="modal-body"&gt;
+          &lt;p&gt;
+            Are you sure you want to delete that page : &lt;span id="editorDeleteMultipleObjectsModalInfo"&gt;&lt;/span&gt;&lt;br /&gt;
+            &lt;button id="editorDeleteMultipleObjectConfirmed" class="btn btn-danger"&gt;Delete the page&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;Cancel&lt;/button&gt;
           &lt;/p&gt;
         &lt;/div&gt;
       &lt;/div&gt;
@@ -3854,6 +4256,40 @@ $(function(){
           &lt;p&gt;
             Are you sure you want to delete that page &lt;span id="editorDeletedPageModalInfo"&gt;&lt;/span&gt;&lt;br /&gt;
             &lt;button id="editorDeletePageConfirmed" class="btn btn-danger"&gt;Delete the page&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;Cancel&lt;/button&gt;
+          &lt;/p&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="modal fade text-left hierarchy-hidden" id="editorDeleteClassModal" tabindex="-1" role="dialog" aria-hidden="true"&gt;
+    &lt;div class="modal-dialog"&gt;
+      &lt;div class="modal-content"&gt;
+        &lt;div class="modal-header"&gt;
+          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
+          &lt;h4 class="modal-title"&gt;Delete a class&lt;/h4&gt;
+        &lt;/div&gt;
+        &lt;div class="modal-body"&gt;
+          &lt;p&gt;
+            Are you sure you want to delete the class : &lt;span id="editorDeletedClassModalInfo"&gt;&lt;/span&gt; ?&lt;br&gt;
+            Delete also: &lt;label for="editorDeleteClassSheet"&gt;All bound sheets&lt;/label&gt; &lt;input type="checkbox" id="editorDeleteClassSheet" /&gt; &lt;label for="editorDeleteClassTemplate"&gt;The class template&lt;/label&gt; &lt;input type="checkbox" id="editorDeleteClassTemplate" /&gt; ?&lt;br&gt;
+            &lt;button id="editorDeleteClassConfirmed" class="btn btn-danger"&gt;Delete the class&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;Cancel&lt;/button&gt;
+          &lt;/p&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="modal fade text-left hierarchy-hidden" id="editorSwitchClassModal" tabindex="-1" role="dialog" aria-hidden="true"&gt;
+    &lt;div class="modal-dialog"&gt;
+      &lt;div class="modal-content"&gt;
+        &lt;div class="modal-header"&gt;
+          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
+          &lt;h4 class="modal-title"&gt;Switch class editor&lt;/h4&gt;
+        &lt;/div&gt;
+        &lt;div class="modal-body"&gt;
+          &lt;p&gt;
+            You have unsaved content, do you want to continue?&lt;br /&gt;
+            You have unsaved content in this tab, do you want to continue? All unsaved modifications will be lost permanently&lt;br /&gt;
+            &lt;button id="hierarchySaveAndSwitchClassModal" class="btn btn-success"&gt;Save &amp; switch editor&lt;/button&gt; &lt;button id="hierarchyDiscardAndAndSwitchClassModal" class="btn btn-danger"&gt;Switch without saving&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;Cancel&lt;/button&gt;
           &lt;/p&gt;
         &lt;/div&gt;
       &lt;/div&gt;

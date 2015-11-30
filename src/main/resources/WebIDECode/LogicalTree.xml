@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347285000</creationDate>
-  <date>1448014006000</date>
-  <contentUpdateDate>1448014006000</contentUpdateDate>
+  <date>1448877449000</date>
+  <contentUpdateDate>1448877449000</contentUpdateDate>
   <version>1.1</version>
   <title>LogicalTree</title>
   <defaultTemplate/>
@@ -103,7 +103,7 @@
   #set($pageClassHidden = "")
   #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%){{html clean='false'}}&lt;span class='fa fa-caret-down'&gt;&lt;/span&gt;{{/html}}")
 #end
-#set($addLinks = "&lt;li&gt;&lt;a href='#' class='newPage newClass' data-space='$escapetool.url($codeSpace).replace('+', '%20')' data-toggle='modal' data-target='#hierarchyPageModal'&gt;Add new class&lt;/a&gt;&lt;/li&gt;")
+#set($addLinks = "&lt;li&gt;&lt;a href='#' class='newAWMClass newClass' data-space='$escapetool.url($codeSpace).replace('+', '%20')' data-toggle='modal' data-target='#hierarchyClassModal'&gt;Add new class&lt;/a&gt;&lt;/li&gt;")
 * $beginAddButton$addLinks$endAddButton (% data-category="classes" class="hierarchy-toggleCategory" %)((($iconBulletToggle  (%%)**Classes**)))
 (% id='hierarchyCategory_classes' class='hierarchy-list${pageClassHidden}' %)
 #set($classesInProjectList = []) ## All classes in the project
@@ -131,19 +131,20 @@
     #end
     #set($spaceEscaped = $escapetool.url($document.space).replace("+", "%20"))
     #set($pageEscaped = $escapetool.url($document.name).replace("+", "%20"))
-    #set($addLinks = "&lt;li&gt;&lt;a href='#' class='newPage newSheet' data-page='$pageEscaped' data-space='$spaceEscaped' data-locale='default' data-toggle='modal' data-target='#hierarchyPageModal'&gt;Add bound sheet&lt;/a&gt;&lt;/li&gt;")
+    #set($addLinks = "&lt;li&gt;&lt;a href='#' class='newAWMClass newSheet' data-page='$pageEscaped' data-space='$spaceEscaped' data-locale='default' data-toggle='modal' data-target='#hierarchyClassModal'&gt;Add bound sheet&lt;/a&gt;&lt;/li&gt;") ##'
     #if($classTemplateDoc.isNew())
-      #set($addLinks = "${addLinks}&lt;li&gt;&lt;a href='#' class='newPage newTemplate' data-page='${pageEscaped}Template' data-space='$spaceEscaped' data-locale='default'&gt;Add template&lt;/a&gt;&lt;/li&gt;") ##'"
+      #set($addLinks = "${addLinks}&lt;li&gt;&lt;a href='#' class='newAWMClass newTemplate' data-page='$pageEscaped' data-space='$spaceEscaped' data-locale='default'&gt;Add template&lt;/a&gt;&lt;/li&gt;") ##'"
     #end
   #set($removeLinks = "")
   #set($removeBlock = "")
-  #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deletePage' data-space='$spaceEscaped' data-page='$pageEscaped' data-locale='default'&gt;Delete from the wiki&lt;/a&gt;&lt;/li&gt;") ##'"
+  #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deleteAWM' data-space='$spaceEscaped' data-page='$pageEscaped'&gt;Delete from the wiki&lt;/a&gt;&lt;/li&gt;") ##'"
   #if("$!removeLinks" != "")
     #set($removeBlock = "$beginRemoveButton$removeLinks$endRemoveButton")
   #end
     ** $beginAddButton$addLinks$endAddButton $!removeBlock (% data-pageid="Class-$escapetool.url($pageFullName)" class="hierarchy-displayPage" %)((($iconBulletToggle (%%){{html clean='false'}}&lt;span class='fa fa-desktop'&gt;&lt;/span&gt;{{/html}} (% id='hierarchyDisplayPage_$escapetool.url($pageFullName)' class="hierarchyPageName"%)$className)))
     (% id='hierarchyPageDetails_Class-$escapetool.url($pageFullName)' class='hierarchy-list${pageClassHidden}' %)
     *** {{html clean='false'}}&lt;span class='fa fa-database'&gt;&lt;/span&gt;{{/html}} [[Edit fields&gt;&gt;path:$document.getURL('edit', "editor=class#!XWebIDE&amp;!!$escapetool.url($masterDoc.space).replace('+', '%20')&amp;!!$escapetool.url($masterDoc.name).replace('+', '%20')")||class="editClass" data-page='$pageEscaped' data-space='$spaceEscaped']]
+    *** {{html clean='false'}}&lt;span class='fa fa-database'&gt;&lt;/span&gt;{{/html}} [[Edit AWM&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="editAWM" data-page='$pageEscaped' data-space='$spaceEscaped']]
     #if($sheetDocList.size() &gt; 0)
       #foreach($sheetFullName in $sheetDocList)
         #set($addName = "")

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc reference="WebIDECode.ClassCreation" locale="">
+  <web>WebIDECode</web>
+  <name>ClassCreation</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <parent>WebIDECode.ApplicationSheet</parent>
+  <creator>xwiki:XWiki.Admin</creator>
+  <author>xwiki:XWiki.Admin</author>
+  <customClass/>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <creationDate>1448617677000</creationDate>
+  <date>1448879900000</date>
+  <contentUpdateDate>1448879900000</contentUpdateDate>
+  <version>1.1</version>
+  <title>ClassCreation</title>
+  <defaultTemplate/>
+  <validationScript/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>false</hidden>
+  <content>{{velocity}}
+#**
+ * Add a class
+ *#
+#if("$!request.type" != "" &amp;&amp; "$!request.className" != "")
+  #if($request.type == 'class')
+    ## Create the class document (if not already existing) and add the "XWiki.ClassSheet" sheet to it
+    #set($classDoc = $xwiki.getDocument($request.className))
+    #if($classDoc.isNew())
+      #set($classObj = $classDoc.newObject('XWiki.DocumentSheetBinding'))
+      #set($ok = $classObj.set('sheet', 'XWiki.ClassSheet'))
+      #set($ok = $classDoc.save())
+    #else
+      ##classDoc already existing : display an error message (choose another name)
+      (% id="editorAddClassError" %)1
+    #end
+  #elseif($request.type == 'sheet' &amp;&amp; "$!request.sheetName" != "")
+    ## Create the sheet document, add the ClassSheetBinding objetc in the class document and, if necessary, add the SheetDescriptorClass object to the object document
+    #set($classDoc = $xwiki.getDocument($request.className))
+    #set($sheetReference = $services.model.createDocumentReference('', $classDoc.space, $request.sheetName))
+    #set($sheetDoc = $xwiki.getDocument($sheetReference))
+    #if($sheetDoc.isNew())
+      ## Sheetdoc is new : create the doc and add all the objects
+      #if("$!request.sheetType" != "")
+        #set($sheetObj = $sheetDoc.newObject('XWiki.SheetDescriptorClass'))
+        #set($ok = $sheetObj.set('action', $request.sheetType))
+      #end
+      #set($ok = $sheetDoc.save())
+      #if(!$classDoc.getObject('XWiki.ClassSheetBinding', 'sheet', $sheetDoc.name))
+        #set($classObj = $classDoc.newObject('XWiki.ClassSheetBinding'))
+        #set($ok = $classObj.set('sheet', $sheetDoc.name))
+        #set($ok = $classDoc.save())
+      #end
+    #else
+      ##Sheetdoc already existing : display an error message (choose another name)
+      (% id="editorAddClassError" %)1
+    #end
+  #elseif($request.type == 'template')
+    ## Create the template document and add an object of the related class to it
+    #set($templateDoc = $xwiki.getDocument("${request.className}Template"))
+    #if($templateDoc.isNew() || !$templateDoc.getObject($request.className))
+      #set($ok = $templateDoc.newObject($request.className))
+      #set($ok = $templateDoc.save())
+    #end
+  #end
+#**
+ * Remove a class
+ *#
+#elseif($request.removeClass)
+  #set($classReference = $services.model.createDocumentReference('', $request.space, $request.page))
+  #set($classDoc = $xwiki.getDocument($classReference))
+  {
+  "delete" : [{
+      "space" : "$classDoc.space",
+      "name" : "$classDoc.name"
+    }
+  #if($request.removeSheet)
+    #set($sheetDocList = $services.sheet.getClassSheets($classDoc))
+    #foreach($sheetRef in $sheetDocList)
+      #set($sheetDoc = $xwiki.getDocument($sheetRef))
+      ,{
+        "space" : "$sheetDoc.space",
+        "name" : "$sheetDoc.name"
+      }
+      #set($ok = $sheetDoc.delete())
+    #end
+  #end
+  #if($request.removeTemplate)
+    #set($className = $stringtool.removeEnd($classDoc.name, 'Class'))
+    #set($classTemplateReference = $services.model.createDocumentReference($classDoc.wiki, $classDoc.space, "${className}ClassTemplate"))
+    #if(!$xwiki.exists($classTemplateReference))
+      #set($classTemplateReference = $services.model.createDocumentReference($classDoc.wiki, $classDoc.space, "${className}Template"))
+    #end
+    #set($classTemplateDoc = $xwiki.getDocument($classTemplateReference))
+    #if(!$classTemplateDoc.isNew())
+      ,{
+        "space" : "$classTemplateDoc.space",
+        "name" : "$classTemplateDoc.name"
+      }
+      #set($ok = $classTemplateDoc.delete())
+    #end
+  #end
+  ]}
+  #set($ok = $classDoc.delete())
+#end
+{{/velocity}}</content>
+</xwikidoc>
