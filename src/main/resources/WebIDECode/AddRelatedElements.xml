@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc reference="WebIDECode.AddRelatedElements" locale="">
+  <web>WebIDECode</web>
+  <name>AddRelatedElements</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <parent>WebIDECode.ApplicationHierarchy</parent>
+  <creator>xwiki:XWiki.Admin</creator>
+  <author>xwiki:XWiki.Admin</author>
+  <customClass/>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <creationDate>1445523575000</creationDate>
+  <date>1448899237000</date>
+  <contentUpdateDate>1448892493000</contentUpdateDate>
+  <version>1.1</version>
+  <title>AddRelatedElements</title>
+  <defaultTemplate/>
+  <validationScript/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <content>{{velocity}}
+#if($request.space &amp;&amp; $request.page &amp;&amp; $xwiki.exists($request.master))
+  #set($pageReference = $services.model.createDocumentReference('', $request.space, $request.page))
+  #set($pageDoc = $xwiki.getDocument($pageReference))
+  #set($spaceEscaped = $escapetool.url($pageDoc.space).replace("+", "%20"))
+  #set($pageEscaped = $escapetool.url($pageDoc.name).replace("+", "%20"))
+  #set($masterDoc = $xwiki.getDocument($request.master))
+  #set($objectCount = $services.query.xwql("select count(obj.className) from BaseObject as obj, Document as doc where obj.name = doc.fullName and doc.fullName = :pageFullName and doc.translation=0").bindValue('pageFullName', $pageDoc.fullName).execute()[0])
+  #if($objectCount &gt; 0)
+    {{html clean='false'}}&lt;span class='fa fa-hdd-o'&gt;&lt;/span&gt;{{/html}} [[Edit objects ($objectCount)&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="editObject" data-page='$pageEscaped' data-space='$spaceEscaped']]
+  #end
+  #set($extMacrosList = [])
+  #foreach($macro in $services.component.getContextComponentManager().getInstanceList('org.xwiki.rendering.macro.Macro'))
+    #if($macro.getDocumentReference() &amp;&amp; $stringtool.contains($pageDoc.content, "{{$macro.descriptor.id.id"))
+      #set($ok = $extMacrosList.add($macro))
+    #end
+  #end
+  #set($includesList = $pageDoc.getIncludedPages())
+  #foreach($macro in $extMacrosList)
+    #set($macroDoc = $xwiki.getDocument($macro.getDocumentReference()))
+    #set($spaceEscaped = $escapetool.url($macroDoc.space).replace("+", "%20"))
+    #set($pageEscaped = $escapetool.url($macroDoc.name).replace("+", "%20"))
+    {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} [[$macroDoc.title&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="editPage" data-locale="default" data-page='$pageEscaped' data-space='$spaceEscaped']]
+  #end
+  #foreach($include in $includesList)
+    #set($incDoc = $xwiki.getDocument($include))
+    #set($spaceEscaped = $escapetool.url($incDoc.space).replace("+", "%20"))
+    #set($pageEscaped = $escapetool.url($incDoc.name).replace("+", "%20"))
+    {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} [[$incDoc.title&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="editPage" data-locale="default" data-page='$pageEscaped' data-space='$spaceEscaped']]
+  #end
+#end
+{{/velocity}}</content>
+</xwikidoc>
