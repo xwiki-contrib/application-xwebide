@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347285000</creationDate>
-  <date>1448877449000</date>
-  <contentUpdateDate>1448877449000</contentUpdateDate>
+  <date>1448899760000</date>
+  <contentUpdateDate>1448899760000</contentUpdateDate>
   <version>1.1</version>
   <title>LogicalTree</title>
   <defaultTemplate/>
@@ -143,8 +143,7 @@
   #end
     ** $beginAddButton$addLinks$endAddButton $!removeBlock (% data-pageid="Class-$escapetool.url($pageFullName)" class="hierarchy-displayPage" %)((($iconBulletToggle (%%){{html clean='false'}}&lt;span class='fa fa-desktop'&gt;&lt;/span&gt;{{/html}} (% id='hierarchyDisplayPage_$escapetool.url($pageFullName)' class="hierarchyPageName"%)$className)))
     (% id='hierarchyPageDetails_Class-$escapetool.url($pageFullName)' class='hierarchy-list${pageClassHidden}' %)
-    *** {{html clean='false'}}&lt;span class='fa fa-database'&gt;&lt;/span&gt;{{/html}} [[Edit fields&gt;&gt;path:$document.getURL('edit', "editor=class#!XWebIDE&amp;!!$escapetool.url($masterDoc.space).replace('+', '%20')&amp;!!$escapetool.url($masterDoc.name).replace('+', '%20')")||class="editClass" data-page='$pageEscaped' data-space='$spaceEscaped']]
-    *** {{html clean='false'}}&lt;span class='fa fa-database'&gt;&lt;/span&gt;{{/html}} [[Edit AWM&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="editAWM" data-page='$pageEscaped' data-space='$spaceEscaped']]
+    *** {{html clean='false'}}&lt;span class='fa fa-database'&gt;&lt;/span&gt;{{/html}} [[Edit fields&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="editAWM" data-page='$pageEscaped' data-space='$spaceEscaped']]
     #if($sheetDocList.size() &gt; 0)
       #foreach($sheetFullName in $sheetDocList)
         #set($addName = "")

@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1448899288000</date>
+  <date>1448901179000</date>
   <contentUpdateDate>1448879351000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -928,7 +928,6 @@ $(function(){
       }
     },
     setDeleteButton : function() {
-      $('#hierarchyDeleteButtonIDE').attr('class', 'btn btn-danger deletePage');
       $('#hierarchyDeleteButtonIDE').val('Delete this page from XWiki');
       $('#hierarchyDeleteButtonIDE').off('click');
       $('#hierarchyDeleteButtonIDE').on('click', function() {
@@ -1661,7 +1660,6 @@ $(function(){
      */
     setDeleteButton : function() {
       if(ObjectEditor._getCurrentObject(false) &amp;&amp; ObjectEditor._getCurrentObject(false) !== 'Panels.PanelClass' &amp;&amp; ObjectEditor._getCurrentObject(false) !== 'XWiki.WikiMacroClass') { // Single object editor : delete only the object displayed in the page
-        $('#hierarchyDeleteButtonIDE').attr('class', 'btn btn-danger');
         $('#hierarchyDeleteButtonIDE').val('Delete this object from the page');
         $('#hierarchyDeleteButtonIDE').off('click');
         $('#hierarchyDeleteButtonIDE').on('click', function() {
@@ -1677,7 +1675,6 @@ $(function(){
         });
       }
       else { // Multiple object editor : delete the whole page
-        $('#hierarchyDeleteButtonIDE').attr('class', 'btn btn-danger');
         $('#hierarchyDeleteButtonIDE').val('Delete this page from the wiki');
         $('#hierarchyDeleteButtonIDE').off('click');
         $('#hierarchyDeleteButtonIDE').on('click', function() {
@@ -2126,7 +2123,9 @@ $(function(){
         var urlIframe = (classEditorStorage === 'basic') ? "/xwiki/bin/edit/"+getCurrentSpace(false)+"/"+getCurrentPage(false)+"?editor=inline&amp;sheet=AppWithinMinutes.ClassEditSheet" : "/xwiki/bin/edit/"+getCurrentSpace(false)+"/"+getCurrentPage(false)+"?editor=class";
         var ifrm = $('&lt;iframe allowtransparency="true" id="tab'+tabNumberId+'_awm" data-type="'+classEditorStorage+'" name="tab'+tabNumberId+'_awm" class="editorIframe"/&gt;').attr('src', urlIframe).appendTo($('&lt;div class="editorClassTabContent"&gt;&lt;/div&gt;').appendTo(jQueryTabId));
         AWMClassEditor._initIframe(ifrm, tabNumberId);
-        $('&lt;input type="button" class="btn btn-default editorAWMSwitch" value="Switch basic/advanced"/&gt;').appendTo(advancedFieldBlock).on('click', function() {
+        var nextEditor = 'advanced';
+        if(classEditorStorage === 'advanced') nextEditor = 'basic';
+        $('&lt;input type="button" class="btn btn-default editorAWMSwitch" value="Switch to '+nextEditor+' editor"/&gt;').appendTo(advancedFieldBlock).on('click', function() {
           if(WebIDESavedContent[tabNumberId] != getCurrentContent(tabNumberId)) {$('#editorSwitchClassModal').modal('show');}
           else{AWMClassEditor._switchClassEditor(ifrm, tabNumberId);}
         });
@@ -2138,6 +2137,7 @@ $(function(){
     },
     _switchClassEditor : function(ifrm, tabNumberId) {
       var oldType = $(ifrm).attr('data-type');
+      var tabDiv = $('.editorTab[data-tabnumber="'+tabNumberId+'"]');
       if(oldType === 'basic') {
         $(ifrm).attr('src', "/xwiki/bin/edit/"+getCurrentSpace(false)+"/"+getCurrentPage(false)+"?editor=class")
         $(ifrm).attr('data-type', 'advanced');
@@ -2148,6 +2148,7 @@ $(function(){
         $(ifrm).attr('data-type', 'basic');
         window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.classEditor'] = 'basic';
       }
+      $(tabDiv).find('.editorAWMSwitch').val('Switch to '+oldType+' editor');
       AWMClassEditor._initIframe(ifrm, tabNumberId);
     },
     save : function(tabNumberId, changeSavedContent, continueEditing, saveAll) {
@@ -2209,7 +2210,19 @@ $(function(){
       return true;
     },
     setDeleteButton : function() {
-      //TODO: delete the page
+      $('#hierarchyDeleteButtonIDE').val('Delete this class from XWiki');
+      $('#hierarchyDeleteButtonIDE').off('click');
+      $('#hierarchyDeleteButtonIDE').on('click', function() {
+        $('#editorDeletedClassModalInfo').html(getCurrentSpace(false)+' - '+getCurrentPage(false));
+        $('#editorDeleteClassConfirmed').attr('data-page', getCurrentPage(false));
+        $('#editorDeleteClassConfirmed').attr('data-space', getCurrentSpace(false));
+        if(WebIDE.bootstrap()) {
+          $('#editorDeleteClassModal').modal('show');
+        }
+        else {
+          openModalNoBootstrap('#editorDeleteClassModal');
+        }
+      });
     },
     /**
      * Contains all events that have to be registered again each time the hierarchy is updated (mostly "click" events on elements in the hierarchy) :
@@ -2300,6 +2313,7 @@ $(function(){
             sheetType = $('#hierarchyClassSheet').val();
           }
           else if(type === 'class') {
+            file = fixName(file, type);
             className = folder+'.'+file;
           }
           AWMClassEditor.add(className, type, sheetType, sheetName);
