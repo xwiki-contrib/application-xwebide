@@ -72,6 +72,14 @@
       </plugin>
     </plugins>
   </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.xwiki.contrib.editortool</groupId>
+      <artifactId>editor-tool-autocomplete-ui</artifactId>
+      <type>xar</type>
+      <version>3.1.1</version>
+    </dependency>
+  </dependencies>
   <distributionManagement>
     <repository>
       <id>xwiki-staging</id>
