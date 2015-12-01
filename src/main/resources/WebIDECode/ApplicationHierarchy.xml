@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1448901179000</date>
-  <contentUpdateDate>1448879351000</contentUpdateDate>
+  <date>1448976541000</date>
+  <contentUpdateDate>1448975088000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -2121,6 +2121,7 @@ $(function(){
         var classEditorStorage = window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.classEditor'] || 'basic';
         classEditorStorage = (classEditorStorage === 'advanced') ? 'advanced' : 'basic';
         var urlIframe = (classEditorStorage === 'basic') ? "/xwiki/bin/edit/"+getCurrentSpace(false)+"/"+getCurrentPage(false)+"?editor=inline&amp;sheet=AppWithinMinutes.ClassEditSheet" : "/xwiki/bin/edit/"+getCurrentSpace(false)+"/"+getCurrentPage(false)+"?editor=class";
+        AWMClassEditor.iFrameLoading = true;
         var ifrm = $('&lt;iframe allowtransparency="true" id="tab'+tabNumberId+'_awm" data-type="'+classEditorStorage+'" name="tab'+tabNumberId+'_awm" class="editorIframe"/&gt;').attr('src', urlIframe).appendTo($('&lt;div class="editorClassTabContent"&gt;&lt;/div&gt;').appendTo(jQueryTabId));
         AWMClassEditor._initIframe(ifrm, tabNumberId);
         var nextEditor = 'advanced';
@@ -2136,20 +2137,23 @@ $(function(){
       }
     },
     _switchClassEditor : function(ifrm, tabNumberId) {
-      var oldType = $(ifrm).attr('data-type');
-      var tabDiv = $('.editorTab[data-tabnumber="'+tabNumberId+'"]');
-      if(oldType === 'basic') {
-        $(ifrm).attr('src', "/xwiki/bin/edit/"+getCurrentSpace(false)+"/"+getCurrentPage(false)+"?editor=class")
-        $(ifrm).attr('data-type', 'advanced');
-        window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.classEditor'] = 'advanced';
+      if(!AWMClassEditor.iFrameLoading) {
+        var oldType = $(ifrm).attr('data-type');
+        var tabDiv = $('.editorTab[data-tabnumber="'+tabNumberId+'"]');
+        AWMClassEditor.iFrameLoading = true;
+        if(oldType === 'basic') {
+          $(ifrm).attr('src', "/xwiki/bin/edit/"+getCurrentSpace(false)+"/"+getCurrentPage(false)+"?editor=class")
+          $(ifrm).attr('data-type', 'advanced');
+          window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.classEditor'] = 'advanced';
+        }
+        else {
+          $(ifrm).attr('src', "/xwiki/bin/edit/"+getCurrentSpace(false)+"/"+getCurrentPage(false)+"?editor=inline&amp;sheet=AppWithinMinutes.ClassEditSheet")
+          $(ifrm).attr('data-type', 'basic');
+          window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.classEditor'] = 'basic';
+        }
+        $(tabDiv).find('.editorAWMSwitch').val('Switch to '+oldType+' editor');
+        AWMClassEditor._initIframe(ifrm, tabNumberId);
       }
-      else {
-        $(ifrm).attr('src', "/xwiki/bin/edit/"+getCurrentSpace(false)+"/"+getCurrentPage(false)+"?editor=inline&amp;sheet=AppWithinMinutes.ClassEditSheet")
-        $(ifrm).attr('data-type', 'basic');
-        window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.classEditor'] = 'basic';
-      }
-      $(tabDiv).find('.editorAWMSwitch').val('Switch to '+oldType+' editor');
-      AWMClassEditor._initIframe(ifrm, tabNumberId);
     },
     save : function(tabNumberId, changeSavedContent, continueEditing, saveAll) {
       if(!WebIDE.SAVING || saveAll) {
@@ -2434,12 +2438,13 @@ $(function(){
         $(ifrm).contents().find('body').addClass('main');
         $(ifrm).contents().find('#menuview, #rightPanels, #leftPanels, .bottombuttons, #hierarchy, #footerglobal, .row').hide();
         $(ifrm).contents().find('#classname').parent().remove();
-        $(ifrm).contents().find('#options').hide(); // Basic mode only
+        $(ifrm).contents().find('#options').find('#updateClassSheet, #updateClassTranslations').attr('checked', false); // Basic mode only
         $(ifrm).contents().find('.switch-xclass, .xclass-title, #editPanels').hide(); // Advanced mode only
         $(ifrm).contents().find('div.main').css({
           "left" : "0%",
           "width" : "100%",
-          "box-shadow" : "none"
+          "box-shadow" : "none",
+          "padding" : "0px"
         });
         var initIframeHeight = $(ifrm).contents().find('body').height();
         $(ifrm).css({
@@ -2476,15 +2481,20 @@ $(function(){
           }
           setSavingState(false, 'Saved', 2500);
         });
-        $(ifrm).contents().find('body').on('keyup', function(){
-          var unsavedState = (WebIDESavedContent[tabNumberId] !== getCurrentContent(tabNumberId));
-          setStar(unsavedState, tabNumberId);
-        });
-        setSavedContent(tabNumberId);
+        $(ifrm).contents().find('form#inline').find('input:first').click();
+        window.setTimeout(function() {
+          setSavedContent(tabNumberId);
+          $(ifrm).contents().find('body').on('click keyup', function(){
+            var unsavedState = (WebIDESavedContent[tabNumberId] !== getCurrentContent(tabNumberId));
+            setStar(unsavedState, tabNumberId);
+          });
+          AWMClassEditor.iFrameLoading = false;
+        }, 500);
         return false;
       });
     },
     switchEditor : false,
+    iFrameLoading : false,
     /**
      * Get all the inputs (input, textarea, select, etc.) in the object editor, except those created by CodeMirror
      * @input DOM tabElement: a div element containing the data of a tab
@@ -2493,10 +2503,15 @@ $(function(){
     _getObjectInputFields : function(tabElement) {
       var tabNumberId = $(tabElement).attr('data-tabnumber');
       var ifrm = document.getElementById('tab'+tabNumberId+'_awm');
-      return $(ifrm).contents().find('form.withLock').find('textarea, input, select')
+      if($(ifrm).contents().find('#propupdate').length) { // Advanced
+        return $(ifrm).contents().find('form#propupdate').find('textarea, input, select')
+      }
+      else {
+        return $(ifrm).contents().find('form#inline').find('textarea[name^="field-"], input[name^="field-"], select[name^="field-"], textarea[name^="'+getCurrentSpace()+'."], input[name^="'+getCurrentSpace()+'."]')
+      }
     }
   };
-  
+
   // Modules
   var Modules = {
     'wiki' : WikiEditor,
@@ -2580,6 +2595,7 @@ $(function(){
         $('#contentMainBlock').css({
           "height" : ($(window).height()-$('#editorTabBar').outerHeight()-$('#hierarchyBottomActionsBar').outerHeight()-10)+"px"
         });
+        $('.actionmenu').hide();
       }
       else { //Switch fullscreen OFF
         $('#editorBlock').removeClass('editor-fullscreen');
@@ -2587,6 +2603,7 @@ $(function(){
         $('#contentMainBlock').css({
           "height" : "auto"
         });
+        $('.actionmenu').show();
       }
       $('.editorOtherFieldsBlockContent').hide();
       $('.editorOtherFieldsBlockTitle').hide();
@@ -3721,7 +3738,7 @@ $(function(){
         <displayType>select</displayType>
         <multiSelect>0</multiSelect>
         <name>cache</name>
-        <number>5</number>
+        <number>6</number>
         <prettyName>Caching policy</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
@@ -3734,7 +3751,7 @@ $(function(){
       <code>
         <disabled>0</disabled>
         <name>code</name>
-        <number>2</number>
+        <number>3</number>
         <prettyName>Code</prettyName>
         <rows>20</rows>
         <size>50</size>
@@ -3747,7 +3764,7 @@ $(function(){
         <displayType>select</displayType>
         <multiSelect>0</multiSelect>
         <name>contentType</name>
-        <number>6</number>
+        <number>1</number>
         <prettyName>Content Type</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
@@ -3760,7 +3777,7 @@ $(function(){
       <name>
         <disabled>0</disabled>
         <name>name</name>
-        <number>1</number>
+        <number>2</number>
         <prettyName>Name</prettyName>
         <size>30</size>
         <unmodifiable>0</unmodifiable>
@@ -3771,7 +3788,7 @@ $(function(){
         <displayFormType>select</displayFormType>
         <displayType>yesno</displayType>
         <name>parse</name>
-        <number>4</number>
+        <number>5</number>
         <prettyName>Parse content</prettyName>
         <unmodifiable>0</unmodifiable>
         <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
@@ -3782,7 +3799,7 @@ $(function(){
         <displayType>select</displayType>
         <multiSelect>0</multiSelect>
         <name>use</name>
-        <number>3</number>
+        <number>4</number>
         <prettyName>Use this extension</prettyName>
         <relationalStorage>0</relationalStorage>
         <separator> </separator>
