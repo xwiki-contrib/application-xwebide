@@ -32,14 +32,14 @@
   <groupId>org.xwiki.contrib</groupId>
   <artifactId>application-webide</artifactId>
   <name>XWebIDE Application</name>
-  <version>0.11</version>
+  <version>0.12-SNAPSHOT</version>
   <packaging>xar</packaging>
   <description>An IDE which allows user to create projects in XWiki.</description>
   <scm>
     <connection>scm:git:git://github.com/xwiki-contrib/application-xwebide.git</connection>
     <developerConnection>scm:git:git@github.com:xwiki-contrib/application-xwebide.git</developerConnection>
     <url>https://github.com/xwiki-contrib/application-xwebide</url>
-    <tag>application-webide-0.11</tag>
+    <tag>HEAD</tag>
   </scm>
   <developers>
     <developer>
