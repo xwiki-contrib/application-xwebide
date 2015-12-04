@@ -54,6 +54,30 @@
     <xwiki.extension.category>application</xwiki.extension.category>
     <xwiki.extension.features>yannflory:xwebide-application</xwiki.extension.features>
   </properties>
+  <repositories>
+    <repository>
+      <id>xwiki-snapshots</id>
+      <name>XWiki Nexus Snapshot Repository Proxy</name>
+      <url>http://nexus.xwiki.org/nexus/content/groups/public-snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>xwiki-releases</id>
+      <name>XWiki Nexus Releases Repository Proxy</name>
+      <url>http://nexus.xwiki.org/nexus/content/groups/public</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
   <build>
     <!-- Needed to add support for the XAR packaging -->
     <extensions>
