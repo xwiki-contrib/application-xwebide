@@ -31,10 +31,14 @@
   </parent>
   <groupId>org.xwiki.contrib</groupId>
   <artifactId>application-webide</artifactId>
-  <name>XWebIDE Application</name>
+  <name>XWebIDE Application - Parent POM</name>
   <version>0.12-SNAPSHOT</version>
-  <packaging>xar</packaging>
-  <description>An IDE which allows user to create projects in XWiki.</description>
+  <packaging>pom</packaging>
+  <description>XWebIDE Application - Parent POM</description>
+  <properties>
+      <platform.version>${commons.version}</platform.version>
+      <rendering.version>${commons.version}</rendering.version>
+  </properties>
   <scm>
     <connection>scm:git:git://github.com/xwiki-contrib/application-xwebide.git</connection>
     <developerConnection>scm:git:git@github.com:xwiki-contrib/application-xwebide.git</developerConnection>
@@ -47,37 +51,17 @@
       <name>Yann Flory</name>
     </developer>
   </developers>
-  <properties>
-    <!-- Don't run CLIRR here since there's no Java code. -->
-    <xwiki.clirr.skip>true</xwiki.clirr.skip>
-    <xwiki.extension.name>XWebIDE Application</xwiki.extension.name>
-    <xwiki.extension.category>application</xwiki.extension.category>
-    <xwiki.extension.features>yannflory:xwebide-application</xwiki.extension.features>
-  </properties>
-  <repositories>
-    <repository>
-      <id>xwiki-snapshots</id>
-      <name>XWiki Nexus Snapshot Repository Proxy</name>
-      <url>http://nexus.xwiki.org/nexus/content/groups/public-snapshots</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>xwiki-releases</id>
-      <name>XWiki Nexus Releases Repository Proxy</name>
-      <url>http://nexus.xwiki.org/nexus/content/groups/public</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
+  <modules>
+    <module>application-xwebide-ui</module>
+  </modules>
+  <profiles>
+    <profile>
+      <id>integration-tests</id>
+      <modules>
+        <module>application-xwebide-test</module>
+      </modules>
+    </profile>
+  </profiles>
   <build>
     <!-- Needed to add support for the XAR packaging -->
     <extensions>
@@ -96,14 +80,6 @@
       </plugin>
     </plugins>
   </build>
-  <dependencies>
-    <dependency>
-      <groupId>org.xwiki.contrib.editortool</groupId>
-      <artifactId>editor-tool-autocomplete-ui</artifactId>
-      <type>xar</type>
-      <version>3.1.1</version>
-    </dependency>
-  </dependencies>
   <distributionManagement>
     <repository>
       <id>xwiki-staging</id>
