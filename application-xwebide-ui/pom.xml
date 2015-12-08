@@ -39,7 +39,7 @@
     <xwiki.clirr.skip>true</xwiki.clirr.skip>
     <xwiki.extension.name>XWebIDE Application</xwiki.extension.name>
     <xwiki.extension.category>application</xwiki.extension.category>
-    <xwiki.extension.features>yannflory:xwebide-application</xwiki.extension.features>
+    <xwiki.extension.features>yannflory:xwebide-application,org.xwiki.contrib:application-webide</xwiki.extension.features>
   </properties>
   <dependencies>
     <dependency>
@@ -55,18 +55,6 @@
       <version>${platform.version}</version>
       <type>xar</type>
       <scope>runtime</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.xwiki.platform</groupId>
-    <artifactId>xwiki-platform-administration-ui</artifactId>
-    <version>${platform.version}</version>
-    <type>xar</type>
-    </dependency>
-    <dependency>
-        <groupId>org.xwiki.platform</groupId>
-    <artifactId>xwiki-platform-extension-ui</artifactId>
-    <version>${platform.version}</version>
-    <type>xar</type>
     </dependency>
     <dependency>
       <groupId>org.xwiki.contrib.editortool</groupId>
