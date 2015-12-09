@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1448976523000</date>
-  <contentUpdateDate>1448968965000</contentUpdateDate>
+  <date>1449658170000</date>
+  <contentUpdateDate>1449658051000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -1269,23 +1269,31 @@ Welcome to the XWiki WebIDE, you can use it to create, edit and export XWiki App
 __Get started__:
 * **Edit a page** in your project by clicking on one of the edit buttons in the lefthand panel - you can edit the page in different modes for editing the content and metadata
 * **Add a new folder** (also known as a Space) clicking the "add new" button on the left (Physical view) or the {{html clean="false"}}&lt;span class="fa fa-plus"&gt;&lt;/span&gt;{{/html}} in the "Pages" category (Logical view)
-* **Add a new page** when you need to create a new empty page clicking on the {{html clean="false"}}&lt;span class="fa fa-plus"&gt;&lt;/span&gt;{{/html}} in the selected folder
 * **Add an existing page** for times when you need to add a page which must be in a Space which is not part of your application's code
-* **Export your project** as a XWiki .xar file which can be imported to other wikis or published on extensions.xwiki.org.
+* **Create a new page** when you need to create a new empty page clicking on the {{html clean="false"}}&lt;span class="fa fa-plus"&gt;&lt;/span&gt;{{/html}} in the selected folder
+* **Export your project** as a .xar file which can be imported to other wikis or published on extensions.xwiki.org.
+
+__Shortcuts with Syntax Highlighting enabled__:
+* **Ctrl + F** : Search (first result)
+** **Ctrl + G** or **F3** : Find next result
+** **Ctrl + Shift + G** : Find previous result
+* **Alt + F** : Persistent search (the search box stays opened after first result)
+* **Tab** : 2-spaces indentation
+* **Shift + Tab** : Automatic indentation
 
 __Shortcuts for the wiki and object editors__:
-* **Save &amp; View** : Alt + S
-* **Save &amp; Continue** : Alt + Shift + S
-* **Discard &amp; View** : Alt + C
-* **View in a new tab** : Alt + Shift + C
+* **Alt + S**: Save &amp; View
+* **Alt + Shift + S** : Save &amp; Continue
+* **Alt + C** : Discard &amp; View
+* **Alt + Shift + C** : View in a new tab
 
 __Shortcuts in XWiki__:
 * **Open the Web IDE in the current page** : W
 
 __Improve your IDE Experience__:
-By installing the additional extensions you can improve the user interface of the XWiki WebIDE. To do so, use the [[Extension Manager&gt;&gt;XWiki.XWikiPreferences||queryString="editor=globaladmin&amp;section=XWiki.AddExtensions"]].
-* Install the [[Syntax Highlighting extension&gt;&gt;http://extensions.xwiki.org/xwiki/bin/view/Extension/Syntax+Highlighting+Application]]
-* Install the [[Auto-Completion extension&gt;&gt;http://extensions.xwiki.org/xwiki/bin/view/Extension/AutoCompletion+Application]]
+The XWiki WebIDE uses Syntax Highlighting and Auto-completion extensions to improve the user interface. You can read the documentation pages below to learn more about these extensions :
+* [[Syntax Highlighting documentation&gt;&gt;http://extensions.xwiki.org/xwiki/bin/view/Extension/Syntax+Highlighting+Application]]
+* [[Auto-Completion documentation&gt;&gt;http://extensions.xwiki.org/xwiki/bin/view/Extension/AutoCompletion+Application]]
 
 To learn about other features of the XWiki WebIDE, see the [[Online Documentation&gt;&gt;http://extensions.xwiki.org/xwiki/bin/view/Extension/XWebIDE+Application]] on xwiki.org.
   )))
