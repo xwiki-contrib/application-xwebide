@@ -336,9 +336,9 @@ public class ProjectPage extends ViewPage {
                 case "panels":
                     return 6;
                 case "uix":
-                    return 8; //TODO
-                case "translations":
                     return 7;
+                case "translations":
+                    return 8;
                 default:
                     return 0;
             }
