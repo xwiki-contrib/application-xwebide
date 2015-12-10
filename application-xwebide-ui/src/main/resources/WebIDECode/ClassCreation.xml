@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1448617677000</creationDate>
-  <date>1448879900000</date>
-  <contentUpdateDate>1448879900000</contentUpdateDate>
+  <date>1449756180000</date>
+  <contentUpdateDate>1449756180000</contentUpdateDate>
   <version>1.1</version>
   <title>ClassCreation</title>
   <defaultTemplate/>
@@ -81,7 +81,10 @@
     #end
   #elseif($request.type == 'template')
     ## Create the template document and add an object of the related class to it
-    #set($templateDoc = $xwiki.getDocument("${request.className}Template"))
+    #set($classDoc = $xwiki.getDocument($request.className))
+    #set($className = $stringtool.removeEnd($classDoc.name, 'Class'))
+    #set($templateReference = $services.model.createDocumentReference('', $classDoc.space, "${className}Template"))
+    #set($templateDoc = $xwiki.getDocument($templateReference))
     #if($templateDoc.isNew() || !$templateDoc.getObject($request.className))
       #set($ok = $templateDoc.newObject($request.className))
       #set($ok = $templateDoc.save())

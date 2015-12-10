@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1435238189000</creationDate>
-  <date>1448632885000</date>
-  <contentUpdateDate>1448632885000</contentUpdateDate>
+  <date>1449850644000</date>
+  <contentUpdateDate>1449850644000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationObjects</title>
   <defaultTemplate/>
@@ -41,7 +41,7 @@
   <comment/>
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
-  <hidden>true</hidden>
+  <hidden>false</hidden>
   <content>{{velocity}}
 #if($request.docFullName &amp;&amp; $xwiki.exists($request.docFullName) &amp;&amp; $request.className &amp;&amp; $request.number)
 #set($Integer = 0)
@@ -50,7 +50,7 @@
 #if($requestedObj.getProperty('name').value)
   #set($objectTitleAdd = "- ${requestedObj.getProperty('name').value} ")
 #end
-(% class="editorObjectTitle" data-classname="$request.className" data-number="$request.number" %)(((==== $request.className - $request.number $!objectTitleAdd====#if(!$request.selectedObject)[[image:icon:cross||title='Remove object' data-classname='$request.className' data-number='$request.number' class='editorRemoveObject']]#end)))
+(% class="editorObjectTitle" data-classname="$request.className" data-number="$request.number" %)(((==== $request.className - $request.number $!objectTitleAdd====#if(!$request.selectedObject)[[image:icon:cross||title='$services.localization.render('webide.objects.buttons.remove')' data-classname='$request.className' data-number='$request.number' class='editorRemoveObject']]#end)))
 (% id="editorObject-${request.className}-${request.number}" class="editorObjectDetails xobject" %)(((
 #foreach($prop in $requestedClassProperties)
   #if(!$request.selectedObject)
@@ -67,8 +67,8 @@
 #end
 #elseif($request.allClasses)
 {{html clean=false}}
-Add an object: &lt;select id="addClassList"&gt;
-  &lt;option value="" disabled&gt;Select a class&lt;/option&gt;
+$services.localization.render('webide.objects.addLabel'): &lt;select id="addClassList"&gt;
+  &lt;option value="" disabled&gt;$services.localization.render('webide.objects.selectClass')&lt;/option&gt;
 #foreach($class in $xwiki.getClassList())
   #set($classDoc = $xwiki.getDocument($class))
   #set($newspace = $classDoc.space)
@@ -83,7 +83,7 @@ Add an object: &lt;select id="addClassList"&gt;
 #end
 &lt;/optgroup&gt;
 &lt;/select&gt;
-&lt;button class="btn btn-success" id="editorObjectAddButton"&gt;Add&lt;/button&gt; &lt;button class="btn btn-default" id="editorExpandAllButton"&gt;Expand all&lt;/button&gt;&lt;button class="btn btn-default" id="editorCollapseAllButton"&gt;Collapse all&lt;/button&gt;
+&lt;button class="btn btn-success" id="editorObjectAddButton"&gt;$services.localization.render('webide.objects.buttons.add')&lt;/button&gt; &lt;button class="btn btn-default" id="editorExpandAllButton"&gt;$services.localization.render('webide.objects.buttons.expand')&lt;/button&gt;&lt;button class="btn btn-default" id="editorCollapseAllButton"&gt;$services.localization.render('webide.objects.buttons.collapse')&lt;/button&gt;
 {{/html}}
 #elseif($request.addObject &amp;&amp; $request.docFullName)
 #set($requestedDoc = $xwiki.getDocument($request.docFullName))
@@ -108,7 +108,7 @@ Add an object: &lt;select id="addClassList"&gt;
 #end
 #set($discard = $requestedDoc.save())
 #set($requestedClassProperties = $xwiki.getClass($request.addObject).properties)
-(% class="editorObjectTitle" data-classname="$request.addObject" data-number="$requestedObj.number" %)(((==== $request.addObject - $requestedObj.number ====#if(!$request.selectedObject)[[image:icon:cross||title='Remove object' data-classname='$request.addObject' data-number='$requestedObj.number' class='editorRemoveObject']]#end)))
+(% class="editorObjectTitle" data-classname="$request.addObject" data-number="$requestedObj.number" %)(((==== $request.addObject - $requestedObj.number ====#if(!$request.selectedObject)[[image:icon:cross||title='$services.localization.render('webide.objects.buttons.remove')' data-classname='$request.addObject' data-number='$requestedObj.number' class='editorRemoveObject']]#end)))
 (% id="editorObject-${request.addObject}-${requestedObj.number}" class="editorObjectDetails xobject" %)(((
 #foreach($prop in $requestedClassProperties)
   (% class="editorPropertyLabel" %)((( $prop.prettyName )))

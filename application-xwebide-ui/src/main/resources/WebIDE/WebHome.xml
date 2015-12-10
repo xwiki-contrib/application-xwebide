@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1435138565000</creationDate>
-  <date>1449676662000</date>
-  <contentUpdateDate>1448966572000</contentUpdateDate>
+  <date>1449754754000</date>
+  <contentUpdateDate>1449754754000</contentUpdateDate>
   <version>1.1</version>
   <title>XWiki Web IDE</title>
   <defaultTemplate/>
@@ -329,23 +329,23 @@ require(['jquery'], function ($) {
 #else
 #if(!$isGuest)
 {{html clean=false}}
-&lt;div align="center"&gt;&lt;input type="button" id="openCreationBlock" class="btn btn-success" value="Add a project"&gt;&lt;/div&gt;
+&lt;div align="center"&gt;&lt;input type="button" id="openCreationBlock" class="btn btn-success" value="$services.localization.render('webide.webhome.addModal')"&gt;&lt;/div&gt;
 
 &lt;div id="modalProjectCreation" class="modal fade" role="dialog"&gt;
   &lt;div class="modal-dialog"&gt;
     &lt;div class="modal-content"&gt;
       &lt;div class="modal-header"&gt;
-        &lt;button type="button" class="close" data-dismiss="modal"&gt;&amp;times;&lt;/button&gt;&lt;h4 class="modal-title"&gt;New XWebIDE Project&lt;/h4&gt;
+        &lt;button type="button" class="close" data-dismiss="modal"&gt;&amp;times;&lt;/button&gt;&lt;h4 class="modal-title"&gt;$services.localization.render('webide.webhome.addModal')&lt;/h4&gt;
       &lt;/div&gt;
       &lt;form id="createProjectBlock" method="post"&gt;
         ##&lt;!-- Step 1 : Project Name --&gt;
         &lt;div id="projectCreationName"&gt;
           &lt;div class="modal-body"&gt;
-            &lt;strong&gt;Project Name*:&lt;/strong&gt; &lt;input type="text" name="projectName" id="projectName" autocomplete="off"&gt; &lt;span class="projectCreationNameError"&gt;&lt;/span&gt;&lt;br&gt;
-            &lt;strong&gt;Code space (space for your technical pages)*:&lt;/strong&gt; &lt;input type="text" name="codeSpace" id="codeSpace" autocomplete="off"&gt; &lt;span class="projectCreationCodeSpaceError"&gt;&lt;/span&gt;
+            &lt;strong&gt;$services.localization.render('webide.application.projectName')*:&lt;/strong&gt; &lt;input type="text" name="projectName" id="projectName" autocomplete="off"&gt; &lt;span class="projectCreationNameError"&gt;&lt;/span&gt;&lt;br&gt;
+            &lt;strong&gt;$services.localization.render('webide.application.codeSpace') ($services.localization.render('webide.webhome.codeSpaceDescription'))*:&lt;/strong&gt; &lt;input type="text" name="codeSpace" id="codeSpace" autocomplete="off"&gt; &lt;span class="projectCreationCodeSpaceError"&gt;&lt;/span&gt;
           &lt;/div&gt;
           &lt;div class="modal-footer"&gt;
-            &lt;input type="submit" value="Create an empty project" class="btn btn-success"&gt; &lt;button type="button" id="projectCreationNameButton" class="btn btn-primary"&gt;Add files to the project&lt;/button&gt;
+            &lt;input type="submit" value="$services.localization.render('webide.webhome.add')" class="btn btn-success"&gt; &lt;button type="button" id="projectCreationNameButton" class="btn btn-primary"&gt;Add files to the project&lt;/button&gt;
           &lt;/div&gt;
         &lt;/div&gt;
         ##&lt;!-- Step 2 : Project Spaces --&gt;
@@ -381,14 +381,14 @@ require(['jquery'], function ($) {
 {{/html}}
 #end
 #set ($columnsProperties = {
-  'projectName': {"displayName":"Project Name", "type":"text","size":10,"link":"view"},
+  'projectName': {"type":"text","size":10,"link":"view"},
   'doc.date': {"type":"text","size":10},
-  'spaces': {"displayName":"Spaces included", "type":"text","size":10},
+  'spaces': {"type":"text","size":10},
   '_actions': {"sortable":false,"filterable":false,"html":true,"actions":["rename","delete"]}
 })
 #set ($options = {
   'className': 'WebIDECode.ApplicationClass',
-  'translationPrefix' : 'xe.index.',
+  'translationPrefix' : 'webide.application.',
   'rowCount': 15,
   'maxPages': 10,
   'selectedColumn': 'projectName',

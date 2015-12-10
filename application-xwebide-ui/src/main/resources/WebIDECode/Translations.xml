@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc reference="WebIDECode.Translations" locale="">
+  <web>WebIDECode</web>
+  <name>Translations</name>
+  <language/>
+  <defaultLanguage>en</defaultLanguage>
+  <translation>0</translation>
+  <parent>WebIDECode.ApplicationClass</parent>
+  <creator>xwiki:XWiki.Admin</creator>
+  <author>xwiki:XWiki.Admin</author>
+  <customClass/>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <creationDate>1449753999000</creationDate>
+  <date>1449851489000</date>
+  <contentUpdateDate>1449847134000</contentUpdateDate>
+  <version>1.1</version>
+  <title>Translations</title>
+  <defaultTemplate/>
+  <validationScript/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <object>
+    <class>
+      <name>XWiki.TranslationDocumentClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <scope>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>scope</name>
+        <number>1</number>
+        <prettyName>Scope</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>GLOBAL|WIKI|USER|ON_DEMAND</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </scope>
+    </class>
+    <name>WebIDECode.Translations</name>
+    <number>0</number>
+    <className>XWiki.TranslationDocumentClass</className>
+    <guid>22e548de-61c8-4f6a-8b48-1f273c169f6c</guid>
+    <property>
+      <scope>WIKI</scope>
+    </property>
+  </object>
+  <content>## Livetable
+webide.application.projectName=Project name
+webide.application.spaces=Spaces
+webide.application.pages=Pages
+webide.application.xarVersion=XAR Version
+webide.application.codeSpace=Code Space
+webide.application.doc.date=Date
+webide.application._actions=Actions
+
+##WebHome
+webide.webhome.addModal=Add a project
+webide.webhome.add=Add
+webide.webhome.codeSpaceDescription=Space for your technical pages
+
+##Menu
+webide.menu.project=Project
+webide.menu.export=Export as XAR
+webide.menu.button.refresh=Refresh the menu
+webide.menu.button.show=Show the menu
+webide.menu.button.hide=Hide the menu
+webide.menu.view.physical=Physical view
+webide.menu.view.logical=Logical view
+webide.menu.empty=//Empty//
+webide.menu.unauthorized=//Unauthorized//
+webide.menu.add=Add...
+webide.menu.rename.space=Rename space {0}
+webide.menu.rename.page=Rename page {0}
+##Add menu
+webide.menu.add.localJS=Add JS to the page
+webide.menu.add.localCSS=Add CSS to the page
+webide.menu.add.localSheet=Add a sheet to the page
+##Remove menu
+webide.menu.remove.page=Delete from the wiki
+webide.menu.remove.object=Delete from the page
+webide.menu.remove.project=Remove from the project
+##Edit menu
+webide.menu.view.physical.view=View
+webide.menu.view.physical.editWiki=Edit content
+webide.menu.view.physical.editObjects=Objects ({0})
+webide.menu.view.physical.editClass=Class ({0})
+webide.menu.view.physical.attach=Attachments ({0})
+webide.menu.view.logical.editClass=Edit fields
+webide.menu.view.logical.editSheet=Edit sheet
+webide.menu.view.logical.editTemplate=Edit template
+webide.menu.view.logical.editWiki=Edit content
+webide.menu.view.logical.edit=Edit
+
+##Classes menu
+webide.menu.category.classes=Classes
+webide.menu.category.classes.add=Add a class
+webide.menu.category.classes.addSheet=Add a sheet
+webide.menu.category.classes.addTemplate=Add a template
+##Pages menu
+webide.menu.category.pages=Pages
+webide.menu.category.pages.addSpace=Add a space
+webide.menu.category.pages.addExistingPage=Add a existing page
+webide.menu.category.pages.addPage=Add a new page
+##Other categories
+webide.menu.category.js=JS
+webide.menu.category.js.add=Add global JavaScript
+webide.menu.category.css=CSS
+webide.menu.category.css.add=Add global CSS
+webide.menu.category.macros=Macros
+webide.menu.category.macros.add=Add a Macro
+webide.menu.category.panels=Panels
+webide.menu.category.panels.add=Add a Panel
+webide.menu.category.uix=UI Extensions
+webide.menu.category.uix.add=Add a UI Extension
+webide.menu.category.translations=Translations
+webide.menu.category.translations.add=Add a Translation page
+webide.menu.category.translations.addLanguage=Add a language
+
+##Modals
+webide.modals.commons.space=Space
+webide.modals.commons.page=Page
+webide.modals.commons.object=Object
+webide.modals.commons.class=Class
+webide.modals.commons.pageFullName=Page full name
+webide.modals.commons.pageName=Page name
+webide.modals.commons.name=Name
+webide.modals.commons.cancel=Cancel
+webide.modals.add.page.title=Add a page
+webide.modals.add.page.button=Add the page
+webide.modals.add.page.language=Language
+webide.modals.add.page.language.list=Supported languages list from your wiki administration
+webide.modals.add.page.type=Type
+webide.modals.add.page.type.content=Content page
+webide.modals.add.page.type.item=Item page
+webide.modals.add.page.info.content=Page where you can edit the content and add JS, CSS, etc.
+webide.modals.add.page.info.item=Page with an instance of your class
+webide.modals.add.space.title=Add a space
+webide.modals.add.space.button=Add the space
+webide.modals.add.object.title=Add an object
+webide.modals.add.object.button=Add the object
+webide.modals.add.class.title=Add a class
+webide.modals.add.class.button=Add the class
+webide.modals.add.class.sheet.actions=Sheet action
+webide.modals.add.class.sheet.edit=Edit
+webide.modals.add.class.sheet.view=View
+webide.modals.add.class.sheet.inline=Inline
+
+webide.modals.closeTab.description=You have unsaved content in this tab ([0}]), do you want to continue? All unsaved modifications will be lost permanently
+webide.modals.closeTab.title=Unsaved content
+webide.modals.closeTab.button.save=Save &amp; close
+webide.modals.closeTab.button.nosave=Close without saving
+
+webide.modals.delete.object.label=Are you sure you want to delete that object
+webide.modals.delete.object.title=Delete an object
+webide.modals.delete.object.button=Delete the object
+webide.modals.delete.page.label=Are you sure you want to delete that page
+webide.modals.delete.page.title=Delete a page
+webide.modals.delete.page.button=Delete the page
+webide.modals.delete.class.label=Are you sure you want to delete that class
+webide.modals.delete.class.title=Delete a class
+webide.modals.delete.class.button=Delete the class
+webide.modals.delete.class.deleteAlso=Delete also
+webide.modals.delete.class.allSheets=All bound sheets
+webide.modals.delete.class.template=The class template
+
+webide.modals.switchClass.label=You have unsaved content in this tab, do you want to continue? All unsaved modifications will be lost permanently
+webide.modals.switchClass.title=Switch class editor
+webide.modals.switchClass.button.save=Save &amp; switch
+webide.modals.switchClass.button.nosave=Switch without saving
+
+##Sheet
+webide.sheet.welcome=Welcome to the XWiki WebIDE, you can use it to create, edit and export XWiki Applications. This is the Master Page of the project, it contains meta-data such as the list of Spaces and Pages which are part of the project.
+webide.sheet.error=**Your code space is not defined**. It is the space where the global elements (JS, CSS, TRanslations, Macros...) will be placed when created from the logical view. You should choose your code space as soon as posible. Without code space specified, the pages will be placed in the space **{0}Code** (that space has been added to your project)
+webide.sheet.error.link=Change the code space
+
+webide.sheet.howto.getstarted=__Get started__:
+webide.sheet.howto.getstarted.1=* **Edit a page** in your project by clicking on one of the edit buttons in the lefthand panel - you can edit the page in different modes for editing the content and metadata
+webide.sheet.howto.getstarted.2=* **Add a space** by clicking the "add new" button on the left (Physical view) or the {{html clean="false"}}&lt;span class="fa fa-plus"&gt;&lt;/span&gt;{{/html}} in the "Pages" category (Logical view)
+webide.sheet.howto.getstarted.3=* **Add an existing page** for times when you need to add a page which must be in a Space which is not part of your application's code
+webide.sheet.howto.getstarted.4=* **Create a new page** when you need to create a new empty page clicking on the {{html clean="false"}}&lt;span class="fa fa-plus"&gt;&lt;/span&gt;{{/html}} in the selected folder
+webide.sheet.howto.getstarted.5=* **Export your project** as a .xar file which can be imported to other wikis or published on extensions.xwiki.org.
+
+webide.sheet.howto.shortcutsSH=__Shortcuts with Syntax Highlighting enabled__:
+webide.sheet.howto.shortcutsSH.1=* **Ctrl + F** : Search (first result)
+webide.sheet.howto.shortcutsSH.2=** **Ctrl + G** or **F3** : Find next result
+webide.sheet.howto.shortcutsSH.3=** **Ctrl + Shift + G** : Find previous result
+webide.sheet.howto.shortcutsSH.4=* **Alt + F** : Persistent search (the search box stays opened after first result)
+webide.sheet.howto.shortcutsSH.5=* **Tab** : 2-spaces indentation
+webide.sheet.howto.shortcutsSH.6=* **Shift + Tab** : Automatic indentation
+
+webide.sheet.howto.shortcutsIDE=__Shortcuts for the wiki and object editors__:
+webide.sheet.howto.shortcutsIDE.1=* **Alt + S**: Save &amp; View
+webide.sheet.howto.shortcutsIDE.2=* **Alt + Shift + S** : Save &amp; Continue
+webide.sheet.howto.shortcutsIDE.3=* **Alt + C** : Discard &amp; View
+webide.sheet.howto.shortcutsIDE.4=* **Alt + Shift + C** : View in a new tab
+
+webide.sheet.howto.shortcutsXWiki=__Shortcuts in XWiki__:
+webide.sheet.howto.shortcutsXWiki.1=* **W** : Open the Web IDE in the current page
+
+webide.sheet.howto.improveXP=__Improve your IDE Experience__:
+webide.sheet.howto.improveXP.1=The XWiki WebIDE uses Syntax Highlighting and Auto-completion extensions to improve the user interface. You can read the documentation pages below to learn more about these extensions :
+webide.sheet.howto.improveXP.linkSH=Syntax Highlighting documentation
+webide.sheet.howto.improveXP.linkAC=Auto-Completion documentation
+
+webide.sheet.howto.doc=To learn about other features of the XWiki WebIDE, see the [[Online Documentation&gt;&gt;{0}]] on xwiki.org.
+##Sheet buttons
+webide.sheet.button.delete.title=Remove the content from XWiki
+webide.sheet.button.savecontinue=Save &amp; Continue
+webide.sheet.button.saveview=Save &amp; View
+webide.sheet.button.cancel=Cancel
+webide.sheet.button.viewtab=View in a new tab
+
+##Objects (ApplicationObjects)
+webide.objects.addLabel=Add an object
+webide.objects.selectClass=Select a class
+webide.objects.buttons.add=Add
+webide.objects.buttons.expand=Expand all
+webide.objects.buttons.collapse=Collapse all
+webide.objects.buttons.remove=Delete object</content>
+</xwikidoc>

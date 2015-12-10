@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1448976541000</date>
-  <contentUpdateDate>1448975088000</contentUpdateDate>
+  <date>1449850822000</date>
+  <contentUpdateDate>1449845442000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -41,7 +41,7 @@
   <comment/>
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
-  <hidden>true</hidden>
+  <hidden>false</hidden>
   <object>
     <class>
       <name>XWiki.JavaScriptExtension</name>
@@ -119,17 +119,17 @@
     <className>XWiki.JavaScriptExtension</className>
     <guid>95d6ad85-599f-40f3-b936-d2312fb7a8df</guid>
     <property>
-      <cache>forbid</cache>
+      <cache>default</cache>
     </property>
     <property>
       <code>if(require.toUrl('xwiki-meta').substr(0,7) === '/xwiki/') {
-  var required = ['jquery', 'xwiki-meta'];
+  var required = ['jquery', '/xwiki/bin/jsx/WebIDECode/JSTranslations', 'xwiki-meta'];
 }
 else {
-  var required = ['jquery'];
+  var required = ['jquery', '/xwiki/bin/jsx/WebIDECode/JSTranslations'];
 }
 var WebIDESavedContent = []; //WebIDE plugins (such as RealTime) should be able to modify the value of the saved content
-require(required , function ($, xm) {
+require(required , function ($, Translations, xm) {
 
 $(function(){
 
@@ -167,7 +167,6 @@ $(function(){
   //Hierarchy.initModals()
   //Hierarchy._addFolderModalShortcut()
   //Hierarchy._addExistingPageModalShortcut()
-
   var Hierarchy = {
     /**
    * Reload completely the project content (hierarchy) :
@@ -177,7 +176,7 @@ $(function(){
     reload: function() {
       $('#hierarchyRefresh').off('click');
       $('#hierarchyRefresh span').hide();
-      var spinner = $('&lt;img title="Reloading the menu..."/&gt;').attr('src', '/'+XWiki.webapppath+'resources/icons/xwiki/spinner.gif').appendTo('#hierarchyRefresh');
+      var spinner = $('&lt;img title="'+Translations.hierarchy.reloading+'"/&gt;').attr('src', '/'+XWiki.webapppath+'resources/icons/xwiki/spinner.gif').appendTo('#hierarchyRefresh');
       $.ajax({
         url: WebIDE.wikiGetURL+"WebIDECode/ApplicationHierarchy?xpage=plain&amp;language="+$('#hierarchyMainLanguage').val(),
         type: "GET",
@@ -229,14 +228,14 @@ $(function(){
    */
     rename : function(type, renameFrom, renameTo, updateList) {
       if(!WebIDE.SAVING) {
-        setSavingState(true, 'Renaming in progress...');
+        setSavingState(true, Translations.hierarchy.renaming);
         var addUpdateList = '&amp;updateList='+updateList;
         $.ajax({
           url: WebIDE.wikiGetURL+"WebIDECode/ApplicationRename",
           type: "POST",
           data: "outputSyntax=plain&amp;"+type+"=1&amp;masterPage="+WebIDE.masterSpace+"."+WebIDE.masterPage+"&amp;renameFrom="+renameFrom+"&amp;renameTo="+renameTo+addUpdateList,
         }).success(function(data) {
-          setSavingState(false, 'Renaming performed', 2500);
+          setSavingState(false, Translations.hierarchy.renamed, 2500);
           Hierarchy.reload();
         }).error(function(xhr) {
           setSavingState(false, xhr.statusText, 4000, 'red');
@@ -252,7 +251,7 @@ $(function(){
    * @input String folder
    */
     removeFolder : function(folder) {
-      setHierarchyState('Removing folder...');
+      setHierarchyState(Translations.hierarchy.folder.removing);
       $.ajax({
         url: getDocumentReferenceData('restURL')+"/objects/WebIDECode.ApplicationClass/0/properties/spaces",
         type: "GET",
@@ -270,14 +269,14 @@ $(function(){
             accept: "application/xml",
             data: "property#spaces="+encodeURIComponent(spaceArray),
           }).success(function(){
-            setHierarchyState('Folder removed from project', 2500);
+            setHierarchyState(Translations.hierarchy.folder.removed, 2500);
             Hierarchy.reload();
           }).error(function(xhr){
             setHierarchyState(xhr.statusText, 4000, 'red');
           });
         }
         else {
-          console.log("Folder "+folder+" not found in the list of folders in this project.");
+          console.log(Translations.hierarchy.folder.notFound);
         }
       });
     },
@@ -290,7 +289,7 @@ $(function(){
    * @input String page
    */
     removePage : function(page) {
-      setHierarchyState('Removing page...');
+      setHierarchyState(Translations.hierarchy.page.removing);
       $.ajax({
         url: getDocumentReferenceData('restURL')+"/objects/WebIDECode.ApplicationClass/0/properties/pages",
         type: "GET",
@@ -308,7 +307,7 @@ $(function(){
             accept: "application/xml",
             data: "property#pages="+encodeURIComponent(pageArray),
           }).success(function(){
-            setHierarchyState('Page removed from project', 2500);
+            setHierarchyState(Translations.hierarchy.page.removed, 2500);
             Hierarchy.reload();
           }).error(function(xhr){
             setHierarchyState(xhr.statusText, 4000, 'red');
@@ -325,7 +324,7 @@ $(function(){
    * @input String folder
    */
     addFolder : function(folder) {
-      setHierarchyState('Adding folder...');
+      setHierarchyState(Translations.hierarchy.folder.adding);
       $.ajax({
         url: getDocumentReferenceData('restURL')+"/objects/WebIDECode.ApplicationClass/0/properties/spaces",
         type: "GET",
@@ -350,7 +349,7 @@ $(function(){
             else {
               closeModalNoBootstrap();
             }
-            setHierarchyState('Folder added', 2500);
+            setHierarchyState(Translations.hierarchy.folder.added, 2500);
             Hierarchy.reload();
           }).error(function(xhr){
             $('#hierarchyNewFolderName').val('');
@@ -380,7 +379,7 @@ $(function(){
       var existingPageName = existingPageList[1];
       var restSpaces = getRestSpacesString(existingPageSpace);
       var restSpacesMaster = getRestSpacesString(WebIDE.masterSpace);
-      setHierarchyState('Adding page...');
+      setHierarchyState(Translations.hierarchy.page.adding);
       $.ajax({
         url: "/"+XWiki.webapppath+"rest/wikis/"+getDocumentReferenceData('wiki')+"/"+restSpaces+"/pages/"+existingPageName,
         type: "GET",
@@ -415,7 +414,7 @@ $(function(){
               else {
                 closeModalNoBootstrap();
               }
-              setHierarchyState('Page added', 2500);
+              setHierarchyState(Translations.hierarchy.page.added, 2500);
               Hierarchy.reload();
             }).error(function(xhr){
               $('#hierarchyExistingPageName').val('');
@@ -648,7 +647,7 @@ $(function(){
           Hierarchy.addFolder($('#hierarchyNewFolderName').val());
         }
         else {
-          $('#hierarchyFolderModalError').html('ERROR : You have to fill the name of the folder!').show().delay(4000).queue(function(n) {
+          $('#hierarchyFolderModalError').html(Translations.hierarchy.folder.modalError).show().delay(4000).queue(function(n) {
             $(this).hide().html('');
             n();
           });
@@ -661,7 +660,7 @@ $(function(){
           Hierarchy.addExistingPage($('#hierarchyExistingPageName').val());
         }
         else {
-          $('#hierarchyExistingPageModalError').html('ERROR : You have to fill the name of the page!').show().delay(4000).queue(function(n) {
+          $('#hierarchyExistingPageModalError').html(Translations.hierarchy.page.modalError).show().delay(4000).queue(function(n) {
             $(this).hide().html('');
             n();
           });
@@ -804,9 +803,9 @@ $(function(){
           var rawtitle = decodeURIComponent(getRawTitle(getCurrentSpace(false), getCurrentPage(false), locale));
           var parentPage = decodeURIComponent(getParentPage(getCurrentSpace(false), getCurrentPage(false), locale));
           var isHidden = WikiEditor._getHidden(getCurrentSpace(false), getCurrentPage(false), locale);
-          var menuBlock = initOtherFieldsBlock($(jQueryTabId), jQueryTabId, "Advanced fields");
-          var relatedElementsBlock = initOtherFieldsBlock($(jQueryTabId), jQueryTabId, "Related elements");
-          $(jQueryTabId).append('&lt;div class="editorWikiTabContent"&gt;&lt;div class="editorPropertyLabel"&gt;&lt;p class="editorWikiTitleLabel"&gt;Title&lt;/p&gt;&lt;/div&gt; &lt;input type="text" class="editorWikiTitle" value="'+rawtitle+'" /&gt;&lt;div class="editorPropertyLabel"&gt;&lt;p class="editorWikiTitleLabel"&gt;Content&lt;/p&gt;&lt;/div&gt;&lt;textarea id="content_'+tabId+'"&gt;&lt;/textarea&gt;&lt;/div&gt;');
+          var menuBlock = initOtherFieldsBlock($(jQueryTabId), jQueryTabId, Translations.panel.advanced);
+          var relatedElementsBlock = initOtherFieldsBlock($(jQueryTabId), jQueryTabId, Translations.panel.related);
+          $(jQueryTabId).append('&lt;div class="editorWikiTabContent"&gt;&lt;div class="editorPropertyLabel"&gt;&lt;p class="editorWikiTitleLabel"&gt;'+Translations.wiki.title+'&lt;/p&gt;&lt;/div&gt; &lt;input type="text" class="editorWikiTitle" value="'+rawtitle+'" /&gt;&lt;div class="editorPropertyLabel"&gt;&lt;p class="editorWikiTitleLabel"&gt;'+Translations.wiki.content+'&lt;/p&gt;&lt;/div&gt;&lt;textarea id="content_'+tabId+'"&gt;&lt;/textarea&gt;&lt;/div&gt;');
           $(jQueryTabId+' &gt; .editorWikiTabContent &gt; textarea').val(dataContent);
           var advancedFieldBlock = $(menuBlock).find('.editorOtherFieldsBlockContent');
           var addHidden = '';
@@ -815,14 +814,14 @@ $(function(){
             addHidden = ' checked="checked"';
             hiddenState = '1';
           }
-          $(advancedFieldBlock).append('&lt;div class="editorPropertyLabel"&gt;&lt;p&gt;Parent&lt;/p&gt;&lt;/div&gt; &lt;input type="text" class="editorWikiParent" value="'+parentPage+'" size="45"/&gt;&lt;br&gt;&lt;div class="editorPropertyLabel"&gt;&lt;p&gt;Hidden document&lt;/p&gt;&lt;/div&gt; &lt;input type="checkbox" class="editorWikiHidden" '+addHidden+'/&gt;&lt;input type="hidden" class="editorWikiHiddenSaved" value="'+hiddenState+'"/&gt;');
+          $(advancedFieldBlock).append('&lt;div class="editorPropertyLabel"&gt;&lt;p&gt;'+Translations.wiki.parent+'&lt;/p&gt;&lt;/div&gt; &lt;input type="text" class="editorWikiParent" value="'+parentPage+'" size="45"/&gt;&lt;br&gt;&lt;div class="editorPropertyLabel"&gt;&lt;p&gt;'+Translations.wiki.hidden+'&lt;/p&gt;&lt;/div&gt; &lt;input type="checkbox" class="editorWikiHidden" '+addHidden+'/&gt;&lt;input type="hidden" class="editorWikiHiddenSaved" value="'+hiddenState+'"/&gt;');
           WikiEditor._loadRelatedElements(getCurrentSpace(false), getCurrentPage(false), relatedElementsBlock);
           if(WebIDE.syntaxHighlighting) {
             // Add the CodeMirror editor
             initCodeMirrorsCustom(WebIDE.currentEditor, tabId);
           }
           setSavedContent(tabNumberId);
-          setLoadingState(false, 'Loaded', 2500);
+          setLoadingState(false, Translations.states.loaded, 2500);
           if(loadAllTabs) {
             WebIDE.continueLoadAll();
           }
@@ -831,7 +830,7 @@ $(function(){
           var jQueryTabId = '#'+tabId;
           var tabNumberId = getTabNumber(jQueryTabId);
           removeTab($('.editorTabButton[data-tabnumber="'+tabNumberId+'"]'), tabNumberId);
-          setLoadingState(false, 'Error while loading "'+getCurrentSpace(false)+'.'+getCurrentPage(false)+'": '+xhr.statusText, 4000, 'red');
+          setLoadingState(false, Translations.states.loadingError+'"'+getCurrentSpace(false)+'.'+getCurrentPage(false)+'": '+xhr.statusText, 4000, 'red');
           if(loadAllTabs) {
             WebIDE.continueLoadAll();
           }
@@ -877,7 +876,7 @@ $(function(){
           }
           setStar(false, tabNumberId);
           if(!saveAll) {
-            setSavingState(false, 'Saved', 2500);
+            setSavingState(false, Translations.states.saved, 2500);
             if(continueEditing) return true;
             else window.location.href = WebIDE.wikiViewURL+space+'/'+page;
           }
@@ -928,7 +927,7 @@ $(function(){
       }
     },
     setDeleteButton : function() {
-      $('#hierarchyDeleteButtonIDE').val('Delete this page from XWiki');
+      $('#hierarchyDeleteButtonIDE').val(Translations.commons.delete);
       $('#hierarchyDeleteButtonIDE').off('click');
       $('#hierarchyDeleteButtonIDE').on('click', function() {
         $('#editorDeletedPageModalInfo').html(getCurrentSpace(false)+' - '+getCurrentPage(false));
@@ -965,8 +964,7 @@ $(function(){
         $('#hierarchyNewPageName').val(file);
 
         if($(this).hasClass('newLanguage')) {
-          $('#hierarchyAddPageTitle').html('Add new language');
-          $('#hierarchyAddPageLabel').html('Page');
+          $('#hierarchyAddPageTitle').html(Translations.wiki.modalAddLanguage);
           $('#hierarchyAddPage').attr('data-type', 'language');
           $('#hierarchyNewPageName').attr('disabled', true);
           $('#hierarchyPageFolder').attr('disabled', true);
@@ -977,8 +975,7 @@ $(function(){
           if($('#hierarchyUpdatedClassList').length &amp;&amp; !$('#hierarchyUpdatedClassList').is(':empty')) {
             $('#hierarchyAddPageTypeBlock').show();
           }
-          $('#hierarchyAddPageTitle').html('Add new page');
-          $('#hierarchyAddPageLabel').html('Page name');
+          $('#hierarchyAddPageTitle').html(Translations.wiki.modalAddPage);
           $('#hierarchyAddPage').attr('data-type', 'page');
         }
         if(!WebIDE.bootstrap() &amp;&amp; modal) {
@@ -1051,7 +1048,7 @@ $(function(){
           WikiEditor.add(folder, file, type, itemvalue);
         }
         else {
-          $('#hierarchyPageModalError').html('ERROR : You have to fill all the fields!').show().delay(4000).queue(function(n) {
+          $('#hierarchyPageModalError').html(Translations.commons.modalError).show().delay(4000).queue(function(n) {
             $(this).hide().html('');
             n();
           });
@@ -1069,7 +1066,7 @@ $(function(){
      */
     remove : function(space, page, locale) {
       if(!WebIDE.LOADING) {
-        setLoadingState(true, 'Deleting...');
+        setLoadingState(true, Translations.commons.deleting);
         var restSpaces = getRestSpacesString(space);
         var addRestLanguage = '';
         if(locale &amp;&amp; locale !== 'default') {
@@ -1105,9 +1102,9 @@ $(function(){
           else {
             closeModalNoBootstrap();
           }
-          setLoadingState(false, 'Deleted', 2500);
+          setLoadingState(false, Translations.commons.deleted, 2500);
         }).error(function(xhr){
-          setLoadingState(false, 'Error: '+xhr.statusText, 2500);
+          setLoadingState(false, xhr.statusText, 2500);
         });
       }
     },
@@ -1120,7 +1117,7 @@ $(function(){
      */
     add : function(folder, file, type, itemValue) {
       var restSpaces = getRestSpacesString(folder);
-      setHierarchyState('Adding page...');
+      setHierarchyState(Translations.hierarchy.page.adding);
       var addRestLanguage = '';
       var ajaxProperties;
       if(type === 'language') {
@@ -1142,11 +1139,11 @@ $(function(){
         type: "GET",
         contentType: "application/xml",
       }).success(function(xhr){
-        $('#hierarchyPageModalError').html('ERROR : A page with the same name already exist').show().delay(4000).queue(function(n) {
+        $('#hierarchyPageModalError').html(Translations.wiki.nameUsedError).show().delay(4000).queue(function(n) {
           $(this).hide().html('');
           n();
         });
-        setHierarchyState('ERROR : Name already used!', 4000, 'red');
+        setHierarchyState(Translations.wiki.nameUsedError, 4000, 'red');
       }).error(function(res){
         $.ajax({
           url: "/"+XWiki.webapppath+"rest/wikis/"+getDocumentReferenceData('wiki')+"/"+restSpaces+"/pages/"+file+addRestLanguage,
@@ -1163,7 +1160,7 @@ $(function(){
             else {
               closeModalNoBootstrap();
             }
-            setHierarchyState('Page added', 2500);
+            setHierarchyState(Translations.hierarchy.page.added, 2500);
             Hierarchy.reload();
           }
           if(type !== 'item') {
@@ -1254,7 +1251,7 @@ $(function(){
           $(relatedElementsBlock).hide();
         }
       }).error(function(xhr) {
-        $(relatedElementsBlock).find('.editorOtherFieldsBlockContent').html('Unable to load related elements: '+xhr.statusText);
+        $(relatedElementsBlock).find('.editorOtherFieldsBlockContent').html(Translations.wiki.relatedElmtError+' : '+xhr.statusText);
       });
     }
   };
@@ -1348,15 +1345,15 @@ $(function(){
       var addObjectNode = null;
       // Creation of the page structure
       if(!ObjectEditor._getCurrentObject(false)) {
-        menuNode = $('&lt;div id="tab'+currentTabNumber+'_editorObjectMenuContent" class="editorObjectMenuContent"&gt;&lt;/div&gt;').appendTo($('&lt;div id="tab'+currentTabNumber+'_editorObjectMenu" class="editorObjectMenu"&gt;&lt;span id="tab'+currentTabNumber+'_editorObjectMenuTitle" class="editorObjectMenuTitle"&gt;Quick Access&lt;/span&gt;&lt;/div&gt;').appendTo($(jQueryTabId)));
+        menuNode = $('&lt;div id="tab'+currentTabNumber+'_editorObjectMenuContent" class="editorObjectMenuContent"&gt;&lt;/div&gt;').appendTo($('&lt;div id="tab'+currentTabNumber+'_editorObjectMenu" class="editorObjectMenu"&gt;&lt;span id="tab'+currentTabNumber+'_editorObjectMenuTitle" class="editorObjectMenuTitle"&gt;'+Translations.objects.quickAccess+'&lt;/span&gt;&lt;/div&gt;').appendTo($(jQueryTabId)));
         addObjectNode = $('&lt;div id="tab'+currentTabNumber+'_addObjectBlock" class="addObjectBlock"&gt;&lt;/div&gt;').appendTo($(jQueryTabId));
       }
       var dataNode = $('&lt;form method="post" action="/'+XWiki.webapppath+''+XWiki.servletpath+'save/'+urlSpaces+'/'+file+'" id="tab'+currentTabNumber+'_objectIDEform" class="objectIDEform"&gt;&lt;input type="hidden" name="form_token" value="'+form_token+'" /&gt;&lt;/form&gt;').appendTo($(jQueryTabId));
       if(ObjectEditor._getCurrentObject(false)) {
-        initOtherFieldsBlock(dataNode, jQueryTabId, "Advanced fields");
+        initOtherFieldsBlock(dataNode, jQueryTabId, Translations.panel.advanced);
         menuNode = $(jQueryTabId+' .editorOtherFieldsBlockContent');
         if(ObjectEditor._getCurrentObject(false) === 'XWiki.WikiMacroClass') {
-          $('&lt;input type="hidden" id="tab'+currentTabNumber+'_addClassList" value="XWiki.WikiMacroParameterClass" /&gt;&lt;button class="btn btn-success" id="tab'+currentTabNumber+'_editorObjectAddButton"&gt;Add a parameter&lt;/button&gt;&lt;button class="btn btn-default" id="tab'+currentTabNumber+'_editorExpandAllButton"&gt;Expand all&lt;/button&gt;&lt;button class="btn btn-default" id="tab'+currentTabNumber+'_editorCollapseAllButton"&gt;Collapse all&lt;/button&gt;&lt;br&gt;').appendTo(menuNode);
+          $('&lt;input type="hidden" id="tab'+currentTabNumber+'_addClassList" value="XWiki.WikiMacroParameterClass" /&gt;&lt;button class="btn btn-success" id="tab'+currentTabNumber+'_editorObjectAddButton"&gt;'+Translations.objects.macroAddParam+'&lt;/button&gt;&lt;button class="btn btn-default" id="tab'+currentTabNumber+'_editorExpandAllButton"&gt;'+Translations.objects.expand+'&lt;/button&gt;&lt;button class="btn btn-default" id="tab'+currentTabNumber+'_editorCollapseAllButton"&gt;'+Translations.objects.collapse+'&lt;/button&gt;&lt;br&gt;').appendTo(menuNode);
         }
         ObjectEditor._loadObjectsDetails(jQueryTabId, objectsList, 0, objectsListSize, '', menuNode, dataNode, null, loadAllTabs);
       }
@@ -1439,7 +1436,7 @@ $(function(){
             currentClassNode.append('&lt;div class="editorDisplayedObject"&gt;'+dataContent+'&lt;/div&gt;');
           }
         }).error(function(xhr) {
-          currentClassNode.append('Error while loading object '+className+' '+number+' : '+xhr.statusText+'&lt;br&gt;');
+          currentClassNode.append(Translations.objects.loadError+' '+className+' '+number+' : '+xhr.statusText+'&lt;br&gt;');
         }).complete(function(xhr) {
           index++;
           if(index &lt; objectsListSize) {ObjectEditor._loadObjectsDetails(jQueryTabId, objectsList, index, objectsListSize, className, menuNode, dataNode, currentClassNode, loadAllTabs);}
@@ -1461,7 +1458,7 @@ $(function(){
       if(WebIDE.syntaxHighlighting) {initCodeMirrorsCustom(ObjectEditor.editor, jQueryTabId);}
       var tabNumberId = getTabNumber(jQueryTabId);
       setSavedContent(tabNumberId);
-      setLoadingState(false, 'Loaded', 2500);
+      setLoadingState(false, Translations.states.loaded, 2500);
       if(loadAllTabs) {
         WebIDE.continueLoadAll();
       }
@@ -1550,7 +1547,7 @@ $(function(){
     save : function(tabNumberId, changeSavedContent, continueEditing, saveAll, tokenUpToDate) {
       if(!WebIDE.SAVING || saveAll) {
         if(!saveAll) {
-          setSavingState(true, 'Saving...', null, 'green');
+          setSavingState(true);
         }
         if(WebIDE.syntaxHighlighting) {
           synchronizeCodeMirrorContent();
@@ -1565,7 +1562,7 @@ $(function(){
             }
             setStar(false, tabNumberId);
             if(!saveAll) {
-              setSavingState(false, 'Saved', 2500);
+              setSavingState(false, Translations.states.saved, 2500);
               if(continueEditing) return true;
               else window.location.href = WebIDE.wikiViewURL+space+'/'+page;
             }
@@ -1675,7 +1672,7 @@ $(function(){
         });
       }
       else { // Multiple object editor : delete the whole page
-        $('#hierarchyDeleteButtonIDE').val('Delete this page from the wiki');
+        $('#hierarchyDeleteButtonIDE').val(Translations.commons.delete);
         $('#hierarchyDeleteButtonIDE').off('click');
         $('#hierarchyDeleteButtonIDE').on('click', function() {
           $('#editorDeleteMultipleObjectsModalInfo').html(getCurrentSpace()+'.'+getCurrentPage());
@@ -1699,8 +1696,7 @@ $(function(){
         $('#hierarchyObjectPageInputDefault').val('');
         $('#hierarchyObjectPageInput').val('');
         $('#hierarchyObjectPage').html('');
-        var objType = 'JS';
-        var objScope = 'local';
+        var objType = Translations.objects.js;
 
         // Manage the case of each type of object that can be added from the logical view.
         // Cf ObjectEditor.initModals() below to add extras properties to the object, if necessary, when the user validates
@@ -1708,33 +1704,32 @@ $(function(){
           $('#hierarchyObjectClassName').val('XWiki.JavaScriptExtension');
         }
         else if($(this).hasClass('newCSSObject')) {
-          objType = 'CSS';
+          objType = Translations.objects.css;
           $('#hierarchyObjectClassName').val('XWiki.StyleSheetExtension');
         }
         else if($(this).hasClass('newMacroObject')) {
-          objType = 'Macro';
+          objType = Translations.objects.macro;
           $('#hierarchyObjectClassName').val('XWiki.WikiMacroClass');
         }
         else if($(this).hasClass('newPanelObject')) {
-          objType = 'Panel';
+          objType = Translations.objects.panel;
           $('#hierarchyObjectClassName').val('Panels.PanelClass');
         }
         else if($(this).hasClass('newTranslationObject')) {
-          objType = 'Translation';
+          objType = Translations.objects.translation;
           $('#hierarchyObjectClassName').val('XWiki.TranslationDocumentClass');
         }
         else if($(this).hasClass('newSheet')) {
-          objType = 'Sheet';
+          objType = Translations.objects.sheet;
           $('#hierarchyObjectClassName').val('XWiki.DocumentSheetBinding');
         }
         else if($(this).hasClass('newUIXObject')) {
-          objType = 'UI Extension';
+          objType = Translations.objects.uix;
           $('#hierarchyObjectPageInput').attr('disabled', true);
           $('#hierarchyObjectClassName').val('XWiki.UIExtensionClass');
         }
 
         if($(this).hasClass('newGlobalObject')) {
-          objScope = 'global';
           $('#hierarchyAddObject').attr('data-scope', 'global');
           $('#hierarchyObjectPageInput').val(file);
           $('#hierarchyObjectPageInputDefault').val(file);
@@ -1748,7 +1743,7 @@ $(function(){
           ObjectEditor.add(null, className, true, folder, file, false, true);
           modal = false;
         }
-        $('#hierarchyAddObject').html('Add '+objScope+' '+objType);
+        $('#hierarchyAddObject').html(Translations.commons.add+' '+objType);
         if(!WebIDE.bootstrap() &amp;&amp; modal) {
           openModalNoBootstrap('#hierarchyObjectModal');
           ObjectEditor._addModalShortcut();
@@ -1837,7 +1832,7 @@ $(function(){
           ObjectEditor.add(null, className, true, folder, file, global, redirect, properties);
         }
         else {
-          $('#hierarchyObjectModalError').html('ERROR : You have to fill all the fields!').show().delay(4000).queue(function(n) {
+          $('#hierarchyObjectModalError').html(Translations.commons.modalError).show().delay(4000).queue(function(n) {
             $(this).hide().html('');
             n();
           });
@@ -1905,12 +1900,12 @@ $(function(){
             type: "GET",
             dataType: "html"
           }).error(function(xhr) {
-            setSavingState(false, 'Unable to add object: '+xhr.statusText, 4000, 'red');
+            setSavingState(false, Translations.objects.loadUnable+' '+xhr.statusText, 4000, 'red');
           }).success(function(dataContent) {
-            setSavingState(false, 'Saved', 2500);
+            setSavingState(false, Translations.states.saved, 2500);
             var number = $('&lt;div/&gt;').append(dataContent).find('div[data-number]').attr('data-number');
             if(newTab) { // Add an object from the menu
-              setLoadingState(false, 'Loaded', 2500);
+              setLoadingState(false, Translations.states.loaded, 2500);
               if(redirect) { // Create an object and redirect to a new tab with that object
                 goToNewPage(ObjectEditor.editor, page, space, [className, number]);
               }
@@ -1965,7 +1960,7 @@ $(function(){
             }
             var unsavedState = (WebIDESavedContent[currentTabNumber] !== getCurrentContent(currentTabNumber));
             setStar(unsavedState, currentTabNumber);
-            setLoadingState(false, 'Complete', 2500);
+            setLoadingState(false, Translations.states.complete, 2500);
           });
         }
       }
@@ -1977,8 +1972,8 @@ $(function(){
      */
     remove : function(space, page, className, number) {
       if(!WebIDE.SAVING &amp;&amp; !WebIDE.LOADING) {
-        setSavingState(true, 'Deleting object...');
-        setLoadingState(true, 'Removing text...');
+        setSavingState(true, Translations.objects.deleting);
+        setLoadingState(true, Translations.objects.removing);
         // Find the current tab number
         var jQueryTabId = '#'+getTabId(ObjectEditor.editor, getCurrentSpace(), getCurrentPage(), ObjectEditor.getParameters());
         var currentTabNumber = getTabNumber(jQueryTabId);
@@ -2007,17 +2002,13 @@ $(function(){
           url: ajaxUrl,
           type: httpMethod,
         }).success(function(dataContent){
-          setSavingState(false, 'Deleted', 2500);
+          setSavingState(false, Translations.commons.deleted, 2500);
           // Case 1: object editor of the concerned page = remove the object from the current tab
           if(isInCurrentTab &amp;&amp; !isCurrentSingleObject &amp;&amp; className) { // Current tab + Current Multiple Objects editor + Only 1 object removed
             var divSelectorInternal = 'div[id="tab'+currentTabNumber+'_editorObject-'+className+'-'+number+'"]';
             $(divSelectorInternal).parent().remove();
             $('#tab'+currentTabNumber+'_editorObjectMenu a[data-classname="'+className+'"][data-number="'+number+'"]').next('br').remove();
             $('#tab'+currentTabNumber+'_editorObjectMenu a[data-classname="'+className+'"][data-number="'+number+'"]').remove();
-            $('#hierarchySavingState').html('&lt;strong&gt;Deleted&lt;/strong&gt;').show().delay(2500).queue(function(n) {
-              $(this).hide().html('');
-              n();
-            });
             Hierarchy.reload();
           }
           // Case 2: object not displayed in the current tab or tab with that object only = remove the tab
@@ -2047,7 +2038,7 @@ $(function(){
             var unsavedState = (WebIDESavedContent[currentTabNumber] !== getCurrentContent(currentTabNumber));
             setStar(unsavedState, currentTabNumber);
           }
-          setLoadingState(false, 'Removed', 2500);
+          setLoadingState(false, Translations.commons.removed, 2500);
         });
       }
     },
@@ -2058,7 +2049,7 @@ $(function(){
      */
     _getUpdatedToken : function(callback, args) {
       if(!WebIDE.LOADING) {
-        setLoadingState(true, 'Updating CSRF token...');
+        setLoadingState(true, Translations.objects.updatingToken);
         $.ajax({
           url: WebIDE.wikiViewURL+"WebIDECode/ApplicationObjects?xpage=plain&amp;updateToken",
           type: "GET",
@@ -2073,14 +2064,14 @@ $(function(){
               $('meta[name="form_token"]').attr('content', newToken);
             }
             $('input[name="form_token"]').val(newToken);
-            setLoadingState(false, 'CSRF token updated!', 2500);
+            setLoadingState(false, Translations.objects.updatedToken, 2500);
             if(callback &amp;&amp; args) {
               args.push(true);
               callback.apply(null, args);
             }
           }
           else {
-            setLoadingState(false, 'Token already up-to-date', 1000);
+            setLoadingState(false, Translations.objects.errorToken, 1000);
           }
         }).error(function(xhr) {
           setLoadingState(false, xhr.statusText, 4000, 'red');
@@ -2116,7 +2107,7 @@ $(function(){
         var tabId = getTabId(WebIDE.currentEditor, getCurrentSpace(false), getCurrentPage(false), AWMClassEditor.getParameters());
         var jQueryTabId = '#'+tabId;
         var tabNumberId = getTabNumber(jQueryTabId);
-        initOtherFieldsBlock($(jQueryTabId), jQueryTabId, "Advanced fields");
+        initOtherFieldsBlock($(jQueryTabId), jQueryTabId, Translations.panel.advanced);
         var advancedFieldBlock = $(jQueryTabId+' .editorOtherFieldsBlockContent');
         var classEditorStorage = window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.classEditor'] || 'basic';
         classEditorStorage = (classEditorStorage === 'advanced') ? 'advanced' : 'basic';
@@ -2125,12 +2116,16 @@ $(function(){
         var ifrm = $('&lt;iframe allowtransparency="true" id="tab'+tabNumberId+'_awm" data-type="'+classEditorStorage+'" name="tab'+tabNumberId+'_awm" class="editorIframe"/&gt;').attr('src', urlIframe).appendTo($('&lt;div class="editorClassTabContent"&gt;&lt;/div&gt;').appendTo(jQueryTabId));
         AWMClassEditor._initIframe(ifrm, tabNumberId);
         var nextEditor = 'advanced';
-        if(classEditorStorage === 'advanced') nextEditor = 'basic';
-        $('&lt;input type="button" class="btn btn-default editorAWMSwitch" value="Switch to '+nextEditor+' editor"/&gt;').appendTo(advancedFieldBlock).on('click', function() {
+        var buttonText = Translations.class.switchAdvanced;
+        if(classEditorStorage === 'advanced') {
+          nextEditor = 'basic';
+          buttonText = Translations.class.switchBasic;
+        }
+        $('&lt;input type="button" class="btn btn-default editorAWMSwitch" value="'+buttonText+'"/&gt;').appendTo(advancedFieldBlock).on('click', function() {
           if(WebIDESavedContent[tabNumberId] != getCurrentContent(tabNumberId)) {$('#editorSwitchClassModal').modal('show');}
           else{AWMClassEditor._switchClassEditor(ifrm, tabNumberId);}
         });
-        setLoadingState(false, 'Loaded', 2500);
+        setLoadingState(false, Translations.states.loaded, 2500);
         if(loadAllTabs) {
           WebIDE.continueLoadAll();
         }
@@ -2151,7 +2146,11 @@ $(function(){
           $(ifrm).attr('data-type', 'basic');
           window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.classEditor'] = 'basic';
         }
-        $(tabDiv).find('.editorAWMSwitch').val('Switch to '+oldType+' editor');
+        var buttonText = Translations.class.switchAdvanced;
+        if(oldType === 'basic') {
+          buttonText = Translations.class.switchBasic;
+        }
+        $(tabDiv).find('.editorAWMSwitch').val(buttonText);
         AWMClassEditor._initIframe(ifrm, tabNumberId);
       }
     },
@@ -2214,7 +2213,7 @@ $(function(){
       return true;
     },
     setDeleteButton : function() {
-      $('#hierarchyDeleteButtonIDE').val('Delete this class from XWiki');
+      $('#hierarchyDeleteButtonIDE').val(Translations.commons.delete);
       $('#hierarchyDeleteButtonIDE').off('click');
       $('#hierarchyDeleteButtonIDE').on('click', function() {
         $('#editorDeletedClassModalInfo').html(getCurrentSpace(false)+' - '+getCurrentPage(false));
@@ -2323,7 +2322,7 @@ $(function(){
           AWMClassEditor.add(className, type, sheetType, sheetName);
         }
         else {
-          $('#hierarchyClassModalError').html('ERROR : You have to fill all the fields!').show().delay(4000).queue(function(n) {
+          $('#hierarchyClassModalError').html(Translations.commons.modalError).show().delay(4000).queue(function(n) {
             $(this).hide().html('');
             n();
           });
@@ -2360,7 +2359,7 @@ $(function(){
     */
     remove : function(space, page, removeSheet, removeTemplate) {
       if(!WebIDE.LOADING) {
-        setLoadingState(true, 'Deleting...');
+        setLoadingState(true, Translations.commons.deleting);
         var addRemoveSheet = '';
         var addRemoveTemplate = '';
         if(removeSheet) {
@@ -2386,9 +2385,9 @@ $(function(){
           });
           $('#editorDeleteClassModal').modal('hide');
           Hierarchy.reload();
-          setLoadingState(false, 'Deleted', 2500);
+          setLoadingState(false, Translations.commons.deleted, 2500);
         }).error(function(xhr){
-          setLoadingState(false, 'Error: '+xhr.statusText, 4000, 'red');
+          setLoadingState(false, xhr.statusText, 4000, 'red');
         });
       }
     },
@@ -2412,14 +2411,14 @@ $(function(){
           }).success(function(dataContent) {
             error = $('&lt;div/&gt;').append(dataContent).find('#editorAddClassError').length;
             if(error) {
-              $('#hierarchyClassModalError').html('ERROR : A page with the same name already exist').show().delay(4000).queue(function(n) {
+              $('#hierarchyClassModalError').html(Translations.wiki.nameUsedError).show().delay(4000).queue(function(n) {
                 $(this).hide().html('');
                 n();
               });
-              setSavingState(false, 'Unable to add '+type+': Existing name', 4000, 'red');
+              setSavingState(false, Translations.wiki.nameUsedError, 4000, 'red');
             }
             else {
-              setSavingState(false, 'Saved', 2500);
+              setSavingState(false, Translations.commons.saved, 2500);
               Hierarchy.reload();
             }
           }).complete(function() {
@@ -2479,7 +2478,7 @@ $(function(){
             AWMClassEditor.switchEditor = false;
             AWMClassEditor._switchClassEditor(ifrm, tabNumberId);
           }
-          setSavingState(false, 'Saved', 2500);
+          setSavingState(false, Translations.commons.saved, 2500);
         });
         $(ifrm).contents().find('form#inline').find('input:first').click();
         window.setTimeout(function() {
@@ -2701,7 +2700,7 @@ $(function(){
           });
           window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.tabs'] = openedTabs;
           if(unsaved) {
-            return "You have unsaved content! Are you sure you want to close the page?";
+            return Translations.core.unsavedContent;
           }
         }
       };
@@ -2918,11 +2917,11 @@ $(function(){
         }
       });
       if(WebIDE.saveAllList.length &gt; 0) {
-        setSavingState(true, "Saving all tabs...");
+        setSavingState(true, Translations.core.savingAll);
         continueSaveAll(true);
       }
       else {
-        setSavingState(false, "All tabs are already saved!", 2500);
+        setSavingState(false, Translations.core.alreadySavedAll, 2500);
       }
     }
   }
@@ -2940,11 +2939,11 @@ $(function(){
       WebIDE.savedAllError.push([xhr.statusText, folder, file]);
     }
     if(WebIDE.savedAll === saveTotal) {
-      var msg = 'All tabs are saved!';
+      var msg = Translations.core.savedAll;
       var cssClass = 'green';
       var delay = 2500;
       if(WebIDE.savedAllError.length &gt; 0) {
-        msg = 'Tabs saved. Error while saving:';
+        msg = Translations.core.saveAllError;
         WebIDE.savedAllError.each(function(index, elt) {
           msg += ' ['+elt[1]+'.'+elt[2]+' : '+elt[0]+']';
         });
@@ -2958,10 +2957,10 @@ $(function(){
     }
     else if(WebIDE.savedAll &lt; saveTotal) {
       if(WebIDE.savedAll !== 0) {
-        var msg = WebIDE.savedAll+'/'+saveTotal+' tabs done...';
+        var msg = WebIDE.savedAll+'/'+saveTotal+' '+Translations.core.saveAllTemp;
         var cssClass = 'green';
         if(WebIDE.savedAllError.length &gt; 0) {
-          msg += ' (Errors: '+WebIDE.savedAllError.length+')';
+          msg += ' ('+Translations.commons.error+': '+WebIDE.savedAllError.length+')';
           cssClass = 'red';
         }
         setSavingState(true, msg, null, cssClass);
@@ -3292,7 +3291,7 @@ $(function(){
         WebIDE.toggleFullScreen();
         return false;
       });
-      $('&lt;span class="btn btn-success"&gt;Save all tabs&lt;/span&gt;').appendTo('#editorTabBar').on('click', function(e) {
+      $('&lt;span class="btn btn-success"&gt;'+Translations.core.saveAllButton+'&lt;/span&gt;').appendTo('#editorTabBar').on('click', function(e) {
         e.preventDefault();
         saveAll();
         return false;
@@ -3716,7 +3715,7 @@ $(function(){
       <name>Hierarchy panel</name>
     </property>
     <property>
-      <parse/>
+      <parse>0</parse>
     </property>
     <property>
       <use>onDemand</use>
@@ -4065,11 +4064,11 @@ $(function(){
   #set($visibleCategoryString = $!{request.visibleCategory})
 #end
 #set($visibleCategory = $!visibleCategoryString.split("[,]"))
-(% class="hierarchy-hidden" id="hierarchyOpenBlock" title="Open menu"%)(((
+(% class="hierarchy-hidden" id="hierarchyOpenBlock" title="$services.localization.render('webide.menu.button.show')"%)(((
 {{html clean="false"}}&lt;span class="fa fa-step-forward"&gt;&lt;/span&gt;{{/html}}
 )))
 (% id="hierarchyCloseBlock" %)(((
-**Project :** $masterDoc.display('projectName', 'view') (% title="Hide menu" id="hierarchyClose" class="hierarchy-icon" %){{html clean="false"}}&lt;span class="fa fa-step-backward"&gt;&lt;/span&gt;{{/html}} (% title="Refresh the menu" id="hierarchyRefresh" class="hierarchy-icon" %){{html clean="false"}}&lt;span class="fa fa-refresh"&gt;&lt;/span&gt;{{/html}}
+**$services.localization.render('webide.menu.project') :** $masterDoc.display('projectName', 'view') (% title="$services.localization.render('webide.menu.button.hide')" id="hierarchyClose" class="hierarchy-icon" %){{html clean="false"}}&lt;span class="fa fa-step-backward"&gt;&lt;/span&gt;{{/html}} (% title="Refresh the menu" id="hierarchyRefresh" class="hierarchy-icon" %){{html clean="false"}}&lt;span class="fa fa-refresh"&gt;&lt;/span&gt;{{/html}}
 )))
 #set($nestedSpaces = false)
 #if($services.model.serialize($services.model.createDocumentReference("wiki", ["A", "B"], "page"), 'default') == 'wiki:A.B.page')
@@ -4138,7 +4137,7 @@ $(function(){
 #set($endRemoveButton = '&lt;/ul&gt;&lt;/div&gt;{{/html}}')
 (% id="hierarchyContent" %) (((
 #if($masterDoc.hasAccessLevel('edit'))
-  {{html clean=false}}&lt;form method="post" action="$masterDoc.getURL('view')" class="masterExportForm"&gt;&lt;input type="hidden" name="export" value="1" /&gt;#if($singlePage)&lt;input type="hidden" name="singlePage" value="$escapetool.url($currentDoc.fullName).replace('+', '%20')" /&gt;#end&lt;input class="btn btn-default hierarchy-export-button" type="submit" value="Export the project (XAR)" title="Export the project"/&gt;&lt;/form&gt;{{/html}}
+  {{html clean=false}}&lt;form method="post" action="$masterDoc.getURL('view')" class="masterExportForm"&gt;&lt;input type="hidden" name="export" value="1" /&gt;#if($singlePage)&lt;input type="hidden" name="singlePage" value="$escapetool.url($currentDoc.fullName).replace('+', '%20')" /&gt;#end&lt;input class="btn btn-default hierarchy-export-button" type="submit" value="$services.localization.render('webide.menu.export')" title="$services.localization.render('webide.menu.export')"/&gt;&lt;/form&gt;{{/html}}
 #end
 #if($currentTree == 'physical')
   {{include reference="WebIDECode.PhysicalTree" /}}
@@ -4155,59 +4154,75 @@ $(function(){
 &lt;/div&gt;
 {{/html}}
 )))
-{{html clean="false" wiki="true"}}
-  &lt;div class="modal fade text-left hierarchy-hidden" id="hierarchyFolderModal" tabindex="-1" role="dialog" aria-hidden="true"&gt;
-    &lt;div class="modal-dialog"&gt;
-      &lt;div class="modal-content"&gt;
-        &lt;div class="modal-header"&gt;
+
+  (% class="modal fade text-left hierarchy-hidden" id="hierarchyFolderModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
           &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;Add New Folder&lt;/h4&gt;
-        &lt;/div&gt;
-        &lt;div class="modal-body"&gt;
-          Folder : &lt;input type="text" id="hierarchyNewFolderName" /&gt;
-          &lt;button id="hierarchyAddFolder" class="btn btn-success"&gt;Add the folder&lt;/button&gt;&lt;br&gt;
+          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.add.space.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false"}}
+          $services.localization.render('webide.modals.commons.space') : &lt;input type="text" id="hierarchyNewFolderName" /&gt;
+          &lt;button id="hierarchyAddFolder" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.space.button')&lt;/button&gt;&lt;br&gt;
           &lt;p id="hierarchyFolderModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-  &lt;div class="modal fade text-left hierarchy-hidden" id="hierarchyExistingPageModal" tabindex="-1" role="dialog" aria-hidden="true"&gt;
-    &lt;div class="modal-dialog"&gt;
-      &lt;div class="modal-content"&gt;
-        &lt;div class="modal-header"&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+  (% class="modal fade text-left hierarchy-hidden" id="hierarchyExistingPageModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
           &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;Add Existing Page&lt;/h4&gt;
-        &lt;/div&gt;
-        &lt;div class="modal-body"&gt;
-          Page Full Name : &lt;input type="text" id="hierarchyExistingPageName" /&gt;
-          &lt;button id="hierarchyAddExistingPage" class="btn btn-success"&gt;Add the page&lt;/button&gt;
+          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.add.page.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false" wiki="true"}}
+          $services.localization.render('webide.modals.commons.pageFullName') : &lt;input type="text" id="hierarchyExistingPageName" /&gt;
+          &lt;button id="hierarchyAddExistingPage" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.page.button')&lt;/button&gt;
           &lt;p id="hierarchyExistingPageModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-  &lt;div class="modal fade text-left hierarchy-hidden" id="hierarchyPageModal" tabindex="-1" role="dialog" aria-hidden="true"&gt;
-    &lt;div class="modal-dialog"&gt;
-      &lt;div class="modal-content"&gt;
-        &lt;div class="modal-header"&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+  (% class="modal fade text-left hierarchy-hidden" id="hierarchyPageModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
           &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title" id="hierarchyAddPageTitle"&gt;Add New Page&lt;/h4&gt;
-        &lt;/div&gt;
-        &lt;div class="modal-body"&gt;
-          Folder : &lt;select id="hierarchyPageFolder"&gt;
+          &lt;h4 class="modal-title" id="hierarchyAddPageTitle"&gt;$services.localization.render('webide.modals.add.page.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false" wiki="true"}}
+          $services.localization.render('webide.modals.commons.space') : &lt;select id="hierarchyPageFolder"&gt;
           #foreach($space in $spacesListNested)
             #if($xwiki.hasAccessLevel('edit', "$space.$reservedDocumentName"))
               &lt;option value="$escapetool.url($space).replace('+', '%20')"&gt;$space&lt;/option&gt;
             #end
           #end
           &lt;/select&gt;&lt;br&gt;
-          &lt;span id="hierarchyAddPageLabel"&gt;Page&lt;/span&gt; : &lt;input type="text" id="hierarchyNewPageName" /&gt;&lt;br&gt;
-          &lt;div id="hierarchyAddPageTypeBlock"&gt;Type: &lt;input type="radio" name="hierarchyAddPageType" id="hierarchyAddPageTypeContent" value="content" checked="checked"/&gt; &lt;label for="hierarchyAddPageTypeContent"&gt;Content page &lt;/label&gt; &lt;input type="radio" name="hierarchyAddPageType" id="hierarchyAddPageTypeItem" value="item"/&gt; &lt;label for="hierarchyAddPageTypeItem"&gt;Item page&lt;/label&gt;&lt;br&gt;
-            &lt;p&gt;**Content page**: Page where you can edit the content and add JS, CSS, etc...&lt;br&gt;
-            **Item page**: Page with an instance of your class&lt;/p&gt;
-          &lt;div id="hierarchyAddPageItemBlock" class="hierarchy-hidden"&gt;&lt;select id="hierarchyAddPageItem"&gt;
+          &lt;span id="hierarchyAddPageLabel"&gt;$services.localization.render('webide.modals.commons.pageName')&lt;/span&gt; : &lt;input type="text" id="hierarchyNewPageName" /&gt;&lt;br&gt;
+          &lt;div id="hierarchyAddPageTypeBlock"&gt;
+
+          {{info}}
+            **$services.localization.render('webide.modals.add.page.type.content')**: $services.localization.render('webide.modals.add.page.info.content')&lt;br&gt;
+            **$services.localization.render('webide.modals.add.page.type.item')**: $services.localization.render('webide.modals.add.page.info.content')
+          {{/info}}
+
+          $services.localization.render('webide.modals.add.page.type') : &lt;input type="radio" name="hierarchyAddPageType" id="hierarchyAddPageTypeContent" value="content" checked="checked"/&gt; &lt;label for="hierarchyAddPageTypeContent"&gt;$services.localization.render('webide.modals.add.page.type.content')&lt;/label&gt; &lt;input type="radio" name="hierarchyAddPageType" id="hierarchyAddPageTypeItem" value="item"/&gt; &lt;label for="hierarchyAddPageTypeItem"&gt;$services.localization.render('webide.modals.add.page.type.item')&lt;/label&gt;&lt;br&gt;
+          &lt;div id="hierarchyAddPageItemBlock" class="hierarchy-hidden"&gt;$services.localization.render('webide.modals.commons.class') :  &lt;select id="hierarchyAddPageItem"&gt;
           &lt;/select&gt;&lt;/div&gt;&lt;/div&gt;
-          &lt;div id="hierarchyAddPageLocaleBlock"&gt;Language: &lt;select id="hierarchyAddPageLocale"&gt;
+          &lt;div id="hierarchyAddPageLocaleBlock"&gt;$services.localization.render('webide.modals.add.page.language'): &lt;select id="hierarchyAddPageLocale"&gt;
           #foreach($locale in $xwiki.getDocument('XWiki.XWikiPreferences').getObject('XWiki.XWikiPreferences').getProperty('languages').value.split(','))
             #set($language = $services.localization.toLocale($locale.trim()).getDisplayLanguage())
             #set($displayLanguage = $language)
@@ -4216,153 +4231,186 @@ $(function(){
             #end
             &lt;option value="$locale.trim()"&gt;$displayLanguage&lt;/option&gt;
           #end
-          &lt;/select&gt; (Supported languages list from your wiki administration)&lt;/div&gt;
-          &lt;button id="hierarchyAddPage" class="btn btn-success"&gt;Add the page&lt;/button&gt;&lt;br&gt;
+          &lt;/select&gt; ($services.localization.render('webide.modals.add.page.language.list'))&lt;/div&gt;
+          &lt;button id="hierarchyAddPage" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.page.button')&lt;/button&gt;&lt;br&gt;
           &lt;p id="hierarchyPageModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-  &lt;div class="modal fade text-left hierarchy-hidden" id="hierarchyObjectModal" tabindex="-1" role="dialog" aria-hidden="true"&gt;
-    &lt;div class="modal-dialog"&gt;
-      &lt;div class="modal-content"&gt;
-        &lt;div class="modal-header"&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+  (% class="modal fade text-left hierarchy-hidden" id="hierarchyObjectModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
           &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;Add Object&lt;/h4&gt;
-        &lt;/div&gt;
-        &lt;div class="modal-body"&gt;
-          Space : &lt;span id="hierarchyObjectSpace"&gt;&lt;/span&gt;&lt;br&gt;
-          &lt;div id="hierarchyObjectPageBlock"&gt;Page : &lt;span id="hierarchyObjectPage"&gt;&lt;/span&gt;&lt;/div&gt;
-          &lt;div id="hierarchyObjectPageInputBlock"&gt;Name : &lt;input type="text" id="hierarchyObjectPageInput" value=""/&gt;&lt;input type="hidden" id="hierarchyObjectPageInputDefault" value=""/&gt;&lt;/div&gt;
+          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.add.object.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false" wiki="true"}}
+          $services.localization.render('webide.modals.commons.space') : &lt;span id="hierarchyObjectSpace"&gt;&lt;/span&gt;&lt;br&gt;
+          &lt;div id="hierarchyObjectPageBlock"&gt;$services.localization.render('webide.modals.commons.page') : &lt;span id="hierarchyObjectPage"&gt;&lt;/span&gt;&lt;/div&gt;
+          &lt;div id="hierarchyObjectPageInputBlock"&gt;$services.localization.render('webide.modals.commons.name') : &lt;input type="text" id="hierarchyObjectPageInput" value=""/&gt;&lt;input type="hidden" id="hierarchyObjectPageInputDefault" value=""/&gt;&lt;/div&gt;
           &lt;input type="hidden" id="hierarchyObjectClassName" /&gt;
-          &lt;button id="hierarchyAddObject" class="btn btn-success"&gt;Add the object&lt;/button&gt;
+          &lt;button id="hierarchyAddObject" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.page.button')&lt;/button&gt;
           &lt;p id="hierarchyObjectModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-  &lt;div class="modal fade text-left hierarchy-hidden" id="hierarchyClassModal" tabindex="-1" role="dialog" aria-hidden="true"&gt;
-    &lt;div class="modal-dialog"&gt;
-      &lt;div class="modal-content"&gt;
-        &lt;div class="modal-header"&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+  (% class="modal fade text-left hierarchy-hidden" id="hierarchyClassModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
           &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;Add class&lt;/h4&gt;
-        &lt;/div&gt;
-        &lt;div class="modal-body"&gt;
-          Space : &lt;span id="hierarchyClassSpace"&gt;&lt;/span&gt;&lt;br&gt;
-          Name : &lt;input type="text" id="hierarchyClassInput" value=""/&gt;&lt;br&gt;
+          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.add.class.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false" wiki="true"}}
+          $services.localization.render('webide.modals.commons.space') : &lt;span id="hierarchyClassSpace"&gt;&lt;/span&gt;&lt;br&gt;
+          $services.localization.render('webide.modals.commons.name') : &lt;input type="text" id="hierarchyClassInput" value=""/&gt;&lt;br&gt;
           &lt;div id="hierarchyAddSheetBlock"&gt;
-            Sheet action : &lt;select id="hierarchyClassSheet"&gt;
+            $services.localization.render('webide.modals.add.class.sheet.actions') : &lt;select id="hierarchyClassSheet"&gt;
               &lt;option value=""&gt;&lt;/option&gt;
-              &lt;option value="view"&gt;View&lt;/option&gt;
-              &lt;option value="edit"&gt;Edit&lt;/option&gt;
-              &lt;option value="inline"&gt;Inline&lt;/option&gt;
+              &lt;option value="view"&gt;$services.localization.render('webide.modals.add.class.sheet.view')&lt;/option&gt;
+              &lt;option value="edit"&gt;$services.localization.render('webide.modals.add.class.sheet.edit')&lt;/option&gt;
+              &lt;option value="inline"&gt;$services.localization.render('webide.modals.add.class.sheet.inline')&lt;/option&gt;
             &lt;/select&gt;
           &lt;/div&gt;
-          &lt;button id="hierarchyAddClass" class="btn btn-success"&gt;Add the class&lt;/button&gt;
-          &lt;p id="hierarchyClassModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-  &lt;div class="modal fade text-left hierarchy-hidden" id="hierarchyCloseTabModal" tabindex="-1" role="dialog" aria-hidden="true"&gt;
-    &lt;div class="modal-dialog"&gt;
-      &lt;div class="modal-content"&gt;
-        &lt;div class="modal-header"&gt;
+          &lt;button id="hierarchyAddObject" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.class.button')&lt;/button&gt;
+          &lt;p id="hierarchyObjectModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+  (% class="modal fade text-left hierarchy-hidden" id="hierarchyCloseTabModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
           &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;Unsaved content&lt;/h4&gt;
-        &lt;/div&gt;
-        &lt;div class="modal-body"&gt;
+          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.closeTab.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false" wiki="true"}}
           &lt;p&gt;
-            You have unsaved content in this tab (&lt;span id="hierarchyCloseTabModalInfo"&gt;&lt;/span&gt;), do you want to continue? All unsaved modifications will be lost permanently&lt;br /&gt;
-            &lt;button id="hierarchySaveAndCloseModal" class="btn btn-success"&gt;Save &amp; close the tab&lt;/button&gt; &lt;button id="hierarchyDiscardAndCloseModal" class="btn btn-danger"&gt;Close without saving&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;Cancel&lt;/button&gt;
+            $services.localization.render('webide.modals.closeTab.description', ['&lt;span id="hierarchyCloseTabModalInfo"&gt;&lt;/span&gt;'])&lt;br /&gt;
+            &lt;button id="hierarchySaveAndCloseModal" class="btn btn-success"&gt;$services.localization.render('webide.modals.closeTab.button.save')&lt;/button&gt; &lt;button id="hierarchyDiscardAndCloseModal" class="btn btn-danger"&gt;$services.localization.render('webide.modals.closeTab.button.nosave')&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;$services.localization.render('webide.modals.commons.cancel')&lt;/button&gt;
           &lt;/p&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-  &lt;div class="modal fade text-left hierarchy-hidden" id="editorDeleteObjectModal" tabindex="-1" role="dialog" aria-hidden="true"&gt;
-    &lt;div class="modal-dialog"&gt;
-      &lt;div class="modal-content"&gt;
-        &lt;div class="modal-header"&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+  (% class="modal fade text-left hierarchy-hidden" id="editorDeleteObjectModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
           &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;Delete an object&lt;/h4&gt;
-        &lt;/div&gt;
-        &lt;div class="modal-body"&gt;
+          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.delete.object.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false" wiki="true"}}
           &lt;p&gt;
-            Are you sure you want to delete that object : &lt;span id="editorDeletedObjectModalInfo"&gt;&lt;/span&gt;&lt;br /&gt;
-            &lt;button id="editorDeleteObjectConfirmed" class="btn btn-danger"&gt;Delete the object&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;Cancel&lt;/button&gt;
+            $services.localization.render('webide.modals.delete.object.label') : &lt;span id="editorDeletedObjectModalInfo"&gt;&lt;/span&gt;&lt;br /&gt;
+            &lt;button id="editorDeleteObjectConfirmed" class="btn btn-danger"&gt;$services.localization.render('webide.modals.delete.object.button')&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;$services.localization.render('webide.modals.commons.cancel')&lt;/button&gt;
           &lt;/p&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-  &lt;div class="modal fade text-left hierarchy-hidden" id="editorDeleteMultipleObjectsModal" tabindex="-1" role="dialog" aria-hidden="true"&gt;
-    &lt;div class="modal-dialog"&gt;
-      &lt;div class="modal-content"&gt;
-        &lt;div class="modal-header"&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+  (% class="modal fade text-left hierarchy-hidden" id="editorDeleteMultipleObjectsModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
           &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;Delete a page&lt;/h4&gt;
-        &lt;/div&gt;
-        &lt;div class="modal-body"&gt;
+          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.delete.page.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false" wiki="true"}}
           &lt;p&gt;
-            Are you sure you want to delete that page : &lt;span id="editorDeleteMultipleObjectsModalInfo"&gt;&lt;/span&gt;&lt;br /&gt;
-            &lt;button id="editorDeleteMultipleObjectConfirmed" class="btn btn-danger"&gt;Delete the page&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;Cancel&lt;/button&gt;
+            $services.localization.render('webide.modals.delete.page.label') : &lt;span id="editorDeleteMultipleObjectsModalInfo"&gt;&lt;/span&gt;&lt;br /&gt;
+            &lt;button id="editorDeleteMultipleObjectConfirmed" class="btn btn-danger"&gt;$services.localization.render('webide.modals.delete.page.button')&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;$services.localization.render('webide.modals.commons.cancel')&lt;/button&gt;
           &lt;/p&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-  &lt;div class="modal fade text-left hierarchy-hidden" id="editorDeletePageModal" tabindex="-1" role="dialog" aria-hidden="true"&gt;
-    &lt;div class="modal-dialog"&gt;
-      &lt;div class="modal-content"&gt;
-        &lt;div class="modal-header"&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+  (% class="modal fade text-left hierarchy-hidden" id="editorDeletePageModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
           &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;Delete a page&lt;/h4&gt;
-        &lt;/div&gt;
-        &lt;div class="modal-body"&gt;
+          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.delete.page.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false" wiki="true"}}
           &lt;p&gt;
-            Are you sure you want to delete that page &lt;span id="editorDeletedPageModalInfo"&gt;&lt;/span&gt;&lt;br /&gt;
-            &lt;button id="editorDeletePageConfirmed" class="btn btn-danger"&gt;Delete the page&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;Cancel&lt;/button&gt;
+            $services.localization.render('webide.modals.delete.page.label') : &lt;span id="editorDeletedPageModalInfo"&gt;&lt;/span&gt;&lt;br /&gt;
+            &lt;button id="editorDeletePageConfirmed" class="btn btn-danger"&gt;$services.localization.render('webide.modals.delete.page.button')&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;$services.localization.render('webide.modals.commons.cancel')&lt;/button&gt;
           &lt;/p&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-  &lt;div class="modal fade text-left hierarchy-hidden" id="editorDeleteClassModal" tabindex="-1" role="dialog" aria-hidden="true"&gt;
-    &lt;div class="modal-dialog"&gt;
-      &lt;div class="modal-content"&gt;
-        &lt;div class="modal-header"&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+  (% class="modal fade text-left hierarchy-hidden" id="editorDeleteClassModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
           &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;Delete a class&lt;/h4&gt;
-        &lt;/div&gt;
-        &lt;div class="modal-body"&gt;
+          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.delete.class.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false" wiki="true"}}
           &lt;p&gt;
-            Are you sure you want to delete the class : &lt;span id="editorDeletedClassModalInfo"&gt;&lt;/span&gt; ?&lt;br&gt;
-            Delete also: &lt;label for="editorDeleteClassSheet"&gt;All bound sheets&lt;/label&gt; &lt;input type="checkbox" id="editorDeleteClassSheet" /&gt; &lt;label for="editorDeleteClassTemplate"&gt;The class template&lt;/label&gt; &lt;input type="checkbox" id="editorDeleteClassTemplate" /&gt; ?&lt;br&gt;
-            &lt;button id="editorDeleteClassConfirmed" class="btn btn-danger"&gt;Delete the class&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;Cancel&lt;/button&gt;
+            $services.localization.render('webide.modals.delete.class.label') : &lt;span id="editorDeletedClassModalInfo"&gt;&lt;/span&gt;&lt;br /&gt;
+            $services.localization.render('webide.modals.delete.class.deleteAlso'): &lt;label for="editorDeleteClassSheet"&gt;$services.localization.render('webide.modals.delete.class.allSheets')&lt;/label&gt; &lt;input type="checkbox" id="editorDeleteClassSheet" /&gt; &lt;label for="editorDeleteClassTemplate"&gt;$services.localization.render('webide.modals.delete.class.template')&lt;/label&gt; &lt;input type="checkbox" id="editorDeleteClassTemplate" /&gt; ?&lt;
+            &lt;button id="editorDeleteClassConfirmed" class="btn btn-danger"&gt;$services.localization.render('webide.modals.delete.class.button')&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;$services.localization.render('webide.modals.commons.cancel')&lt;/button&gt;
           &lt;/p&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-  &lt;div class="modal fade text-left hierarchy-hidden" id="editorSwitchClassModal" tabindex="-1" role="dialog" aria-hidden="true"&gt;
-    &lt;div class="modal-dialog"&gt;
-      &lt;div class="modal-content"&gt;
-        &lt;div class="modal-header"&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+  (% class="modal fade text-left hierarchy-hidden" id="editorSwitchClassModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
           &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;Switch class editor&lt;/h4&gt;
-        &lt;/div&gt;
-        &lt;div class="modal-body"&gt;
+          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.switchClass.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false" wiki="true"}}
           &lt;p&gt;
-            You have unsaved content, do you want to continue?&lt;br /&gt;
-            You have unsaved content in this tab, do you want to continue? All unsaved modifications will be lost permanently&lt;br /&gt;
-            &lt;button id="hierarchySaveAndSwitchClassModal" class="btn btn-success"&gt;Save &amp; switch editor&lt;/button&gt; &lt;button id="hierarchyDiscardAndAndSwitchClassModal" class="btn btn-danger"&gt;Switch without saving&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;Cancel&lt;/button&gt;
+          $services.localization.render('webide.modals.switchClass.label')&lt;br /&gt;
+            &lt;button id="hierarchySaveAndSwitchClassModal" class="btn btn-success"&gt;$services.localization.render('webide.modals.switchClass.button.save')&lt;/button&gt; &lt;button id="hierarchyDiscardAndAndSwitchClassModal" class="btn btn-danger"&gt;$services.localization.render('webide.modals.switchClass.button.nosave')&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;$services.localization.render('webide.modals.commons.cancel')&lt;/button&gt;
           &lt;/p&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+{{html clean="false"}}
   &lt;div class="hierarchy-hidden"&gt;&lt;input type="hidden" id="hierarchyMasterDocName" value="$escapetool.url($masterDoc.name)" /&gt;&lt;input type="hidden" id="hierarchyMasterDocSpace" value="$escapetool.url($masterDoc.space)" /&gt;&lt;input type="hidden" id="xwikiNested" value="$nestedSpaces" /&gt;&lt;input type="hidden" id="hierarchyMainLanguage" value="$xwiki.getLanguagePreference()" /&gt;&lt;/div&gt;
 
 &lt;div id="backgroundModalNoBootstrap"&gt;&lt;/div&gt;

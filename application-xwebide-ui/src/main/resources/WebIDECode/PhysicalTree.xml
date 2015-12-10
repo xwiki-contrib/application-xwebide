@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347276000</creationDate>
-  <date>1448899454000</date>
-  <contentUpdateDate>1448899454000</contentUpdateDate>
+  <date>1449847281000</date>
+  <contentUpdateDate>1449847281000</contentUpdateDate>
   <version>1.1</version>
   <title>PhysicalTree</title>
   <defaultTemplate/>
@@ -41,21 +41,21 @@
   <comment/>
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
-  <hidden>true</hidden>
+  <hidden>false</hidden>
   <content>{{velocity}}
 #if(!$singlePage)
 {{html wiki="true"}}
 &lt;div class="btn-group" id="hierarchyAddNewElement"&gt;
-  &lt;button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"&gt;{{html clean='false'}}&lt;span class='fa fa-plus'&gt;&lt;/span&gt;{{/html}} Add new... &lt;span class="caret"&gt;&lt;/span&gt;&lt;span class="sr-only"&gt;Toggle Dropdown&lt;/span&gt;&lt;/button&gt;
+  &lt;button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"&gt;{{html clean='false'}}&lt;span class='fa fa-plus'&gt;&lt;/span&gt;{{/html}} $services.localization.render('webide.menu.add')&lt;span class="caret"&gt;&lt;/span&gt;&lt;span class="sr-only"&gt;Toggle Dropdown&lt;/span&gt;&lt;/button&gt;
   &lt;ul class="dropdown-menu"&gt;
     #if($masterDoc.hasAccessLevel('edit'))
-      &lt;li&gt;&lt;a href="#" class="newFolder" data-toggle="modal" data-target="#hierarchyFolderModal"&gt;Space&lt;/a&gt;&lt;/li&gt;
-      &lt;li&gt;&lt;a href="#" class="newExistingPage" data-toggle="modal" data-target="#hierarchyExistingPageModal"&gt;Existing page&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href="#" class="newFolder" data-toggle="modal" data-target="#hierarchyFolderModal"&gt;$services.localization.render('webide.menu.category.pages.addSpace')&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href="#" class="newExistingPage" data-toggle="modal" data-target="#hierarchyExistingPageModal"&gt;$services.localization.render('webide.menu.category.pages.addExistingPage')&lt;/a&gt;&lt;/li&gt;
     #end
   &lt;/ul&gt;
 &lt;/div&gt;
 {{/html}}
-(% class="btn btn-primary" id="hierarchyChangeTree" %)(((Logical view)))
+(% class="btn btn-primary" id="hierarchyChangeTree" %)((($services.localization.render('webide.menu.view.logical'))))
 #end
 (% class="hierarchy-list hierarchy-no-padding" id="hierarchyMainList" %)
 #foreach($space in $spacesList)
@@ -128,12 +128,12 @@
   #set($renameForm = "")
   #set($removeLinks = "")
   #set($removeBlock = "")
-  #set($addLinks = "&lt;li&gt;&lt;a href='#' class='newPage' data-toggle='modal' data-space='$spaceEscaped' data-target='#hierarchyPageModal'&gt;Add new page&lt;/a&gt;&lt;/li&gt;") ##'"
+  #set($addLinks = "&lt;li&gt;&lt;a href='#' class='newPage' data-toggle='modal' data-space='$spaceEscaped' data-target='#hierarchyPageModal'&gt;$services.localization.render('webide.menu.category.pages.addPage')&lt;/a&gt;&lt;/li&gt;") ##'"
   #if($spaceInListInit &amp;&amp; $masterDoc.hasAccessLevel('edit'))
-    #set($removeLinks = "&lt;li&gt;&lt;a href='#' data-space='$spaceEscaped' class='hierarchy-remove-folder'&gt;Remove from the project&lt;/a&gt;&lt;/li&gt;") ##'"
+    #set($removeLinks = "&lt;li&gt;&lt;a href='#' data-space='$spaceEscaped' class='hierarchy-remove-folder'&gt;$services.localization.render('webide.menu.remove.project')&lt;/a&gt;&lt;/li&gt;") ##'"
   #end
   #if($spaceInListNested &amp;&amp; $masterDoc.hasAccessLevel('edit') &amp;&amp; $xwiki.hasAccessLevel('edit', "$spaceEscaped.$reservedDocumentName"))
-    #set($renameButton = "{{html clean=false}}&lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span title='Rename folder $subspaceNameEscaped' data-subspace='$subspaceNameEscaped' data-space='$spaceEscaped' class='hierarchyAddNewElementButton hierarchy-rename-folder'&gt;&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;{{/html}}") ##'"
+    #set($renameButton = "{{html clean=false}}&lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span title='$services.localization.render('webide.menu.rename.space', [$subspaceNameEscaped])' data-subspace='$subspaceNameEscaped' data-space='$spaceEscaped' class='hierarchyAddNewElementButton hierarchy-rename-folder'&gt;&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;{{/html}}") ##'"
     #set($renameForm = "{{html clean=false}}&lt;input type='text' id='renameFolder_$spaceEscaped' style='display:none;'/&gt;{{/html}}") ##'"
   #end
   #if("$!removeLinks" != "")
@@ -191,13 +191,13 @@
       #set($removeLinks = "")
       #set($removeBlock = "")
       #if($pageInPagesList &amp;&amp; $masterDoc.hasAccessLevel('edit'))
-        #set($removeLinks = "&lt;li&gt;&lt;a href='#' data-pageid='$pageFullNameEscaped' class='hierarchy-remove-page'&gt;Remove from the project&lt;/a&gt;&lt;/li&gt;") ##'"
+        #set($removeLinks = "&lt;li&gt;&lt;a href='#' data-pageid='$pageFullNameEscaped' class='hierarchy-remove-page'&gt;$services.localization.render('webide.menu.remove.project')&lt;/a&gt;&lt;/li&gt;") ##'"
       #end
       #if($masterDoc.hasAccessLevel('edit') &amp;&amp; $currentDoc.hasAccessLevel('edit'))
         #if($pageLocaleList.size() == 0)
-          #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deletePage' data-space='$spaceEscaped' data-page='$pageEscaped' data-locale='default'&gt;Delete from the wiki&lt;/a&gt;&lt;/li&gt;") ##'"
+          #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deletePage' data-space='$spaceEscaped' data-page='$pageEscaped' data-locale='default'&gt;$services.localization.render('webide.menu.remove.page')&lt;/a&gt;&lt;/li&gt;") ##'"
         #end
-        #set($renameButton = "{{html clean=false}}&lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span title='Rename page $pageFullNameEscaped' data-pageid='$pageFullNameEscaped' class='hierarchyAddNewElementButton hierarchy-rename-page'&gt;&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;{{/html}}") ##'"
+        #set($renameButton = "{{html clean=false}}&lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span title='$services.localization.render('webide.menu.rename.page', [$pageFullNameEscaped])' data-pageid='$pageFullNameEscaped' class='hierarchyAddNewElementButton hierarchy-rename-page'&gt;&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;{{/html}}") ##'"
         #set($renameForm = "{{html clean=false}}&lt;input type='text' data-pageinlist='$pageInPagesList' id='renamePage_$pageFullNameEscaped' style='display:none;' value='$pageFullName'/&gt;{{/html}}") ##'"
       #end
       #if("$!removeLinks" != "")
@@ -205,7 +205,7 @@
       #end
       $addStars** $!removeBlock$!renameButton$!renameForm (% data-pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage $!addPageActive" %)((($iconBulletToggle (%%){{html clean='false'}}&lt;span class='fa fa-file'&gt;&lt;/span&gt;{{/html}} $pageName
       (% id='hierarchyPageDetails_$spaceEscapedBackslash.$pageEscapedBackslash' class='hierarchy-list${pageClassHidden}' %)
-      $addStars*** {{html clean='false'}}&lt;span class='fa fa-file-o'&gt;&lt;/span&gt;{{/html}} [[View&gt;&gt;path:$pageDoc.getURL('view')||class="hierarchy-viewElement" data-page='$pageEscaped' data-space='$spaceEscaped']]
+      $addStars*** {{html clean='false'}}&lt;span class='fa fa-file-o'&gt;&lt;/span&gt;{{/html}} [[$services.localization.render('webide.menu.view.physical.view')&gt;&gt;path:$pageDoc.getURL('view')||class="hierarchy-viewElement" data-page='$pageEscaped' data-space='$spaceEscaped']]
       #if($pageLocaleList.size() == 0)
         #set($ok = $pageLocaleList.add('default'))
       #end
@@ -217,27 +217,27 @@
         #if($velocityCount == 1)
           #set($pageLocale = 'default')
         #end
-        $addStars*** {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} [[Edit content$!pageLocaleDisplay&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="$pageLocale" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" data-parent="$pageParentEscaped" data-hidden="$pageDoc.isHidden()" class='editPage $!addPageActiveWikiClass']]
+        $addStars*** {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} [[$services.localization.render('webide.menu.view.physical.editWiki')$!pageLocaleDisplay&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="$pageLocale" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" data-parent="$pageParentEscaped" data-hidden="$pageDoc.isHidden()" class='editPage $!addPageActiveWikiClass']]
       #end
-      $addStars*** {{html clean='false'}}&lt;span class='fa fa-hdd-o'&gt;&lt;/span&gt;{{/html}} [[Objects ($objectCount)&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' class='editObject $!addPageActiveObjectClass']]
-      $addStars*** {{html clean='false'}}&lt;span class='fa fa-database'&gt;&lt;/span&gt;{{/html}} [[Class ($classCount)&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="editAWM" data-page='$pageEscaped' data-space='$spaceEscaped']]
-      $addStars*** {{html clean='false'}}&lt;span class='fa fa-paperclip'&gt;&lt;/span&gt;{{/html}} [[Attachments ($attachmentCount)&gt;&gt;path:$pageDoc.getURL('view')#Attachments]]
+      $addStars*** {{html clean='false'}}&lt;span class='fa fa-hdd-o'&gt;&lt;/span&gt;{{/html}} [[$services.localization.render('webide.menu.view.physical.editObjects', [$objectCount])&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' class='editObject $!addPageActiveObjectClass']]
+      $addStars*** {{html clean='false'}}&lt;span class='fa fa-database'&gt;&lt;/span&gt;{{/html}} [[$services.localization.render('webide.menu.view.physical.editClass', [$classCount])&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||class="editAWM" data-page='$pageEscaped' data-space='$spaceEscaped']]
+      $addStars*** {{html clean='false'}}&lt;span class='fa fa-paperclip'&gt;&lt;/span&gt;{{/html}} [[$services.localization.render('webide.menu.view.physical.attach', [$attachmentCount])&gt;&gt;path:$pageDoc.getURL('view')#Attachments]]
     #elseif($pageDoc.hasAccessLevel('view'))
       #set($pageCount = $pageCount + 1)
       $addStars** (% data-pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((($iconBulletToggle (%%){{html clean='false'}}&lt;span class='fa fa-file'&gt;&lt;/span&gt;{{/html}} $pageName $!addRemoveButton
       (% id='hierarchyPageDetails_$spaceEscapedBackslash.$pageEscapedBackslash' class='hierarchy-list${pageClassHidden}' %)
       #if($xcontext.action != "edit" &amp;&amp; "$!request.action" != "edit" &amp;&amp; $isPageActive)
-        $addStars*** {{html clean='false'}}&lt;span class='fa fa-file-o'&gt;&lt;/span&gt;{{/html}} (% class='hierarchyCurrentSpacePageAction'%)View
+        $addStars*** {{html clean='false'}}&lt;span class='fa fa-file-o'&gt;&lt;/span&gt;{{/html}} (% class='hierarchyCurrentSpacePageAction'%)$services.localization.render('webide.menu.view.physical.view')
       #else
-        $addStars*** {{html clean='false'}}&lt;span class='fa fa-file-o'&gt;&lt;/span&gt;{{/html}} [[View&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')]]
+        $addStars*** {{html clean='false'}}&lt;span class='fa fa-file-o'&gt;&lt;/span&gt;{{/html}} [[$services.localization.render('webide.menu.view.physical.view')&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')]]
       #end
-      $addStars*** {{html clean='false'}}&lt;span class='fa fa-paperclip'&gt;&lt;/span&gt;{{/html}} [[Attachments ($attachmentCount)&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')#Attachments]]
+      $addStars*** {{html clean='false'}}&lt;span class='fa fa-paperclip'&gt;&lt;/span&gt;{{/html}} [[$services.localization.render('webide.menu.view.physical.attach', [$attachmentCount])&gt;&gt;path:$xwiki.getURL("$pageFullName", 'view')#Attachments]]
     #end
   #end
   #if($pageCount == 0 &amp;&amp; $spacePageList.size() != 0) ##Space not empty but user doesn't have the right to view any page
-    $addStars** //Unauthorized//
+    $addStars** $services.localization.render('webide.menu.unauthorized')
   #elseif($pageCount == 0 &amp;&amp; $spacePageList.size() == 0)
-    $addStars** //Empty//
+    $addStars** $services.localization.render('webide.menu.empty')
   #end
 #end
 {{/velocity}}</content>
