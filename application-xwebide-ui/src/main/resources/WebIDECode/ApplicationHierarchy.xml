@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1449850822000</date>
+  <date>1450086604000</date>
   <contentUpdateDate>1449845442000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -1657,7 +1657,7 @@ $(function(){
      */
     setDeleteButton : function() {
       if(ObjectEditor._getCurrentObject(false) &amp;&amp; ObjectEditor._getCurrentObject(false) !== 'Panels.PanelClass' &amp;&amp; ObjectEditor._getCurrentObject(false) !== 'XWiki.WikiMacroClass') { // Single object editor : delete only the object displayed in the page
-        $('#hierarchyDeleteButtonIDE').val('Delete this object from the page');
+        $('#hierarchyDeleteButtonIDE').val(Translations.commons.delete);
         $('#hierarchyDeleteButtonIDE').off('click');
         $('#hierarchyDeleteButtonIDE').on('click', function() {
           $('#editorDeletedObjectModalInfo').html(ObjectEditor._getCurrentObject(false)+' - '+ObjectEditor.currentNumber);
@@ -2731,6 +2731,16 @@ $(function(){
         }
       });
 
+      // Align the bottom action bar with the editor
+      onElementWidthChange($('#hierarchyBlock'), function() {
+        if(WebIDE.fullscreen) {
+          $('#hierarchyBottomActionsBar').css({'marginLeft' : '0px'});
+        }
+        else {
+          $('#hierarchyBottomActionsBar').css({'marginLeft' : $('#hierarchyBlock').outerWidth()+'px'});
+        }
+      });
+
       // Add the click events for the buttons to hide or show the whole hierarchy
       $('#hierarchyClose').click(function(e){
         $('#hierarchyContent').hide();
@@ -3706,6 +3716,20 @@ $(function(){
         clearTimeout(elm.onElementHeightChangeTimer);
 
       elm.onElementHeightChangeTimer = setTimeout(run, 500);
+    })();
+  }
+  function onElementWidthChange(elm, callback){
+    var lastWidth = $(elm).outerWidth(), newWidth;
+    (function run(){
+      newWidth = $(elm).outerWidth();
+      if( lastWidth != newWidth )
+        callback();
+      lastWidth = newWidth;
+
+      if( elm.onElementWidthChangeTimer )
+        clearTimeout(elm.onElementWidthChangeTimer);
+
+      elm.onElementWidthChangeTimer = setTimeout(run, 250);
     })();
   }
 });
