@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1450092297000</date>
-  <contentUpdateDate>1450092297000</contentUpdateDate>
+  <date>1450102310000</date>
+  <contentUpdateDate>1450102310000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -2616,6 +2616,7 @@ $(function(){
         'width' : 'auto',
       });
       $('.editorDisplayAdvancedFields').html($('#hierarchyClose').html());
+      WebIDE.alignBottomBar();
       $(window).resize(WebIDE.fixContentBlockHeight);
     },
     fixContentBlockHeight : function() {
@@ -2623,6 +2624,14 @@ $(function(){
         $('#contentMainBlock').css({
           "height" : ($(window).height()-$('#editorTabBar').outerHeight()-$('#hierarchyBottomActionsBar').outerHeight()-10)+"px"
         });
+      }
+    },
+    alignBottomBar : function() {
+      if(WebIDE.fullscreen) {
+        $('#hierarchyBottomActionsBar').css({'marginLeft' : '0px'});
+      }
+      else {
+        $('#hierarchyBottomActionsBar').css({'marginLeft' : $('#hierarchyBlock').outerWidth()+'px'});
       }
     },
     init : function() {
@@ -2738,14 +2747,8 @@ $(function(){
       });
 
       // Align the bottom action bar with the editor
-      onElementWidthChange($('#hierarchyBlock'), function() {
-        if(WebIDE.fullscreen) {
-          $('#hierarchyBottomActionsBar').css({'marginLeft' : '0px'});
-        }
-        else {
-          $('#hierarchyBottomActionsBar').css({'marginLeft' : $('#hierarchyBlock').outerWidth()+'px'});
-        }
-      });
+      onElementWidthChange($('#hierarchyBlock'), WebIDE.alignBottomBar);
+      WebIDE.alignBottomBar();
 
       // Add the click events for the buttons to hide or show the whole hierarchy
       $('#hierarchyClose').click(function(e){
