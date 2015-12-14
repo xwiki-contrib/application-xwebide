@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1450086604000</date>
-  <contentUpdateDate>1449845442000</contentUpdateDate>
+  <date>1450092297000</date>
+  <contentUpdateDate>1450092297000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -196,7 +196,7 @@ $(function(){
         Hierarchy.init();
       }).complete(function() {
         $('#hierarchyRefresh').on('click', Hierarchy.reload);
-        $('#hierarchyChangeTree').on('click', Hierarchy.changeTreeView);
+        $('.hierarchyChangeTree').on('click', Hierarchy.changeTreeView);
         spinner.remove();
         $('#hierarchyRefresh span').show();
       });
@@ -206,16 +206,22 @@ $(function(){
    * Change the current tree view in the menu
    */
     changeTreeView : function() {
-      $('#hierarchyChangeTree').off('click', Hierarchy.changeTreeView);
-      if(WebIDE.currentTree == 'physical') {
+      if(WebIDE.currentTree == 'physical' &amp;&amp; $(this).hasClass('hierarchyLogicalTree')) {
+        $('.hierarchyChangeTree').off('click', Hierarchy.changeTreeView);
+        $('.hierarchyChangeTree.active').removeClass('active');
         WebIDE.currentTree = 'logical';
         setCookieHierarchy('currentTree', 'logical', 31);
+        $(this).addClass('active');
+        Hierarchy.reload();
       }
-      else {
+      else if($(this).hasClass('hierarchyPhysicalTree')) {
+        $('.hierarchyChangeTree').off('click', Hierarchy.changeTreeView);
+        $('.hierarchyChangeTree.active').removeClass('active');
         WebIDE.currentTree = 'physical';
         setCookieHierarchy('currentTree', 'physical', 31);
+        $(this).addClass('active');
+        Hierarchy.reload();
       }
-      Hierarchy.reload();
     },
 
     /**
@@ -2758,7 +2764,7 @@ $(function(){
         $("#hierarchyBlock").removeAttr('style');
       });
       $('#hierarchyRefresh').on('click', Hierarchy.reload);
-      $('#hierarchyChangeTree').on('click', Hierarchy.changeTreeView);
+      $('.hierarchyChangeTree').on('click', Hierarchy.changeTreeView);
     }
   };
   var insertTags = function(){return true}; // Prevent issues with Syntax Highligthing extension
@@ -3846,7 +3852,7 @@ $(function(){
 /* Hierarchy Block */
 #hierarchyBlock {
   background-color: $theme.fieldGradientColor;
-  min-width: 250px;
+  min-width: 275px;
   width: auto;
   float: left;
   height: 100%;
@@ -3881,7 +3887,6 @@ $(function(){
 }
 #hierarchyCloseBlock p {
   padding: 5px;
-  margin: 0px;
 }
 #hierarchyCloseBlock .hierarchy-icon{
   cursor: pointer;
@@ -3891,9 +3896,6 @@ $(function(){
 }
 .exportLink {
   font-weight: bold;
-}
-#hierarchyBlock p {
-  margin : 0;
 }
 /* Project Block - Colibri skin */
 #hierarchyContent ul {
@@ -3976,19 +3978,20 @@ $(function(){
 }
 .masterExportForm {
   display: inline-block;
-  width: 100%;
+  width: 49%;
+  box-sizing: border-box;
 }
 .hierarchy-export-button {
   display: inline-block;
   width: 100%;
 }
-#hierarchyChangeTree {
-  display: inline-block;
+.hierarchyChangeTree {
   width: 50%;
-  box-sizing: border-box;
+  text-align: center;
 }
 #hierarchyAddNewElement {
-  width: 50%;
+  display: inline-block;
+  width: 49%;
   box-sizing: border-box;
 }
 .hierarchy-large-button {
@@ -4159,10 +4162,13 @@ $(function(){
 #set($endAddButton = '&lt;/ul&gt;&lt;/div&gt;{{/html}}')
 #set($beginRemoveButton = "{{html clean='false' wiki='true'}} &lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span class='hierarchyAddNewElementButton' class='dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'&gt;&lt;span class='fa fa-times'&gt;&lt;/span&gt;&lt;span class='sr-only'&gt;Toggle Dropdown&lt;/span&gt;&lt;/span&gt;&lt;ul class='dropdown-menu dropdown-menu-right'&gt;")
 #set($endRemoveButton = '&lt;/ul&gt;&lt;/div&gt;{{/html}}')
+{{html clean=false}}
+  &lt;ul class="nav nav-tabs"&gt;
+    &lt;li class="hierarchyChangeTree hierarchyLogicalTree #if($currentTree == 'logical')active#end"&gt;&lt;a href="#"&gt;$services.localization.render('webide.menu.view.logical')&lt;/a&gt;&lt;/li&gt;
+    &lt;li class="hierarchyChangeTree hierarchyPhysicalTree #if($currentTree == 'physical')active#end"&gt;&lt;a href="#"&gt;$services.localization.render('webide.menu.view.physical')&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+{{/html}}
 (% id="hierarchyContent" %) (((
-#if($masterDoc.hasAccessLevel('edit'))
-  {{html clean=false}}&lt;form method="post" action="$masterDoc.getURL('view')" class="masterExportForm"&gt;&lt;input type="hidden" name="export" value="1" /&gt;#if($singlePage)&lt;input type="hidden" name="singlePage" value="$escapetool.url($currentDoc.fullName).replace('+', '%20')" /&gt;#end&lt;input class="btn btn-default hierarchy-export-button" type="submit" value="$services.localization.render('webide.menu.export')" title="$services.localization.render('webide.menu.export')"/&gt;&lt;/form&gt;{{/html}}
-#end
 #if($currentTree == 'physical')
   {{include reference="WebIDECode.PhysicalTree" /}}
 #else

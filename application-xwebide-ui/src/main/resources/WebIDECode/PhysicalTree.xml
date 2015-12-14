@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347276000</creationDate>
-  <date>1449847281000</date>
-  <contentUpdateDate>1449847281000</contentUpdateDate>
+  <date>1450092289000</date>
+  <contentUpdateDate>1450092289000</contentUpdateDate>
   <version>1.1</version>
   <title>PhysicalTree</title>
   <defaultTemplate/>
@@ -45,6 +45,9 @@
   <content>{{velocity}}
 #if(!$singlePage)
 {{html wiki="true"}}
+#if($masterDoc.hasAccessLevel('edit'))
+  &lt;form method="post" action="$masterDoc.getURL('view')" class="masterExportForm"&gt;&lt;input type="hidden" name="export" value="1" /&gt;#if($singlePage)&lt;input type="hidden" name="singlePage" value="$escapetool.url($currentDoc.fullName).replace('+', '%20')" /&gt;#end&lt;input class="btn btn-default hierarchy-export-button" type="submit" value="$services.localization.render('webide.menu.export')" title="$services.localization.render('webide.menu.export')"/&gt;&lt;/form&gt;
+#end
 &lt;div class="btn-group" id="hierarchyAddNewElement"&gt;
   &lt;button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"&gt;{{html clean='false'}}&lt;span class='fa fa-plus'&gt;&lt;/span&gt;{{/html}} $services.localization.render('webide.menu.add')&lt;span class="caret"&gt;&lt;/span&gt;&lt;span class="sr-only"&gt;Toggle Dropdown&lt;/span&gt;&lt;/button&gt;
   &lt;ul class="dropdown-menu"&gt;
@@ -55,7 +58,6 @@
   &lt;/ul&gt;
 &lt;/div&gt;
 {{/html}}
-(% class="btn btn-primary" id="hierarchyChangeTree" %)((($services.localization.render('webide.menu.view.logical'))))
 #end
 (% class="hierarchy-list hierarchy-no-padding" id="hierarchyMainList" %)
 #foreach($space in $spacesList)

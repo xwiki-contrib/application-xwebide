@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347285000</creationDate>
-  <date>1449761857000</date>
-  <contentUpdateDate>1449761857000</contentUpdateDate>
+  <date>1450092278000</date>
+  <contentUpdateDate>1450092278000</contentUpdateDate>
   <version>1.1</version>
   <title>LogicalTree</title>
   <defaultTemplate/>
@@ -43,6 +43,11 @@
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>false</hidden>
   <content>{{velocity}}
+#if($masterDoc.hasAccessLevel('edit'))
+{{html wiki="true"}}
+  &lt;form method="post" action="$masterDoc.getURL('view')" class="masterExportForm"&gt;&lt;input type="hidden" name="export" value="1" /&gt;#if($singlePage)&lt;input type="hidden" name="singlePage" value="$escapetool.url($currentDoc.fullName).replace('+', '%20')" /&gt;#end&lt;input class="btn btn-default hierarchy-export-button" type="submit" value="$services.localization.render('webide.menu.export')" title="$services.localization.render('webide.menu.export')"/&gt;&lt;/form&gt;
+{{/html}}
+#end
 #set($codeSpace = "${doc.space}Code")
 #if($masterDoc.codeSpace)
   #set($codeSpace = $masterDoc.codeSpace)
@@ -95,7 +100,6 @@
     #end
   #end
 #end
-(% class="btn btn-primary hierarchy-large-button" id="hierarchyChangeTree" %)((($services.localization.render('webide.menu.view.physical'))))
 ## **************************************
 ## Display all the classes in the project
 ## **************************************
