@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1450174762000</date>
+  <date>1450177514000</date>
   <contentUpdateDate>1450102524000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -3880,6 +3880,9 @@ require(required , function ($, Translations, SH, xm) {
 }
 .exportLink {
   font-weight: bold;
+}
+.fa-caret-right {
+  padding-right: 3px;
 }
 /* Project Block - Colibri skin */
 #hierarchyContent ul {
