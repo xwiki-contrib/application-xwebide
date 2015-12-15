@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1449848904000</date>
-  <contentUpdateDate>1449848904000</contentUpdateDate>
+  <date>1450107398000</date>
+  <contentUpdateDate>1450107398000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -1239,15 +1239,7 @@ $(function(){
   #if($xwiki.exists("WebIDECode.RTWiki"))
     #set($discard = $xwiki.jsx.use("WebIDECode.RTWiki"))
   #end
-  #set($syntaxHState = '')
-  ## Check the version of Syntax Highlighting installed, and load the custom JS if version &gt; 2.1
-  #if($xwiki.exists('SyntaxHighlighting.ConfigurationClass'))
-    #set($discard = $xwiki.jsx.use("WebIDECode.SyntaxHighlighting"))
-    #set($discard = $xwiki.ssx.use("WebIDECode.SyntaxHighlighting"))
-    #set($syntaxHState = 'new')
-  #elseif($xwiki.exists('SyntaxHighlighting.SyntaxHighlighting'))
-    #set($syntaxHState = 'old')
-  #end
+  #set($syntaxHURL = $xwiki.getURL('SyntaxHighlighting.SyntaxHighlighting', 'jsx'))
   (% id="editorBlock" %)
   (((
   (% id="hierarchyBlock" %)
@@ -1312,7 +1304,7 @@ $services.localization.render('webide.sheet.howto.doc', ["http://extensions.xwik
   (% id="editorCrossIcon" class="editorIcon"%)((((% class="editorTabButtonCross"%){{html clean='false'}}&lt;span class='fa fa-times'&gt;&lt;/span&gt;{{/html}}))) (% id="editorWikiIcon" class="editorIcon"%)((({{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}})))
   (% id="editorObjectIcon" class="editorIcon"%)((({{html clean='false'}}&lt;span class='fa fa-hdd-o'&gt;&lt;/span&gt;{{/html}})))
   (% id="editorAwmIcon" class="editorIcon"%)((({{html clean='false'}}&lt;span class='fa fa-database'&gt;&lt;/span&gt;{{/html}})))
-  {{html clean="false"}}&lt;input type="hidden" id="syntaxHState" value="$syntaxHState" /&gt;{{/html}}
+  {{html clean="false"}}&lt;input type="hidden" id="syntaxHState" value="$syntaxHState" /&gt;&lt;input type="hidden" id="syntaxHURL" value="$syntaxHURL" /&gt;{{/html}}
 #end
 {{/velocity}}</content>
 </xwikidoc>

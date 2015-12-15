@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1450102310000</date>
-  <contentUpdateDate>1450102310000</contentUpdateDate>
+  <date>1450174762000</date>
+  <contentUpdateDate>1450102524000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -122,16 +122,15 @@
       <cache>default</cache>
     </property>
     <property>
-      <code>if(require.toUrl('xwiki-meta').substr(0,7) === '/xwiki/') {
-  var required = ['jquery', '/xwiki/bin/jsx/WebIDECode/JSTranslations', 'xwiki-meta'];
+      <code>var syntaxHURL = document.getElementById('syntaxHURL').value;
+if(require.toUrl('xwiki-meta').substr(0,7) === '/xwiki/') {
+  var required = ['jquery', '/xwiki/bin/jsx/WebIDECode/JSTranslations', syntaxHURL, 'xwiki-meta'];
 }
 else {
-  var required = ['jquery', '/xwiki/bin/jsx/WebIDECode/JSTranslations'];
+  var required = ['jquery', '/xwiki/bin/jsx/WebIDECode/JSTranslations', syntaxHURL];
 }
 var WebIDESavedContent = []; //WebIDE plugins (such as RealTime) should be able to modify the value of the saved content
-require(required , function ($, Translations, xm) {
-
-$(function(){
+require(required , function ($, Translations, SH, xm) {
 
   /*
    * STRUCTURE:
@@ -824,7 +823,7 @@ $(function(){
           WikiEditor._loadRelatedElements(getCurrentSpace(false), getCurrentPage(false), relatedElementsBlock);
           if(WebIDE.syntaxHighlighting) {
             // Add the CodeMirror editor
-            initCodeMirrorsCustom(WebIDE.currentEditor, tabId);
+            WikiEditor.initCodeMirror(tabId);
           }
           setSavedContent(tabNumberId);
           setLoadingState(false, Translations.states.loaded, 2500);
@@ -921,10 +920,10 @@ $(function(){
     },
     initCodeMirror : function(tabId) {
       if($('#syntaxHState').val() === 'old') { //SyntaxHighlighting &lt;= 2.2
-        initCodeMirror('#content_'+tabId, 'xwiki');
+        SH.initCodeMirror('#content_'+tabId, 'xwiki');
       }
       else { //SyntaxHighlighting &gt;= 3.0
-        initCodeMirror('#content_'+tabId, XWiki.docsyntax);
+        SH.initCodeMirror('#content_'+tabId, XWiki.docsyntax);
       }
     },
     initHash : function(hashArray) {
@@ -1461,7 +1460,7 @@ $(function(){
       // Objects should be hidden if there are more than 2
       if(objectsListSize &lt; 3) {$(jQueryTabId+' .editorObjectDetails').show();}
       // Start the code mirror instances for objects with a textarea field
-      if(WebIDE.syntaxHighlighting) {initCodeMirrorsCustom(ObjectEditor.editor, jQueryTabId);}
+      if(WebIDE.syntaxHighlighting) {ObjectEditor.initCodeMirror(jQueryTabId);}
       var tabNumberId = getTabNumber(jQueryTabId);
       setSavedContent(tabNumberId);
       setLoadingState(false, Translations.states.loaded, 2500);
@@ -1643,14 +1642,14 @@ $(function(){
     },
     initCodeMirror : function(id) {
       id = id.replace( /(:|\.|\[|\]|,)/g, "\\$1" );
-      initCodeMirror(id+" textarea[name^='XWiki.StyleSheetExtension_'][name$='_code']", 'css');
-      initCodeMirror(id+" textarea[name^='XWiki.JavaScriptExtension_'][name$='_code']", 'javascript');
-      initCodeMirror(id+" textarea[name^='XWiki.XWikiSkins_'][name$='.css']", 'css');
-      initCodeMirror(id+" textarea[name^='XWiki.XWikiSkins_'][name$='.js']", 'javascript');
-      initCodeMirror(id+" textarea[name^='XWiki.XWikiSkins_'][name$='.vm']", 'velocity');
-      initCodeMirror(id+" textarea[name^='XWiki.WikiMacroClass_'][name$='_code']", XWiki.docsyntax);
-      initCodeMirror(id+" textarea[name^='Panels.PanelClass_'][name$='_content']", XWiki.docsyntax);
-      initCodeMirror(id+" textarea[name^='XWiki.UIExtensionClass'][name$='_content']", XWiki.docsyntax);
+      SH.initCodeMirror(id+" textarea[name^='XWiki.StyleSheetExtension_'][name$='_code']", 'css');
+      SH.initCodeMirror(id+" textarea[name^='XWiki.JavaScriptExtension_'][name$='_code']", 'javascript');
+      SH.initCodeMirror(id+" textarea[name^='XWiki.XWikiSkins_'][name$='.css']", 'css');
+      SH.initCodeMirror(id+" textarea[name^='XWiki.XWikiSkins_'][name$='.js']", 'javascript');
+      SH.initCodeMirror(id+" textarea[name^='XWiki.XWikiSkins_'][name$='.vm']", 'velocity');
+      SH.initCodeMirror(id+" textarea[name^='XWiki.WikiMacroClass_'][name$='_code']", XWiki.docsyntax);
+      SH.initCodeMirror(id+" textarea[name^='Panels.PanelClass_'][name$='_content']", XWiki.docsyntax);
+      SH.initCodeMirror(id+" textarea[name^='XWiki.UIExtensionClass'][name$='_content']", XWiki.docsyntax);
     },
     initHash : function(hashArray) {
       if(hashArray.size() === 7) {
@@ -1954,7 +1953,7 @@ $(function(){
               }
               ObjectEditor._initEvents(false, jQueryTabId);
               if(WebIDE.syntaxHighlighting) {
-                initCodeMirrorsCustom(ObjectEditor.editor, newObjectId);
+                ObjectEditor.initCodeMirror(newObjectId);
               }
             }
           }).complete(function() {
@@ -2090,7 +2089,7 @@ $(function(){
      * @return List[DOM elements] The list of editable elements in the selected object editor tab
      */
     _getObjectInputFields : function(tabElement) {
-      return $(tabElement).find('.editorDisplayedObject textarea, .editorDisplayedObject input, .editorDisplayedObject select').not('.CodeMirror textarea')
+      return $(tabElement).find('.editorDisplayedObject textarea, .editorDisplayedObject input, .editorDisplayedObject select').not('.CodeMirror textarea, .SHcheckbox')
     },
     /**
      * Set data about the current document edited
@@ -2531,10 +2530,7 @@ $(function(){
     masterPage : '',
     currentTree : '',
     currentEditor : '',
-    syntaxHighlightingState : function() { //Is SyntaxHighlighting loaded yet?
-      return ($('#syntaxHState').val() === 'new') ? true : (typeof(CodeMirror) !== 'undefined');
-    },
-    syntaxHighlighting : ($('#syntaxHState').val() === 'new' || $('#syntaxHState').val() === 'old') ? true : false, //Is SyntaxHighlighting installed?
+    syntaxHighlighting : SH ? true : false, //Is SyntaxHighlighting enabled?
     SAVING : false,
     LOADING : false,
     NESTED_SPACES : checkNestedSpaces(),
@@ -2730,6 +2726,11 @@ $(function(){
             var parentTab = $(e.target).closest('.editorTab');
           }, 50);
         }
+      });
+
+      // Reload the page when the user enable Syntax Highlighting
+      $('.enableCodeMirror').on('click', function() {
+        alert(window.localStorage['XWiki.extension.SyntaxHighlighting.disable']);
       });
 
       // Check for unsaved content
@@ -3495,36 +3496,16 @@ $(function(){
   /*
    * CodeMirror editor tools
    * ---------------------------------
-   * initCodeMirrorsCustom(mode, id)
    * synchronizeCodeMirrorContent()
    */
 
   /**
-   * Initialize all possible CodeMirror instances
-   * @input String mode: the edition mode concerned (wiki or object)
-   * @input String id: The id of the tab (in order to avoid the creation of CodeMirror instances for existing textarea in other tabs)
-   */
-  function initCodeMirrorsCustom(mode, id) {
-    // SyntaxHighlighting extension is installed but we have to wait for it to be loaded in that page
-    if(WebIDE.syntaxHighlighting &amp;&amp; WebIDE.syntaxHighlightingState()) {
-      Modules[mode].initCodeMirror(id);
-    }
-    else {
-      setTimeout(function() {initCodeMirrorsCustom(mode, id)}, 150);
-    }
-  }
-  /**
    * Synchronize the original textareas' contents with the codemirrors' contents.
    */
   function synchronizeCodeMirrorContent() {
-    if(WebIDE.syntaxHighlighting &amp;&amp; WebIDE.syntaxHighlightingState()) {
-      $('.CodeMirror').each(function (index) {
-        $('.CodeMirror')[index].CodeMirror.save();
-      });
-    }
-    else {
-      setTimeout(synchronizeCodeMirrorContent, 150);
-    }
+    $('.CodeMirror').each(function (index) {
+      $('.CodeMirror')[index].CodeMirror.save();
+    });
   }
 
   /*
@@ -3741,7 +3722,7 @@ $(function(){
       elm.onElementWidthChangeTimer = setTimeout(run, 250);
     })();
   }
-});
+
 });</code>
     </property>
     <property>
