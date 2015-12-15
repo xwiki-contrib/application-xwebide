@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347285000</creationDate>
-  <date>1450092278000</date>
-  <contentUpdateDate>1450092278000</contentUpdateDate>
+  <date>1450176503000</date>
+  <contentUpdateDate>1450176503000</contentUpdateDate>
   <version>1.1</version>
   <title>LogicalTree</title>
   <defaultTemplate/>
@@ -335,10 +335,14 @@
       #if($xwiki.getDocument($pageFullName).hasAccessLevel('edit'))
         #set($pageCount = $pageCount + 1)
         #set($itemPage = "")
-        #foreach($className in $classesInProjectList)
-          #if($pageDoc.getObject($className))
-            #set($itemPage = $className)
-            #break
+        #if($pageDoc.getObject("WebIDECode.ApplicationClass"))
+          #set($itemPage = "WebIDECode.ApplicationClass")
+        #else
+          #foreach($className in $classesInProjectList)
+            #if($pageDoc.getObject($className))
+              #set($itemPage = $className)
+              #break
+            #end
           #end
         #end
         #set($renameButton = "")
