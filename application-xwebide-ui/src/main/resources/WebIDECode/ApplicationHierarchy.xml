@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1450177514000</date>
-  <contentUpdateDate>1450102524000</contentUpdateDate>
+  <date>1450345146000</date>
+  <contentUpdateDate>1450274073000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -2302,6 +2302,8 @@ require(required , function ($, Translations, SH, xm) {
     * Initialize the modals (with or without Bootstrap) and their one-time events (shown, hidden, clicks)
     */
     initModals : function() {
+      $('#hierarchyClassModal').on('shown.bs.modal', AWMClassEditor._addModalShortcut);
+      $('#hierarchyClassModal').on('hidden.bs.modal', removeEnterShortcut);
       $('#hierarchyAddClass').on('click', function(e){
         $('body').removeClass('modal-open');
         e.preventDefault();
@@ -2310,7 +2312,7 @@ require(required , function ($, Translations, SH, xm) {
         var sheetName;
         var sheetType;
         var className;
-        var type; // Check if it is a class or a sheet:
+        var type; // Check if it is a class or a sheet
         if($(this).attr('data-type')) {
             type = $('#hierarchyAddClass').attr('data-type');
           }
@@ -2357,6 +2359,15 @@ require(required , function ($, Translations, SH, xm) {
         var removeSheet = $('#editorDeleteClassSheet').is(':checked');
         var removeTemplate = $('#editorDeleteClassTemplate').is(':checked');
         AWMClassEditor.remove($(this).attr('data-space'), $(this).attr('data-page'), removeSheet, removeTemplate);
+      });
+    },
+    /**
+     * Add shortcuts when the "page" modal is opened
+     */
+    _addModalShortcut : function() {
+      $('#hierarchyClassInput').focus();
+      shortcut.add("Enter", function() {
+        $('#hierarchyAddClass').click();
       });
     },
    /**
@@ -2440,7 +2451,7 @@ require(required , function ($, Translations, SH, xm) {
         // Hide some UI elements from the iframe and show only the main edit area
         $(ifrm).contents().find('body').css({"overflow" : "hidden", "min-height":"300px"});
         $(ifrm).contents().find('body').addClass('main');
-        $(ifrm).contents().find('#menuview, #rightPanels, #leftPanels, .bottombuttons, #hierarchy, #footerglobal, .row').hide();
+        $(ifrm).contents().find('#menuview, #rightPanels, #leftPanels, .bottombuttons, #hierarchy, #footerglobal, .row, .leftmenu2').hide();
         $(ifrm).contents().find('#classname').parent().remove();
         $(ifrm).contents().find('#options').find('#updateClassSheet, #updateClassTranslations').attr('checked', false); // Basic mode only
         $(ifrm).contents().find('.switch-xclass, .xclass-title, #editPanels').hide(); // Advanced mode only
@@ -4183,9 +4194,14 @@ require(required , function ($, Translations, SH, xm) {
         )))
         (% class="modal-body"%)(((
           {{html clean="false"}}
-          $services.localization.render('webide.modals.commons.space') : &lt;input type="text" id="hierarchyNewFolderName" /&gt;
+          &lt;form class="xform"&gt;
+          &lt;dl&gt;
+          &lt;dt&gt;&lt;label for="hierarchyNewFolderName"&gt;$services.localization.render('webide.modals.commons.space')&lt;/label&gt;&lt;/dt&gt;
+          &lt;dd&gt;&lt;input type="text" id="hierarchyNewFolderName" /&gt;&lt;/dd&gt;
           &lt;button id="hierarchyAddFolder" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.space.button')&lt;/button&gt;&lt;br&gt;
           &lt;p id="hierarchyFolderModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
+          &lt;/dl&gt;
+          &lt;/form&gt;
           {{/html}}
         )))
       )))
@@ -4202,9 +4218,13 @@ require(required , function ($, Translations, SH, xm) {
         )))
         (% class="modal-body"%)(((
           {{html clean="false" wiki="true"}}
-          $services.localization.render('webide.modals.commons.pageFullName') : &lt;input type="text" id="hierarchyExistingPageName" /&gt;
+          &lt;form class="xform"&gt;
+          &lt;dl&gt;
+          &lt;dt&gt;&lt;label for="hierarchyExistingPageName"&gt;$services.localization.render('webide.modals.commons.pageFullName')&lt;/label&gt;&lt;/dt&gt;&lt;dd&gt;&lt;input type="text" id="hierarchyExistingPageName" /&gt;&lt;/dd&gt;
           &lt;button id="hierarchyAddExistingPage" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.page.button')&lt;/button&gt;
           &lt;p id="hierarchyExistingPageModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
+          &lt;/dl&gt;
+          &lt;/form&gt;
           {{/html}}
         )))
       )))
@@ -4221,25 +4241,35 @@ require(required , function ($, Translations, SH, xm) {
         )))
         (% class="modal-body"%)(((
           {{html clean="false" wiki="true"}}
-          $services.localization.render('webide.modals.commons.space') : &lt;select id="hierarchyPageFolder"&gt;
+          &lt;form class="xform"&gt;
+          &lt;dl&gt;
+          &lt;dt&gt;&lt;label for="hierarchyPageFolder"&gt;$services.localization.render('webide.modals.commons.space')&lt;/label&gt;&lt;/dt&gt;
+          &lt;dd&gt;&lt;select id="hierarchyPageFolder"&gt;
           #foreach($space in $spacesListNested)
             #if($xwiki.hasAccessLevel('edit', "$space.$reservedDocumentName"))
               &lt;option value="$escapetool.url($space).replace('+', '%20')"&gt;$space&lt;/option&gt;
             #end
           #end
-          &lt;/select&gt;&lt;br&gt;
-          &lt;span id="hierarchyAddPageLabel"&gt;$services.localization.render('webide.modals.commons.pageName')&lt;/span&gt; : &lt;input type="text" id="hierarchyNewPageName" /&gt;&lt;br&gt;
-          &lt;div id="hierarchyAddPageTypeBlock"&gt;
+          &lt;/select&gt;&lt;/dd&gt;
+          &lt;dt&gt;&lt;label for="hierarchyNewPageName"&gt;&lt;span id="hierarchyAddPageLabel"&gt;$services.localization.render('webide.modals.commons.pageName')&lt;/span&gt;&lt;/label&gt;&lt;/dt&gt;
+          &lt;dd&gt;&lt;input type="text" id="hierarchyNewPageName" /&gt;&lt;/dd&gt;
+          &lt;div id="hierarchyAddPageTypeBlock"&gt;&lt;br&gt;
 
           {{info}}
             **$services.localization.render('webide.modals.add.page.type.content')**: $services.localization.render('webide.modals.add.page.info.content')&lt;br&gt;
             **$services.localization.render('webide.modals.add.page.type.item')**: $services.localization.render('webide.modals.add.page.info.content')
           {{/info}}
 
-          $services.localization.render('webide.modals.add.page.type') : &lt;input type="radio" name="hierarchyAddPageType" id="hierarchyAddPageTypeContent" value="content" checked="checked"/&gt; &lt;label for="hierarchyAddPageTypeContent"&gt;$services.localization.render('webide.modals.add.page.type.content')&lt;/label&gt; &lt;input type="radio" name="hierarchyAddPageType" id="hierarchyAddPageTypeItem" value="item"/&gt; &lt;label for="hierarchyAddPageTypeItem"&gt;$services.localization.render('webide.modals.add.page.type.item')&lt;/label&gt;&lt;br&gt;
-          &lt;div id="hierarchyAddPageItemBlock" class="hierarchy-hidden"&gt;$services.localization.render('webide.modals.commons.class') :  &lt;select id="hierarchyAddPageItem"&gt;
-          &lt;/select&gt;&lt;/div&gt;&lt;/div&gt;
-          &lt;div id="hierarchyAddPageLocaleBlock"&gt;$services.localization.render('webide.modals.add.page.language'): &lt;select id="hierarchyAddPageLocale"&gt;
+          &lt;dt&gt;&lt;label&gt;$services.localization.render('webide.modals.add.page.type')&lt;/label&gt;&lt;/dt&gt;
+          &lt;dd&gt;&lt;label for="hierarchyAddPageTypeContent"&gt;&lt;input type="radio" name="hierarchyAddPageType" id="hierarchyAddPageTypeContent" value="content" checked="checked"/&gt; $services.localization.render('webide.modals.add.page.type.content')&lt;/label&gt;&lt;/dd&gt;&lt;dd&gt;&lt;label for="hierarchyAddPageTypeItem"&gt;&lt;input type="radio" name="hierarchyAddPageType" id="hierarchyAddPageTypeItem" value="item"/&gt; $services.localization.render('webide.modals.add.page.type.item')&lt;/label&gt;&lt;/dd&gt;
+          &lt;div id="hierarchyAddPageItemBlock" class="hierarchy-hidden"&gt;&lt;br&gt;
+          &lt;dt&gt;&lt;label for="hierarchyAddPageItem"&gt;$services.localization.render('webide.modals.commons.class')&lt;/label&gt;&lt;/dt&gt;
+          &lt;dd&gt;&lt;select id="hierarchyAddPageItem"&gt;
+          &lt;/select&gt;&lt;/dd&gt;&lt;/div&gt;
+          &lt;/div&gt;
+          &lt;div id="hierarchyAddPageLocaleBlock"&gt;&lt;br&gt;
+          &lt;dt&gt;&lt;label for="hierarchyAddPageLocale"&gt;$services.localization.render('webide.modals.add.page.language')&lt;/label&gt; ($services.localization.render('webide.modals.add.page.language.list'))&lt;/dt&gt;
+          &lt;dd&gt;&lt;select id="hierarchyAddPageLocale"&gt;
           #foreach($locale in $xwiki.getDocument('XWiki.XWikiPreferences').getObject('XWiki.XWikiPreferences').getProperty('languages').value.split(','))
             #set($language = $services.localization.toLocale($locale.trim()).getDisplayLanguage())
             #set($displayLanguage = $language)
@@ -4248,9 +4278,11 @@ require(required , function ($, Translations, SH, xm) {
             #end
             &lt;option value="$locale.trim()"&gt;$displayLanguage&lt;/option&gt;
           #end
-          &lt;/select&gt; ($services.localization.render('webide.modals.add.page.language.list'))&lt;/div&gt;
-          &lt;button id="hierarchyAddPage" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.page.button')&lt;/button&gt;&lt;br&gt;
+          &lt;/select&gt;&lt;/dd&gt;&lt;/div&gt;
+          &lt;br&gt;&lt;button id="hierarchyAddPage" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.page.button')&lt;/button&gt;
           &lt;p id="hierarchyPageModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
+          &lt;/dl&gt;
+          &lt;/form&gt;
           {{/html}}
         )))
       )))
@@ -4267,12 +4299,19 @@ require(required , function ($, Translations, SH, xm) {
         )))
         (% class="modal-body"%)(((
           {{html clean="false" wiki="true"}}
-          $services.localization.render('webide.modals.commons.space') : &lt;span id="hierarchyObjectSpace"&gt;&lt;/span&gt;&lt;br&gt;
-          &lt;div id="hierarchyObjectPageBlock"&gt;$services.localization.render('webide.modals.commons.page') : &lt;span id="hierarchyObjectPage"&gt;&lt;/span&gt;&lt;/div&gt;
-          &lt;div id="hierarchyObjectPageInputBlock"&gt;$services.localization.render('webide.modals.commons.name') : &lt;input type="text" id="hierarchyObjectPageInput" value=""/&gt;&lt;input type="hidden" id="hierarchyObjectPageInputDefault" value=""/&gt;&lt;/div&gt;
+          &lt;form class="xform"&gt;
+          &lt;dl&gt;
+          &lt;dt&gt;&lt;label&gt;$services.localization.render('webide.modals.commons.space')&lt;/label&gt;&lt;/dt&gt;
+          &lt;dd&gt;&lt;span id="hierarchyObjectSpace"&gt;&lt;/span&gt;&lt;/dd&gt;
+          &lt;div id="hierarchyObjectPageBlock"&gt;&lt;dt&gt;&lt;label&gt;$services.localization.render('webide.modals.commons.page')&lt;/label&gt;&lt;/dt&gt;
+          &lt;dd&gt;&lt;span id="hierarchyObjectPage"&gt;&lt;/span&gt;&lt;/dd&gt;&lt;/div&gt;
+          &lt;div id="hierarchyObjectPageInputBlock"&gt;&lt;dt&gt;&lt;label for="hierarchyObjectPageInput"&gt;$services.localization.render('webide.modals.commons.name')&lt;/label&gt;&lt;/dt&gt;
+          &lt;dd&gt;&lt;input type="text" id="hierarchyObjectPageInput" value=""/&gt;&lt;/dd&gt;&lt;input type="hidden" id="hierarchyObjectPageInputDefault" value=""/&gt;&lt;/div&gt;
           &lt;input type="hidden" id="hierarchyObjectClassName" /&gt;
-          &lt;button id="hierarchyAddObject" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.page.button')&lt;/button&gt;
+          &lt;br&gt;&lt;button id="hierarchyAddObject" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.page.button')&lt;/button&gt;
           &lt;p id="hierarchyObjectModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
+          &lt;/dl&gt;
+          &lt;/form&gt;
           {{/html}}
         )))
       )))
@@ -4289,18 +4328,25 @@ require(required , function ($, Translations, SH, xm) {
         )))
         (% class="modal-body"%)(((
           {{html clean="false" wiki="true"}}
-          $services.localization.render('webide.modals.commons.space') : &lt;span id="hierarchyClassSpace"&gt;&lt;/span&gt;&lt;br&gt;
-          $services.localization.render('webide.modals.commons.name') : &lt;input type="text" id="hierarchyClassInput" value=""/&gt;&lt;br&gt;
+          &lt;form class="xform"&gt;
+          &lt;dl&gt;
+          &lt;dt&gt;&lt;label&gt;$services.localization.render('webide.modals.commons.space')&lt;/label&lt;&lt;/dt&gt;
+          &lt;dd&gt;&lt;span id="hierarchyClassSpace"&gt;&lt;/span&gt;&lt;/dd&gt;
+          &lt;dt&gt;&lt;label for="hierarchyClassInput"&gt;$services.localization.render('webide.modals.commons.name')&lt;/label&gt;&lt;/dt&gt;
+          &lt;dd&gt;&lt;input type="text" id="hierarchyClassInput" value=""/&gt;&lt;/dd&gt;
           &lt;div id="hierarchyAddSheetBlock"&gt;
-            $services.localization.render('webide.modals.add.class.sheet.actions') : &lt;select id="hierarchyClassSheet"&gt;
+            &lt;br&gt;&lt;dt&gt;&lt;label for="hierarchyClassSheet"&gt;$services.localization.render('webide.modals.add.class.sheet.actions')&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;select id="hierarchyClassSheet"&gt;
               &lt;option value=""&gt;&lt;/option&gt;
               &lt;option value="view"&gt;$services.localization.render('webide.modals.add.class.sheet.view')&lt;/option&gt;
               &lt;option value="edit"&gt;$services.localization.render('webide.modals.add.class.sheet.edit')&lt;/option&gt;
               &lt;option value="inline"&gt;$services.localization.render('webide.modals.add.class.sheet.inline')&lt;/option&gt;
-            &lt;/select&gt;
+            &lt;/select&gt;&lt;/dd&gt;
           &lt;/div&gt;
-          &lt;button id="hierarchyAddObject" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.class.button')&lt;/button&gt;
-          &lt;p id="hierarchyObjectModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
+          &lt;br&gt;&lt;button id="hierarchyAddClass" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.class.button')&lt;/button&gt;
+          &lt;p id="hierarchyClassModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
+          &lt;/dl&gt;
+          &lt;/form&gt;
           {{/html}}
         )))
       )))
@@ -4321,6 +4367,7 @@ require(required , function ($, Translations, SH, xm) {
             $services.localization.render('webide.modals.closeTab.description', ['&lt;span id="hierarchyCloseTabModalInfo"&gt;&lt;/span&gt;'])&lt;br /&gt;
             &lt;button id="hierarchySaveAndCloseModal" class="btn btn-success"&gt;$services.localization.render('webide.modals.closeTab.button.save')&lt;/button&gt; &lt;button id="hierarchyDiscardAndCloseModal" class="btn btn-danger"&gt;$services.localization.render('webide.modals.closeTab.button.nosave')&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;$services.localization.render('webide.modals.commons.cancel')&lt;/button&gt;
           &lt;/p&gt;
+          &lt;/form&gt;
           {{/html}}
         )))
       )))
@@ -4397,11 +4444,14 @@ require(required , function ($, Translations, SH, xm) {
         )))
         (% class="modal-body"%)(((
           {{html clean="false" wiki="true"}}
-          &lt;p&gt;
-            $services.localization.render('webide.modals.delete.class.label') : &lt;span id="editorDeletedClassModalInfo"&gt;&lt;/span&gt;&lt;br /&gt;
-            $services.localization.render('webide.modals.delete.class.deleteAlso'): &lt;label for="editorDeleteClassSheet"&gt;$services.localization.render('webide.modals.delete.class.allSheets')&lt;/label&gt; &lt;input type="checkbox" id="editorDeleteClassSheet" /&gt; &lt;label for="editorDeleteClassTemplate"&gt;$services.localization.render('webide.modals.delete.class.template')&lt;/label&gt; &lt;input type="checkbox" id="editorDeleteClassTemplate" /&gt; ?&lt;
-            &lt;button id="editorDeleteClassConfirmed" class="btn btn-danger"&gt;$services.localization.render('webide.modals.delete.class.button')&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;$services.localization.render('webide.modals.commons.cancel')&lt;/button&gt;
-          &lt;/p&gt;
+          &lt;form class="xform"&gt;
+          &lt;dl&gt;
+            $services.localization.render('webide.modals.delete.class.label') : &lt;span id="editorDeletedClassModalInfo"&gt;&lt;/span&gt;&lt;br&gt;&lt;br&gt;
+            &lt;dt&gt;&lt;label&gt;$services.localization.render('webide.modals.delete.class.deleteAlso')&lt;/lebal&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;label for="editorDeleteClassSheet"&gt;&lt;input type="checkbox" id="editorDeleteClassSheet" /&gt; $services.localization.render('webide.modals.delete.class.allSheets')&lt;/label&gt;&lt;br&gt;&lt;label for="editorDeleteClassTemplate"&gt;&lt;input type="checkbox" id="editorDeleteClassTemplate" /&gt; $services.localization.render('webide.modals.delete.class.template')&lt;/label&gt;&lt;br&gt;
+            &lt;br&gt;&lt;button id="editorDeleteClassConfirmed" class="btn btn-danger"&gt;$services.localization.render('webide.modals.delete.class.button')&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;$services.localization.render('webide.modals.commons.cancel')&lt;/button&gt;
+          &lt;/dl&gt;
+          &lt;/form&gt;
           {{/html}}
         )))
       )))
