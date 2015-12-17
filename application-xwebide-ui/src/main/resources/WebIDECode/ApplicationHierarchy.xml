@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1450350161000</date>
-  <contentUpdateDate>1450274073000</contentUpdateDate>
+  <date>1450370892000</date>
+  <contentUpdateDate>1450365404000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -1390,7 +1390,7 @@ require(required , function ($, Translations, SH, xm) {
      * @input DOMElements menuNode, dataNode : The element in which object details have to be added
      */
     _loadObjectsDetails : function(jQueryTabId, objectsList, index, objectsListSize, oldClass, menuNode, dataNode, currentClassNode, loadAllTabs) {
-      if(objectsListSize == 0) {ObjectEditor._endDisplayObjects(jQueryTabId, objectsListSize);}
+      if(objectsListSize == 0) {ObjectEditor._endDisplayObjects(jQueryTabId, objectsListSize, loadAllTabs);}
       else {
         var currentTabNumber = getTabNumber(jQueryTabId);
         var className = $(objectsList[index]).find('className').text();
@@ -2641,6 +2641,24 @@ require(required , function ($, Translations, SH, xm) {
         $('#hierarchyBottomActionsBar').css({'marginLeft' : $('#hierarchyBlock').outerWidth()+'px'});
       }
     },
+    saveOpenedTabs : function() {
+      var unsaved = false;
+      var openedTabs = [];
+      $('.editorTabButton').each(function(index, elt) {
+        var editor = $(elt).attr('data-editor');
+        var space = $(elt).attr('data-space');
+        var page = $(elt).attr('data-page');
+        var parameters = Modules[editor].getParametersFromTab($(elt));
+        var list = encodeURIComponent([encodeURIComponent(editor), encodeURIComponent(space), encodeURIComponent(page), encodeURIComponent(parameters)]);
+        openedTabs.push(list);
+        var tabNumberId = $(elt).attr('data-tabnumber');
+        if(WebIDESavedContent[tabNumberId] != getCurrentContent(tabNumberId)) {
+          unsaved = true;
+        }
+      });
+      window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.tabs'] = openedTabs;
+      return unsaved;
+    },
     init : function() {
       setCurrentPage(getDocumentReferenceData('page'));
       setCurrentSpace(getDocumentReferenceData('space'));
@@ -2706,21 +2724,7 @@ require(required , function ($, Translations, SH, xm) {
       // Display a warning message when the user try to close/reload the tab/window and he has unsaved content
       window.onbeforeunload = function() {
         if(WebIDE.currentEditor !== 'class') {
-          var unsaved = false;
-          var openedTabs = [];
-          $('.editorTabButton').each(function(index, elt) {
-            var editor = $(elt).attr('data-editor');
-            var space = $(elt).attr('data-space');
-            var page = $(elt).attr('data-page');
-            var parameters = Modules[editor].getParametersFromTab($(elt));
-            var list = encodeURIComponent([encodeURIComponent(editor), encodeURIComponent(space), encodeURIComponent(page), encodeURIComponent(parameters)]);
-            openedTabs.push(list);
-            var tabNumberId = $(elt).attr('data-tabnumber');
-            if(WebIDESavedContent[tabNumberId] != getCurrentContent(tabNumberId)) {
-              unsaved = true;
-            }
-          });
-          window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.tabs'] = openedTabs;
+          var unsaved = WebIDE.saveOpenedTabs(); // Return true if there are unsaved tabs
           if(unsaved) {
             return Translations.core.unsavedContent;
           }
@@ -3352,6 +3356,7 @@ require(required , function ($, Translations, SH, xm) {
       });
       setActiveTab(mode, file, folder, parameters);
       WebIDE.fixContentBlockHeight();
+      WebIDE.saveOpenedTabs();
     }
   }
 
@@ -3428,6 +3433,7 @@ require(required , function ($, Translations, SH, xm) {
       goToNewPage(tabMode, tabFile, tabFolder, parameters);
     }
     WebIDE.fixContentBlockHeight();
+    WebIDE.saveOpenedTabs();
   }
 
   /**
@@ -4093,7 +4099,7 @@ require(required , function ($, Translations, SH, xm) {
 {{html clean="false"}}&lt;span class="fa fa-step-forward"&gt;&lt;/span&gt;{{/html}}
 )))
 (% id="hierarchyCloseBlock" %)(((
-**$services.localization.render('webide.menu.project') :** $masterDoc.display('projectName', 'view') (% title="$services.localization.render('webide.menu.button.hide')" id="hierarchyClose" class="hierarchy-icon" %){{html clean="false"}}&lt;span class="fa fa-step-backward"&gt;&lt;/span&gt;{{/html}} (% title="Refresh the menu" id="hierarchyRefresh" class="hierarchy-icon" %){{html clean="false"}}&lt;span class="fa fa-refresh"&gt;&lt;/span&gt;{{/html}}
+**$services.localization.render('webide.menu.project') :** $masterDoc.display('projectName', 'view') (% title="$services.localization.render('webide.menu.button.hide')" id="hierarchyClose" class="hierarchy-icon" %){{html clean="false"}}&lt;span class="fa fa-step-backward"&gt;&lt;/span&gt;{{/html}} (% title="$services.localization.render('webide.menu.button.refresh')" id="hierarchyRefresh" class="hierarchy-icon" %){{html clean="false"}}&lt;span class="fa fa-refresh"&gt;&lt;/span&gt;{{/html}}
 )))
 #set($nestedSpaces = false)
 #if($services.model.serialize($services.model.createDocumentReference("wiki", ["A", "B"], "page"), 'default') == 'wiki:A.B.page')
