@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1449845664000</creationDate>
-  <date>1449851464000</date>
-  <contentUpdateDate>1449851452000</contentUpdateDate>
+  <date>1450349992000</date>
+  <contentUpdateDate>1450349992000</contentUpdateDate>
   <version>1.1</version>
   <title>Translations in JS</title>
   <defaultTemplate/>
@@ -41,7 +41,7 @@
   <comment/>
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
-  <hidden>true</hidden>
+  <hidden>false</hidden>
   <content>## French translation
 webide.js.panel.advanced=Champs avancés
 webide.js.panel.related=Eléments liés
@@ -62,7 +62,7 @@ webide.js.hierarchy.page.added=Page ajoutée
 webide.js.commons.deleting=Suppression...
 webide.js.commons.deleted=Supprimé
 webide.js.commons.removed=Enlevé
-webide.js.commons.delete=Supprimer
+webide.js.commons.deleteAction=Supprimer
 webide.js.commons.add=Ajouter
 webide.js.commons.error=Erreur
 webide.js.commons.modalError=ERREUR : Vous devez remplir tous les champs!
@@ -95,8 +95,8 @@ webide.js.objects.updatingToken=Mise-à-jour du token CSRF...
 webide.js.objects.updatedToken=Token CSRF mis-à-jour!
 webide.js.objects.errorToken=Token déjà à jour
 ##Class editor
-webide.js.class.switchAdvanced=Changer vers l'éditeur avancé
-webide.js.class.switchBasic=Changer vers l'éditeur basique
+webide.js.classes.switchAdvanced=Changer vers l'éditeur avancé
+webide.js.classes.switchBasic=Changer vers l'éditeur basique
 ##Core module (WebIDE)
 webide.js.core.unsavedContent=Vous avez du contenu non sauvegardé! Voulez-vous vraiment fermer cette page?
 webide.js.core.savingAll=Enregistrement des onglets...

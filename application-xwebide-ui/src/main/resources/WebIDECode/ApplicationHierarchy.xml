@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1450345146000</date>
+  <date>1450350161000</date>
   <contentUpdateDate>1450274073000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -932,7 +932,7 @@ require(required , function ($, Translations, SH, xm) {
       }
     },
     setDeleteButton : function() {
-      $('#hierarchyDeleteButtonIDE').val(Translations.commons.delete);
+      $('#hierarchyDeleteButtonIDE').val(Translations.commons.deleteAction);
       $('#hierarchyDeleteButtonIDE').off('click');
       $('#hierarchyDeleteButtonIDE').on('click', function() {
         $('#editorDeletedPageModalInfo').html(getCurrentSpace(false)+' - '+getCurrentPage(false));
@@ -1662,7 +1662,7 @@ require(required , function ($, Translations, SH, xm) {
      */
     setDeleteButton : function() {
       if(ObjectEditor._getCurrentObject(false) &amp;&amp; ObjectEditor._getCurrentObject(false) !== 'Panels.PanelClass' &amp;&amp; ObjectEditor._getCurrentObject(false) !== 'XWiki.WikiMacroClass') { // Single object editor : delete only the object displayed in the page
-        $('#hierarchyDeleteButtonIDE').val(Translations.commons.delete);
+        $('#hierarchyDeleteButtonIDE').val(Translations.commons.deleteAction);
         $('#hierarchyDeleteButtonIDE').off('click');
         $('#hierarchyDeleteButtonIDE').on('click', function() {
           $('#editorDeletedObjectModalInfo').html(ObjectEditor._getCurrentObject(false)+' - '+ObjectEditor.currentNumber);
@@ -1677,7 +1677,7 @@ require(required , function ($, Translations, SH, xm) {
         });
       }
       else { // Multiple object editor : delete the whole page
-        $('#hierarchyDeleteButtonIDE').val(Translations.commons.delete);
+        $('#hierarchyDeleteButtonIDE').val(Translations.commons.deleteAction);
         $('#hierarchyDeleteButtonIDE').off('click');
         $('#hierarchyDeleteButtonIDE').on('click', function() {
           $('#editorDeleteMultipleObjectsModalInfo').html(getCurrentSpace()+'.'+getCurrentPage());
@@ -2121,10 +2121,10 @@ require(required , function ($, Translations, SH, xm) {
         var ifrm = $('&lt;iframe allowtransparency="true" id="tab'+tabNumberId+'_awm" data-type="'+classEditorStorage+'" name="tab'+tabNumberId+'_awm" class="editorIframe"/&gt;').attr('src', urlIframe).appendTo($('&lt;div class="editorClassTabContent"&gt;&lt;/div&gt;').appendTo(jQueryTabId));
         AWMClassEditor._initIframe(ifrm, tabNumberId);
         var nextEditor = 'advanced';
-        var buttonText = Translations.class.switchAdvanced;
+        var buttonText = Translations.classes.switchAdvanced;
         if(classEditorStorage === 'advanced') {
           nextEditor = 'basic';
-          buttonText = Translations.class.switchBasic;
+          buttonText = Translations.classes.switchBasic;
         }
         $('&lt;input type="button" class="btn btn-default editorAWMSwitch" value="'+buttonText+'"/&gt;').appendTo(advancedFieldBlock).on('click', function() {
           if(WebIDESavedContent[tabNumberId] != getCurrentContent(tabNumberId)) {$('#editorSwitchClassModal').modal('show');}
@@ -2151,9 +2151,9 @@ require(required , function ($, Translations, SH, xm) {
           $(ifrm).attr('data-type', 'basic');
           window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.classEditor'] = 'basic';
         }
-        var buttonText = Translations.class.switchAdvanced;
+        var buttonText = Translations.classes.switchAdvanced;
         if(oldType === 'basic') {
-          buttonText = Translations.class.switchBasic;
+          buttonText = Translations.classes.switchBasic;
         }
         $(tabDiv).find('.editorAWMSwitch').val(buttonText);
         AWMClassEditor._initIframe(ifrm, tabNumberId);
@@ -2218,7 +2218,7 @@ require(required , function ($, Translations, SH, xm) {
       return true;
     },
     setDeleteButton : function() {
-      $('#hierarchyDeleteButtonIDE').val(Translations.commons.delete);
+      $('#hierarchyDeleteButtonIDE').val(Translations.commons.deleteAction);
       $('#hierarchyDeleteButtonIDE').off('click');
       $('#hierarchyDeleteButtonIDE').on('click', function() {
         $('#editorDeletedClassModalInfo').html(getCurrentSpace(false)+' - '+getCurrentPage(false));
@@ -2390,7 +2390,7 @@ require(required , function ($, Translations, SH, xm) {
           contentType: "application/json",
         }).success(function(data){
           var dataJson = $.parseJSON(data);
-          $(dataJson.delete).each(function(index, elmt){
+          $(dataJson['delete']).each(function(index, elmt){
             var selector = '_'+encodeURIComponent(elmt.space).replace(/\./g, '2E').replace(/%/g, '')+'_'+encodeURIComponent(elmt.name).replace(/\./g, '2E').replace(/%/g, '');
             var elements = $('.editorTab[id*="'+selector+'"]');
             elements.each(function(i, innerElmt) {
