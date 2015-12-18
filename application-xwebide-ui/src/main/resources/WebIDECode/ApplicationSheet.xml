@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1450107398000</date>
-  <contentUpdateDate>1450107398000</contentUpdateDate>
+  <date>1450444606000</date>
+  <contentUpdateDate>1450444606000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -1239,6 +1239,7 @@ $(function(){
   #if($xwiki.exists("WebIDECode.RTWiki"))
     #set($discard = $xwiki.jsx.use("WebIDECode.RTWiki"))
   #end
+  #set($discard = $xwiki.ssx.use("SyntaxHighlighting.SyntaxHighlighting", {'highlightColor' : '#FFFF44'}))
   #set($syntaxHURL = $xwiki.getURL('SyntaxHighlighting.SyntaxHighlighting', 'jsx'))
   (% id="editorBlock" %)
   (((

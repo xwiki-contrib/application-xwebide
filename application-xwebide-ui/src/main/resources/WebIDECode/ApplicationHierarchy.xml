@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <!--
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
@@ -31,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1450436562000</date>
+  <date>1450455123000</date>
   <contentUpdateDate>1450365404000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -918,12 +919,7 @@ require(required , function ($, Translations, SH, xm) {
       return $(tabWikiElement).val();
     },
     initCodeMirror : function(tabId) {
-      if($('#syntaxHState').val() === 'old') { //SyntaxHighlighting &lt;= 2.2
-        SH.initCodeMirror('#content_'+tabId, 'xwiki');
-      }
-      else { //SyntaxHighlighting &gt;= 3.0
-        SH.initCodeMirror('#content_'+tabId, XWiki.docsyntax);
-      }
+      SH.initCodeMirror('#content_'+tabId, XWiki.docsyntax, WebIDE.codeMirrorParams);
     },
     initHash : function(hashArray) {
       if(hashArray.size() === 6) {
@@ -1663,15 +1659,20 @@ require(required , function ($, Translations, SH, xm) {
       return content;
     },
     initCodeMirror : function(id) {
+      var selector = [
+        [id+" textarea[name^='XWiki.StyleSheetExtension_'][name$='_code']", 'css'],
+        [id+" textarea[name^='XWiki.JavaScriptExtension_'][name$='_code']", 'javascript'],
+        [id+" textarea[name^='XWiki.XWikiSkins_'][name$='.css']", 'css'],
+        [id+" textarea[name^='XWiki.XWikiSkins_'][name$='.js']", 'javascript'],
+        [id+" textarea[name^='XWiki.XWikiSkins_'][name$='.vm']", 'velocity'],
+        [id+" textarea[name^='XWiki.WikiMacroClass_'][name$='_code']", XWiki.docsyntax],
+        [id+" textarea[name^='Panels.PanelClass_'][name$='_content']", XWiki.docsyntax],
+        [id+" textarea[name^='XWiki.UIExtensionClass'][name$='_content']", XWiki.docsyntax]
+      ];
       id = id.replace( /(:|\.|\[|\]|,)/g, "\\$1" );
-      SH.initCodeMirror(id+" textarea[name^='XWiki.StyleSheetExtension_'][name$='_code']", 'css');
-      SH.initCodeMirror(id+" textarea[name^='XWiki.JavaScriptExtension_'][name$='_code']", 'javascript');
-      SH.initCodeMirror(id+" textarea[name^='XWiki.XWikiSkins_'][name$='.css']", 'css');
-      SH.initCodeMirror(id+" textarea[name^='XWiki.XWikiSkins_'][name$='.js']", 'javascript');
-      SH.initCodeMirror(id+" textarea[name^='XWiki.XWikiSkins_'][name$='.vm']", 'velocity');
-      SH.initCodeMirror(id+" textarea[name^='XWiki.WikiMacroClass_'][name$='_code']", XWiki.docsyntax);
-      SH.initCodeMirror(id+" textarea[name^='Panels.PanelClass_'][name$='_content']", XWiki.docsyntax);
-      SH.initCodeMirror(id+" textarea[name^='XWiki.UIExtensionClass'][name$='_content']", XWiki.docsyntax);
+      $(selector).each(function(ind, elmt) {
+        SH.initCodeMirror(elmt[0], elmt[1], WebIDE.codeMirrorParams);
+      });
     },
     initHash : function(hashArray) {
       if(hashArray.size() === 7) {
@@ -2233,9 +2234,6 @@ require(required , function ($, Translations, SH, xm) {
       });
       return content;
     },
-    initCodeMirror : function(tabId) {
-      return true;
-    },
     initHash : function(hashArray) {
       return true;
     },
@@ -2584,6 +2582,7 @@ require(required , function ($, Translations, SH, xm) {
     ssxUrl : '',
     loadList : [],
     fullscreen : false,
+    codeMirrorParams : [[],{}],
     restorePreviousSession : function() {
       // Open all tabs from last session
       var openedTabs = window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.tabs'];
@@ -2692,10 +2691,6 @@ require(required , function ($, Translations, SH, xm) {
       WebIDE.visibleSpaces = getCookieHierarchy('visibleSpaces').split(',');
       WebIDE.visiblePages = getCookieHierarchy('visiblePages').split(',');
       WebIDE.visibleCategory = getCookieHierarchy('visibleCategory').split(',');
-
-      if($('#syntaxHState').val() === 'old') { //TODO: remove that part when SyntaxHighlighting 3.x will be available on XWiki 6.2+
-        initCodeMirrorInternals();
-      }
 
       if(XWiki.webapppath.substr(0,1) === '/') {
         XWiki.webapppath = XWiki.webapppath.substr(1,(XWiki.webapppath.length-1));
