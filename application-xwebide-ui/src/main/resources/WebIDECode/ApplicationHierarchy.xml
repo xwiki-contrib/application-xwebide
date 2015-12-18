@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
@@ -32,7 +31,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1450370892000</date>
+  <date>1450436562000</date>
   <contentUpdateDate>1450365404000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -1396,10 +1395,16 @@ require(required , function ($, Translations, SH, xm) {
         var className = $(objectsList[index]).find('className').text();
         var number = $(objectsList[index]).find('number').text();
         if(className != oldClass &amp;&amp; !ObjectEditor._getCurrentObject(false)) {
-          dataNode.append('&lt;h2 class="wikigeneratedheader editorObjectClassTitle" data-classname="'+className+'"&gt;'+className+'&lt;/h2&gt;');
+          // Create the new class block
+          dataNode.append('&lt;h2 class="wikigeneratedheader editorObjectClassTitle" data-classname="'+className+'"&gt;&lt;span class="fa fa-caret-down"&gt;&lt;/span&gt; '+className+'&lt;/h2&gt;');
           var currentClassNode = $('&lt;div id="tab'+currentTabNumber+'_editorObjects-'+className+'" class="editorObjectClassDetails"&gt;&lt;/div&gt;').appendTo(dataNode);
         }
+        else if(!ObjectEditor._getCurrentObject(false)) {
+          // Not a new class : insert data in the previous class block (objects are ordered by class)
+          var currentClassNode = $('.editorObjectClassDetails:last');
+        }
         else {
+          // Only one object displayed (JSX, SSX, ...) : no class block displayed
           var currentClassNode = dataNode;
         }
         var isSelectedObject = '';
@@ -1458,7 +1463,10 @@ require(required , function ($, Translations, SH, xm) {
       // Initialize the events (click on link/buttons) for all the objects
       ObjectEditor._initEvents(true, jQueryTabId);
       // Objects should be hidden if there are more than 2
-      if(objectsListSize &lt; 3) {$(jQueryTabId+' .editorObjectDetails').show();}
+      if(objectsListSize &lt; 3) {
+        $(jQueryTabId+' .editorObjectDetails').show();
+        $(jQueryTabId+' .editorObjectTitle h4 span.fa').attr('class', 'fa fa-caret-down');
+      }
       // Start the code mirror instances for objects with a textarea field
       if(WebIDE.syntaxHighlighting) {ObjectEditor.initCodeMirror(jQueryTabId);}
       var tabNumberId = getTabNumber(jQueryTabId);
@@ -1479,25 +1487,37 @@ require(required , function ($, Translations, SH, xm) {
       $(jQueryTabId+' textarea').attr('spellcheck','false');
       $(jQueryTabId+' textarea').attr('autocomplete','off');
 
+      function setArrows(element, content) {
+        if(content &amp;&amp; $(content).length &amp;&amp; $(content).is(':visible')) {
+          $(element).find('span.fa').attr('class', 'fa fa-caret-down');
+        }
+        else {
+          $(element).find('span.fa').attr('class', 'fa fa-caret-right');
+        }
+      }
       function clickOnClass() {
         var divSelector = 'div[id="tab'+currentTabNumber+'_editorObjects-'+$(this).attr('data-classname')+'"]';
         $(divSelector).toggle();
         // If the textarea was initially hidden, Syntax Highlighting editor will only appear when the user click on the textarea : force the click with jQuery
         $(divSelector+' textarea').click();
+        setArrows(this, divSelector);
       }
       function clickOnObject() {
         var divSelector = 'div[id="tab'+currentTabNumber+'_editorObject-'+$(this).parent().attr('data-classname')+'-'+$(this).parent().attr('data-number')+'"]';
         $(divSelector).toggle();
+        setArrows(this, divSelector);
         // If the textarea was initially hidden, Syntax Highlighting editor will only appear when the user click on the textarea : force the click with jQuery
         $(divSelector+' textarea').click();
       }
       function clickOnMenu(e) {
         $(jQueryTabId+' .editorObjectDetails').hide();
+        setArrows($(jQueryTabId+' .editorObjectTitle h4'), false);
         var divSelector = 'div[id="tab'+currentTabNumber+'_editorObjects-'+$(this).attr('data-classname')+'"]';
         var divSelectorInternal = 'div[id="tab'+currentTabNumber+'_editorObject-'+$(this).attr('data-classname')+'-'+$(this).attr('data-number')+'"]';
         $(divSelector).show();
         $(divSelectorInternal).show();
         $(divSelector+' textarea').click();
+        setArrows($(divSelectorInternal).siblings('.editorObjectTitle').find('h4'), divSelectorInternal);
       }
       function clickOnRemoveObject(e) {
         e.preventDefault();
@@ -1526,11 +1546,13 @@ require(required , function ($, Translations, SH, xm) {
           e.preventDefault();
           $(jQueryTabId+' .editorObjectDetails, '+jQueryTabId+' .editorObjectClassDetails').show();
           $(jQueryTabId+' .editorObjectDetails textarea').click();
+          setArrows($(jQueryTabId+' .editorObjectTitle h4'), $(jQueryTabId+' .editorObjectDetails'));
         });
         $('#tab'+currentTabNumber+'_editorCollapseAllButton').on('click', function(e) {
           e.preventDefault();
           $(jQueryTabId+' .editorObjectClassDetails').show();
           $(jQueryTabId+' .editorObjectDetails').hide();
+          setArrows($(jQueryTabId+' .editorObjectTitle h4'), false);
         });
         // Event : Add an object
         $('#tab'+currentTabNumber+'_editorObjectAddButton').on('click', function(e) {
@@ -2741,11 +2763,6 @@ require(required , function ($, Translations, SH, xm) {
             var parentTab = $(e.target).closest('.editorTab');
           }, 50);
         }
-      });
-
-      // Reload the page when the user enable Syntax Highlighting
-      $('.enableCodeMirror').on('click', function() {
-        alert(window.localStorage['XWiki.extension.SyntaxHighlighting.disable']);
       });
 
       // Check for unsaved content
