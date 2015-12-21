@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1449845659000</creationDate>
-  <date>1450178038000</date>
-  <contentUpdateDate>1450178038000</contentUpdateDate>
+  <date>1450695566000</date>
+  <contentUpdateDate>1450695566000</contentUpdateDate>
   <version>1.1</version>
   <title>Translations</title>
   <defaultTemplate/>
@@ -55,6 +55,12 @@ webide.application._actions=Actions
 webide.webhome.addModal=Ajouter un projet
 webide.webhome.add=Ajouter
 webide.webhome.codeSpaceDescription=Espace contenant vos pages techniques
+webide.webhome.error.name=Vous devez entrer un nom de projet!
+webide.webhome.error.code=Vous devez choisir un espace de code!
+webide.webhome.add.pages=Ajouter des pages
+webide.webhome.add.spaces=Ajouter des espaces
+webide.webhome.spaces.info=Vous pouvez ici ajouter des espaces du wiki que vous souhaitez intégrer au projet. Toutes les pages actuelles et futures contenues dans cet espace seront ajoutées au projet. Vous pourrez toujours modifier cette liste d'espaces ultérieurement (ajout ou retrait d'espaces).
+webide.webhome.pages.info=Vous pouvez ici intégrer des pages additionnelles au projet. Elles apparaîtront dans la liste des pages du projet, même si l'espace dans lequel elles se trouvent ne fait pas partie du projet.
 
 ##Menu
 webide.menu.project=Projet

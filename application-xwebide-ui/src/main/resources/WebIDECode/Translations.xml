@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1449753999000</creationDate>
-  <date>1450178047000</date>
-  <contentUpdateDate>1450178047000</contentUpdateDate>
+  <date>1450695286000</date>
+  <contentUpdateDate>1450695286000</contentUpdateDate>
   <version>1.1</version>
   <title>Translations</title>
   <defaultTemplate/>
@@ -90,6 +90,12 @@ webide.application._actions=Actions
 webide.webhome.addModal=Add a project
 webide.webhome.add=Add
 webide.webhome.codeSpaceDescription=Space for your technical pages
+webide.webhome.error.name=You have to choose a project name!
+webide.webhome.error.code=You have to choose a project code space!
+webide.webhome.add.pages=Add pages
+webide.webhome.add.spaces=Add spaces
+webide.webhome.spaces.info=Here you can choose the spaces you want to add as a folder in your project. All current and future pages from these spaces will be added in the project. You will still be able to change that list later (add or remove spaces).
+webide.webhome.pages.info=Here you can choose additional pages you want to add in your project. They will appear in the project pages even if the corresponding space in not in the previous list.
 
 ##Menu
 webide.menu.project=Project
@@ -132,7 +138,7 @@ webide.menu.category.classes.addTemplate=Add a template
 ##Pages menu
 webide.menu.category.pages=Pages
 webide.menu.category.pages.addSpace=Add a space
-webide.menu.category.pages.addExistingPage=Add a existing page
+webide.menu.category.pages.addExistingPage=Add an existing page
 webide.menu.category.pages.addPage=Add a new page
 ##Other categories
 webide.menu.category.js=JS
