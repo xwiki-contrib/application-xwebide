@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1449845659000</creationDate>
-  <date>1450695566000</date>
-  <contentUpdateDate>1450695566000</contentUpdateDate>
+  <date>1450711114000</date>
+  <contentUpdateDate>1450711114000</contentUpdateDate>
   <version>1.1</version>
   <title>Translations</title>
   <defaultTemplate/>
@@ -172,6 +172,9 @@ webide.modals.switchClass.title=Changer d'éditeur de classe
 webide.modals.switchClass.button.save=Enregistrer &amp; changer
 webide.modals.switchClass.button.nosave=Changer sans enregistrer
 
+webide.modals.config.title=Configuration
+webide.modals.config.highlighting=Activer Syntax Highlighting
+
 ##Sheet
 webide.sheet.welcome=Bienvenue dans le Web IDE d'XWiki! Vous pouvez l'utiliser pour créer, éditer et exporter des applications pour XWiki. Ceci est la Page Principale du projet, elle contient ses meta-informations telles que la liste des Espaces et la liste des Pages de l'application.
 webide.sheet.error=**Votre espace de code n'est pas défini**. Il s'agit de l'espace où les éléments globaux (JS, CSS, Traductions, Macros...) seront placés lorsqu'ils seront créés depuis la vue logique. Vous devriez définir l'espace de code dés que possible. Tant qu'il ne sera pas spécifié, les éléments seront placés dans l'espace **{0}Code** (espace ajouté automatiquement à votre projet)
@@ -179,10 +182,11 @@ webide.sheet.error.link=Changer l'espace de code
 
 webide.sheet.howto.getstarted=__Pour commencer__:
 webide.sheet.howto.getstarted.1=* **Editer une page** de votre projet en cliquant sur l'une des actions d'édition dans le panneau de gauche.
-webide.sheet.howto.getstarted.2=* **Ajouter un espace** en cliquant sur le bouton "Ajouter" dans le menu (Vue physique) ou sur le {{html clean="false"}}&lt;span class="fa fa-plus"&gt;&lt;/span&gt;{{/html}} dans la catégorie "Pages" (Vue logique)
-webide.sheet.howto.getstarted.3=* **Ajouter une page existante** lorsque vous avez besoin d'importer une page du wiki sans intégrer à votre projet l'espace entier dans lequel elle se trouve
-webide.sheet.howto.getstarted.4=* **Ajouter une nouvelle page** quand vous souhaitez créer une nouvelle page vide, en cliquant sur le {{html clean="false"}}&lt;span class="fa fa-plus"&gt;&lt;/span&gt;{{/html}} sur le dossier souhaiter
+webide.sheet.howto.getstarted.2=* **Ajouter un espace** en cliquant sur le bouton "Ajouter" dans le menu (Vue physique) ou sur le {{html clean="false"}}&lt;span class="fa fa-plus"&gt;&lt;/span&gt;{{/html}} dans la catégorie "Pages" (Vue logique).
+webide.sheet.howto.getstarted.3=* **Ajouter une page existante** lorsque vous avez besoin d'importer une page du wiki sans intégrer à votre projet l'espace entier dans lequel elle se trouve.
+webide.sheet.howto.getstarted.4=* **Ajouter une nouvelle page** quand vous souhaitez créer une nouvelle page vide, en cliquant sur le {{html clean="false"}}&lt;span class="fa fa-plus"&gt;&lt;/span&gt;{{/html}} sur le dossier souhaiter.
 webide.sheet.howto.getstarted.5=* **Exporter votre projet** en tant que fichier .xar qui pourra être importé sur d'autres wikis ou publié sur extensions.xwiki.org.
+webide.sheet.howto.getstarted.6=* **Désactiver la coloration syntaxique** en cliquant sur {{html clean="false"}}&lt;span class="fa fa-cog"&gt;&lt;/span&gt;{{/html}} dans le menu. Cette option peut être utile si vous utilisez déjà un éditeur de texte personnalisé dans votre navigateur.
 
 webide.sheet.howto.shortcutsSH=__Raccourcis clavier avec la coloration syntaxique__:
 webide.sheet.howto.shortcutsSH.1=* **Ctrl + F** : Rechercher (1er résultat)

@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1449753999000</creationDate>
-  <date>1450695286000</date>
-  <contentUpdateDate>1450695286000</contentUpdateDate>
+  <date>1450711154000</date>
+  <contentUpdateDate>1450711154000</contentUpdateDate>
   <version>1.1</version>
   <title>Translations</title>
   <defaultTemplate/>
@@ -207,17 +207,21 @@ webide.modals.switchClass.title=Switch class editor
 webide.modals.switchClass.button.save=Save &amp; switch
 webide.modals.switchClass.button.nosave=Switch without saving
 
+webide.modals.config.title=Configuration
+webide.modals.config.highlighting=Enable Syntax Highlighting
+
 ##Sheet
 webide.sheet.welcome=Welcome to the XWiki WebIDE, you can use it to create, edit and export XWiki Applications. This is the Master Page of the project, it contains meta-data such as the list of Spaces and Pages which are part of the project.
 webide.sheet.error=**Your code space is not defined**. It is the space where the global elements (JS, CSS, TRanslations, Macros...) will be placed when created from the logical view. You should choose your code space as soon as posible. Without code space specified, the pages will be placed in the space **{0}Code** (that space has been added to your project)
 webide.sheet.error.link=Change the code space
 
 webide.sheet.howto.getstarted=__Get started__:
-webide.sheet.howto.getstarted.1=* **Edit a page** in your project by clicking on one of the edit buttons in the lefthand panel - you can edit the page in different modes for editing the content and metadata
-webide.sheet.howto.getstarted.2=* **Add a space** by clicking the "add new" button on the left (Physical view) or the {{html clean="false"}}&lt;span class="fa fa-plus"&gt;&lt;/span&gt;{{/html}} in the "Pages" category (Logical view)
-webide.sheet.howto.getstarted.3=* **Add an existing page** for times when you need to add a page which must be in a Space which is not part of your application's code
-webide.sheet.howto.getstarted.4=* **Create a new page** when you need to create a new empty page clicking on the {{html clean="false"}}&lt;span class="fa fa-plus"&gt;&lt;/span&gt;{{/html}} in the selected folder
+webide.sheet.howto.getstarted.1=* **Edit a page** in your project by clicking on one of the edit buttons in the lefthand panel - you can edit the page in different modes for editing the content and metadata.
+webide.sheet.howto.getstarted.2=* **Add a space** by clicking the "add new" button on the left (Physical view) or the {{html clean="false"}}&lt;span class="fa fa-plus"&gt;&lt;/span&gt;{{/html}} in the "Pages" category (Logical view).
+webide.sheet.howto.getstarted.3=* **Add an existing page** for times when you need to add a page which must be in a Space which is not part of your application's code.
+webide.sheet.howto.getstarted.4=* **Create a new page** when you need to create a new empty page clicking on the {{html clean="false"}}&lt;span class="fa fa-plus"&gt;&lt;/span&gt;{{/html}} in the selected folder.
 webide.sheet.howto.getstarted.5=* **Export your project** as a .xar file which can be imported to other wikis or published on extensions.xwiki.org.
+webide.sheet.howto.getstarted.6=* **Disable syntax highlighting** by clicking on {{html clean="false"}}&lt;span class="fa fa-cog"&gt;&lt;/span&gt;{{/html}} in the menu. You may have to disable this feature if you already use a custom text editor in your browser.
 
 webide.sheet.howto.shortcutsSH=__Shortcuts with Syntax Highlighting enabled__:
 webide.sheet.howto.shortcutsSH.1=* **Ctrl + F** : Search (first result)

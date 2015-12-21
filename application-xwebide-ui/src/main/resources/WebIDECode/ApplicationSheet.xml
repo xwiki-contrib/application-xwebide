@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1450444606000</date>
-  <contentUpdateDate>1450444606000</contentUpdateDate>
+  <date>1450710677000</date>
+  <contentUpdateDate>1450710677000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -1265,6 +1265,7 @@ $services.localization.render('webide.sheet.howto.getstarted.2')
 $services.localization.render('webide.sheet.howto.getstarted.3')
 $services.localization.render('webide.sheet.howto.getstarted.4')
 $services.localization.render('webide.sheet.howto.getstarted.5')
+$services.localization.render('webide.sheet.howto.getstarted.6')
 
 $services.localization.render('webide.sheet.howto.shortcutsSH')
 $services.localization.render('webide.sheet.howto.shortcutsSH.1')
