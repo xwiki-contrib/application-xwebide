@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1449753999000</creationDate>
-  <date>1450711154000</date>
-  <contentUpdateDate>1450711154000</contentUpdateDate>
+  <date>1450715198000</date>
+  <contentUpdateDate>1450711455000</contentUpdateDate>
   <version>1.1</version>
   <title>Translations</title>
   <defaultTemplate/>
@@ -103,6 +103,7 @@ webide.menu.export=Export as XAR
 webide.menu.button.refresh=Refresh the menu
 webide.menu.button.show=Show the menu
 webide.menu.button.hide=Hide the menu
+webide.menu.button.config=Configuration
 webide.menu.view.physical=Physical view
 webide.menu.view.logical=Logical view
 webide.menu.empty=(% class="noitems"%)Empty

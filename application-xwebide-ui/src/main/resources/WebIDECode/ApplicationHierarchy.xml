@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1450711230000</date>
-  <contentUpdateDate>1450709953000</contentUpdateDate>
+  <date>1450715490000</date>
+  <contentUpdateDate>1450714772000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -41,7 +41,7 @@
   <comment/>
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
-  <hidden>false</hidden>
+  <hidden>true</hidden>
   <object>
     <class>
       <name>XWiki.JavaScriptExtension</name>
@@ -1223,9 +1223,9 @@ require(required , function ($, Translations, SH, xm) {
       var jQueryTabId = '#'+getTabId(WikiEditor.editor, space, page, [locale]);
       var form_token = getDocumentReferenceData('form_token');
       $.ajax({
-        url: '/'+XWiki.webapppath+XWiki.servletpath+'save/'+getURLSpacesString(space)+'/'+page+'?language='+locale,
+        url: '/'+XWiki.webapppath+XWiki.servletpath+'save/'+getURLSpacesString(space)+'/'+page,
         type: 'POST',
-        data: 'form_token='+form_token+'&amp;xhidden='+state,
+        data: 'language='+locale+'&amp;form_token='+form_token+'&amp;xhidden='+state,
         success: function() {
           $(jQueryTabId+' .editorWikiHiddenSaved').val(state);
         },
@@ -1300,7 +1300,7 @@ require(required , function ($, Translations, SH, xm) {
         $.ajax({
           url: '/'+XWiki.webapppath+'rest/wikis/'+getDocumentReferenceData('wiki')+'/'+restSpaces+'/pages/'+getCurrentPage(false)+'/objects'+selectedObjectURL,
           type: "GET",
-          contentType: "application/xml",
+          contentType: "application/xml"
         }).success(function(dataContent){
           var tabId = getTabId(ObjectEditor.editor, getCurrentSpace(false), getCurrentPage(false), ObjectEditor.getParameters());
           var jQueryTabId = '#'+tabId;
@@ -1411,7 +1411,7 @@ require(required , function ($, Translations, SH, xm) {
         $.ajax({
           url: url,
           type: "GET",
-          contentType: "plain/text",
+          contentType: "text/html"
         }).success(function(dataContent){
           var dataContentTmp = $('&lt;div/&gt;').html(dataContent);
           var tabAdd = 'tab'+currentTabNumber+'_';
@@ -4150,7 +4150,7 @@ require(required , function ($, Translations, SH, xm) {
 (% class="hierarchyCloseBlockButtons" %)(((
 (% title="$services.localization.render('webide.menu.button.hide')" id="hierarchyClose" class="hierarchy-icon" %){{html clean="false"}}&lt;span class="fa fa-step-backward"&gt;&lt;/span&gt;{{/html}} 
 (% title="$services.localization.render('webide.menu.button.refresh')" id="hierarchyRefresh" class="hierarchy-icon" %){{html clean="false"}}&lt;span class="fa fa-refresh"&gt;&lt;/span&gt;{{/html}}
-(% title="$services.localization.render('webide.menu.button.refresh')" class="hierarchy-icon" data-toggle='modal' data-target='#editorConfig' %){{html clean="false"}}&lt;span class="fa fa-cog"&gt;&lt;/span&gt;{{/html}}
+(% title="$services.localization.render('webide.menu.button.config')" class="hierarchy-icon" data-toggle='modal' data-target='#editorConfig' %){{html clean="false"}}&lt;span class="fa fa-cog"&gt;&lt;/span&gt;{{/html}}
 )))
 )))
 #set($nestedSpaces = false)
