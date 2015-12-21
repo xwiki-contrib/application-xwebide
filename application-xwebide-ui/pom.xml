@@ -58,9 +58,9 @@
     </dependency>
     <dependency>
       <groupId>org.xwiki.contrib.editortool</groupId>
-      <artifactId>editor-tool-autocomplete-ui</artifactId>
+      <artifactId>editor-tool-highlighting-ui-code</artifactId>
       <type>xar</type>
-      <version>3.1.1</version>
+      <version>3.2</version>
     </dependency>
   </dependencies>
 </project>
