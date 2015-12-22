@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1450715490000</date>
+  <date>1450778045000</date>
   <contentUpdateDate>1450714772000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -808,8 +808,10 @@ require(required , function ($, Translations, SH, xm) {
           var rawtitle = decodeURIComponent(getRawTitle(getCurrentSpace(false), getCurrentPage(false), locale));
           var parentPage = decodeURIComponent(getParentPage(getCurrentSpace(false), getCurrentPage(false), locale));
           var isHidden = WikiEditor._getHidden(getCurrentSpace(false), getCurrentPage(false), locale);
-          var menuBlock = initOtherFieldsBlock($(jQueryTabId), jQueryTabId, Translations.panel.advanced);
-          var relatedElementsBlock = initOtherFieldsBlock($(jQueryTabId), jQueryTabId, Translations.panel.related);
+          var menuBlock = initOtherFieldsBlock($(jQueryTabId), jQueryTabId, 1, Translations.panel.advanced);
+          var relatedElementsBlock = initOtherFieldsBlock($(jQueryTabId), jQueryTabId, 2, Translations.panel.related);
+          initOtherFieldsBlock($(jQueryTabId), jQueryTabId, 3, Translations.panel.shortcuts);
+          WikiEditor._loadRelatedElements(getCurrentSpace(false), getCurrentPage(false), relatedElementsBlock);
           $(jQueryTabId).append('&lt;div class="editorWikiTabContent"&gt;&lt;div class="editorPropertyLabel"&gt;&lt;p class="editorWikiTitleLabel"&gt;'+Translations.wiki.title+'&lt;/p&gt;&lt;/div&gt; &lt;input type="text" class="editorWikiTitle" value="'+rawtitle+'" /&gt;&lt;div class="editorPropertyLabel"&gt;&lt;p class="editorWikiTitleLabel"&gt;'+Translations.wiki.content+'&lt;/p&gt;&lt;/div&gt;&lt;textarea id="content_'+tabId+'"&gt;&lt;/textarea&gt;&lt;/div&gt;');
           $(jQueryTabId+' &gt; .editorWikiTabContent &gt; textarea').val(dataContent);
           var advancedFieldBlock = $(menuBlock).find('.editorOtherFieldsBlockContent');
@@ -820,7 +822,6 @@ require(required , function ($, Translations, SH, xm) {
             hiddenState = '1';
           }
           $(advancedFieldBlock).append('&lt;div class="editorPropertyLabel"&gt;&lt;p&gt;'+Translations.wiki.parent+'&lt;/p&gt;&lt;/div&gt; &lt;input type="text" class="editorWikiParent" value="'+parentPage+'" size="45"/&gt;&lt;br&gt;&lt;div class="editorPropertyLabel"&gt;&lt;p&gt;'+Translations.wiki.hidden+'&lt;/p&gt;&lt;/div&gt; &lt;input type="checkbox" class="editorWikiHidden" '+addHidden+'/&gt;&lt;input type="hidden" class="editorWikiHiddenSaved" value="'+hiddenState+'"/&gt;');
-          WikiEditor._loadRelatedElements(getCurrentSpace(false), getCurrentPage(false), relatedElementsBlock);
           if(WebIDE.syntaxHighlighting) {
             // Add the CodeMirror editor
             WikiEditor.initCodeMirror(tabId);
@@ -1350,8 +1351,9 @@ require(required , function ($, Translations, SH, xm) {
       }
       var dataNode = $('&lt;form method="post" action="/'+XWiki.webapppath+''+XWiki.servletpath+'save/'+urlSpaces+'/'+file+'" id="tab'+currentTabNumber+'_objectIDEform" class="objectIDEform"&gt;&lt;input type="hidden" name="form_token" value="'+form_token+'" /&gt;&lt;/form&gt;').appendTo($(jQueryTabId));
       if(ObjectEditor._getCurrentObject(false)) {
-        initOtherFieldsBlock(dataNode, jQueryTabId, Translations.panel.advanced);
-        menuNode = $(jQueryTabId+' .editorOtherFieldsBlockContent');
+        var advancedBlock = initOtherFieldsBlock(dataNode, jQueryTabId, 1, Translations.panel.advanced);
+        initOtherFieldsBlock(dataNode, jQueryTabId, 3, Translations.panel.shortcuts);
+        menuNode = advancedBlock.find('.editorOtherFieldsBlockContent');
         if(ObjectEditor._getCurrentObject(false) === 'XWiki.WikiMacroClass') {
           $('&lt;input type="hidden" id="tab'+currentTabNumber+'_addClassList" value="XWiki.WikiMacroParameterClass" /&gt;&lt;button class="btn btn-success" id="tab'+currentTabNumber+'_editorObjectAddButton"&gt;'+Translations.objects.macroAddParam+'&lt;/button&gt;&lt;button class="btn btn-default" id="tab'+currentTabNumber+'_editorExpandAllButton"&gt;'+Translations.objects.expand+'&lt;/button&gt;&lt;button class="btn btn-default" id="tab'+currentTabNumber+'_editorCollapseAllButton"&gt;'+Translations.objects.collapse+'&lt;/button&gt;&lt;br&gt;').appendTo(menuNode);
         }
@@ -2135,8 +2137,9 @@ require(required , function ($, Translations, SH, xm) {
         var tabId = getTabId(WebIDE.currentEditor, getCurrentSpace(false), getCurrentPage(false), AWMClassEditor.getParameters());
         var jQueryTabId = '#'+tabId;
         var tabNumberId = getTabNumber(jQueryTabId);
-        initOtherFieldsBlock($(jQueryTabId), jQueryTabId, Translations.panel.advanced);
-        var advancedFieldBlock = $(jQueryTabId+' .editorOtherFieldsBlockContent');
+        var advancedFieldBlock = initOtherFieldsBlock($(jQueryTabId), jQueryTabId, 1, Translations.panel.advanced);
+        advancedFieldBlock = advancedFieldBlock.find('.editorOtherFieldsBlockContent');
+        initOtherFieldsBlock($(jQueryTabId), jQueryTabId, 3, Translations.panel.shortcuts);
         var classEditorStorage = window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.classEditor'] || 'basic';
         classEditorStorage = (classEditorStorage === 'advanced') ? 'advanced' : 'basic';
         var urlIframe = (classEditorStorage === 'basic') ? "/xwiki/bin/edit/"+getCurrentSpace(false)+"/"+getCurrentPage(false)+"?editor=inline&amp;sheet=AppWithinMinutes.ClassEditSheet" : "/xwiki/bin/edit/"+getCurrentSpace(false)+"/"+getCurrentPage(false)+"?editor=class";
@@ -2679,6 +2682,9 @@ require(required , function ($, Translations, SH, xm) {
       });
       window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.tabs'] = openedTabs;
       return unsaved;
+    },
+    displayShortcutsInfo : function(shortcutBlock) {
+      $(shortcutBlock).html(Translations.shortcuts);
     },
     init : function() {
       setCurrentPage(getDocumentReferenceData('page'));
@@ -3395,27 +3401,62 @@ require(required , function ($, Translations, SH, xm) {
    * @input DOM dataNode : The node where the block has to be created
    * @input String jQueryTabId : The jQuery Id of the selected tab
    */
-  function initOtherFieldsBlock(dataNode, jQueryTabId, title) {
+  function initOtherFieldsBlock(dataNode, jQueryTabId, type, title) {
+    // Type 1 = Advanced fields
+    // Type 2 = Related elements
+    // Type 3 = Shortcuts info
     var menuNodeBlock = $('&lt;div class="editorOtherFieldsBlock"&gt;&lt;/div&gt;').appendTo(dataNode);
-    $('&lt;div class="editorOtherFieldsBlockContent"&gt;&lt;/div&gt;').appendTo(menuNodeBlock);
+    var innerContent = $('&lt;div class="editorOtherFieldsBlockContent"&gt;&lt;/div&gt;').appendTo(menuNodeBlock);
     $(menuNodeBlock).css({'backgroundColor' : $('#hierarchyBlock').css('backgroundColor')});
     $('&lt;span class="editorDisplayAdvancedFields"&gt;'+$('#hierarchyOpenBlock').html()+'&lt;/span&gt; &lt;strong class="editorOtherFieldsBlockTitle"&gt;'+title+'&lt;/strong&gt;').prependTo(menuNodeBlock);
+    var icon = '';
+    switch(type) {
+      case 2:
+        icon = 'fa-info-circle';
+        break;
+      case 3:
+        icon = 'fa-question-circle';
+        break;
+      default:
+        icon = 'fa-hdd-o'
+    }
     $(menuNodeBlock).find('.editorDisplayAdvancedFields').click(function() {
       $(menuNodeBlock).find('.editorOtherFieldsBlockContent').toggle();
       $(menuNodeBlock).find('.editorOtherFieldsBlockTitle').toggle();
       if($(menuNodeBlock).find('.editorOtherFieldsBlockContent').is(':visible')) {
+        if(type === 3) { // Save the preferences about shortcuts
+          window.localStorage['XWiki.extension.XWebIDE.displayShortcuts'] = 1;
+          console.log('1111');
+        }
         $(menuNodeBlock).find('.editorDisplayAdvancedFields').html($('#hierarchyOpenBlock').html());
         $(menuNodeBlock).css({
           'width' : '400px'
         });
       }
       else {
-        $(menuNodeBlock).find('.editorDisplayAdvancedFields').html($('#hierarchyClose').html());
+        if(type === 3) { // Save the preferences about shortcuts
+          window.localStorage['XWiki.extension.XWebIDE.displayShortcuts'] = 0;
+          console.log('0000');
+        }
+        $(menuNodeBlock).find('.editorDisplayAdvancedFields').html('&lt;span title="'+title+'" class="fa '+icon+'"&gt;&lt;/span&gt;');
         $(menuNodeBlock).css({
           'width' : 'auto'
         });
       }
     });
+    if(type === 3) {
+      WebIDE.displayShortcutsInfo($(innerContent));
+      var storedState = window.localStorage['XWiki.extension.XWebIDE.displayShortcuts']
+      var state = (storedState &amp;&amp; storedState==1) ? true : false;
+      if(!state) { // Hide
+        $(menuNodeBlock).find('.editorOtherFieldsBlockContent').hide();
+        $(menuNodeBlock).find('.editorOtherFieldsBlockTitle').hide();
+        $(menuNodeBlock).find('.editorDisplayAdvancedFields').html('&lt;span title="'+title+'" class="fa '+icon+'"&gt;&lt;/span&gt;');
+        $(menuNodeBlock).css({
+          'width' : 'auto'
+        });
+      }
+    }
     return menuNodeBlock;
   }
 

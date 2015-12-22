@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434698860000</creationDate>
-  <date>1450715431000</date>
-  <contentUpdateDate>1450711857000</contentUpdateDate>
+  <date>1450779794000</date>
+  <contentUpdateDate>1450775902000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -1271,8 +1271,7 @@ $services.localization.render('webide.sheet.howto.shortcutsSH')
 $services.localization.render('webide.sheet.howto.shortcutsSH.1')
 $services.localization.render('webide.sheet.howto.shortcutsSH.2')
 $services.localization.render('webide.sheet.howto.shortcutsSH.3')
-##TODO: Remove comment when Syntax Highlighting will use a version of CodeMirror &gt;= 5.5
-##$services.localization.render('webide.sheet.howto.shortcutsSH.4')
+$services.localization.render('webide.sheet.howto.shortcutsSH.4')
 $services.localization.render('webide.sheet.howto.shortcutsSH.5')
 $services.localization.render('webide.sheet.howto.shortcutsSH.6')
 
