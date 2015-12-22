@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1450780731000</date>
+  <date>1450793281000</date>
   <contentUpdateDate>1450714772000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -672,6 +672,13 @@ require(required , function ($, Translations, SH, xm) {
           });
         }
       });
+      $('#hierarchyNewFolderName').bind('keypress', function (event) {
+        var code = (!event.charCode ? event.which : event.charCode);
+        if (code == 61) { // Prevent '=' in the space name, it crashes the project permanently
+          event.preventDefault();
+          return false;
+        }
+      });
 
       // Save or discard the content when a tab is closed ? :
       $('#hierarchySaveAndCloseModal, #hierarchyDiscardAndCloseModal').click(function(e){
@@ -850,10 +857,10 @@ require(required , function ($, Translations, SH, xm) {
           setSavingState(true);
         }
         var tabButtonElement = $('.editorTabButton[data-tabnumber="'+tabNumberId+'"]');
-        var page = decodeURIComponent($(tabButtonElement).attr('data-page'));
-        var space = decodeURIComponent($(tabButtonElement).attr('data-space'));
+        var page = $(tabButtonElement).attr('data-page');
+        var space = $(tabButtonElement).attr('data-space');
         var locale = $(tabButtonElement).attr('data-locale');
-        var jQueryTabId = '#'+getTabId(WikiEditor.editor, space, page, WikiEditor.getParameters());
+        var jQueryTabId = '#'+getTabId(WikiEditor.editor, $(tabButtonElement).attr('data-space'), $(tabButtonElement).attr('data-page'), WikiEditor.getParameters());
         var restSpaces = getRestSpacesString(space);
         var restLocale = (locale === 'default' || locale === '') ? '' : '/translations/'+locale;
         var fileTitle = getCurrentTitle(jQueryTabId);
@@ -1721,7 +1728,7 @@ require(required , function ($, Translations, SH, xm) {
         e.preventDefault();
         var modal = true;
         var folder = $(this).attr('data-space') || '';
-        var file = encodeURIComponent($(this).attr('data-page')) || '';
+        var file = $(this).attr('data-page') || '';
         $('#hierarchyObjectPageInput').attr('disabled', false);
         $('#hierarchyObjectSpace').html(folder);
         $('#hierarchyObjectPageInputDefault').val('');
@@ -2276,7 +2283,6 @@ require(required , function ($, Translations, SH, xm) {
         $('#hierarchyAddSheetBlock').hide();
         var folder = $(this).attr('data-space') || '';
         var file = $(this).attr('data-page') || '';
-        file = encodeURIComponent(file);
 
         $('#hierarchyClassSpace').html(folder);
         $('#hierarchyClassInput').val('');
@@ -2289,7 +2295,7 @@ require(required , function ($, Translations, SH, xm) {
           $('#hierarchyClassSheet').val('');
           var classFile = file; // e.g.: ApplicationClass
           file = file.substr(0, file.length - 5); // e.g.: Application
-          $('#hierarchyClassInput').val(file+"Sheet");
+          $('#hierarchyClassInput').val(decodeURIComponent(file)+"Sheet");
           $('#hierarchyAddClass').attr('data-type', 'sheet');
           $('#hierarchyAddClass').attr('data-classname', classFile);
           $('#hierarchyClassSheet').on('change', function() {
@@ -3352,6 +3358,7 @@ require(required , function ($, Translations, SH, xm) {
     var decodedParameters = parameters.map(decodeURIComponent);
     var currentModule = Modules[mode];
     if(tabName.length &gt; 30) tabName = tabName.substr(0,27)+'...';
+    tabName = decodeURIComponent(tabName);
     var prettyModeName;
     var iconModeId;
     var tabModeClass;
@@ -3375,7 +3382,7 @@ require(required , function ($, Translations, SH, xm) {
     tabModeClass = 'editor'+prettyModeName+'Tab';
     if(!$(jQueryId).length) {
       $(WebIDE.TAB_MAIN_CONTAINER).append('&lt;div id="'+id+'" class="editorTab '+tabModeClass+'" data-tabnumber="'+WebIDE.tabCount+'"&gt;&lt;/div&gt;');
-      var tabButton = $('&lt;span class="editorTabButton" data-tabnumber="'+WebIDE.tabCount+'" data-editor="'+mode+'" data-space="'+encodeURIComponent(folder)+'" data-page="'+encodeURIComponent(file)+'" '+addEditorParameters+' title="('+prettyModeName+') '+folder+'.'+file+'"&gt;'+$(iconModeId).html()+' &lt;strong class="unsavedTab"&gt;*&lt;/strong&gt; '+tabName+'&lt;/span&gt;').appendTo('#editorTabBar').on('mousedown', function(e) {
+      var tabButton = $('&lt;span class="editorTabButton" data-tabnumber="'+WebIDE.tabCount+'" data-editor="'+mode+'" data-space="'+folder+'" data-page="'+file+'" '+addEditorParameters+' title="('+prettyModeName+') '+folder+'.'+file+'"&gt;'+$(iconModeId).html()+' &lt;strong class="unsavedTab"&gt;*&lt;/strong&gt; '+tabName+'&lt;/span&gt;').appendTo('#editorTabBar').on('mousedown', function(e) {
         e.preventDefault();
         if(e.which === 1) { // Left-click
           if(decodeURIComponent(file) !== getCurrentPage(false) || decodeURIComponent(folder) !== getCurrentSpace(false) || $(decodedParameters).not(currentModule.getParameters()).length !== 0 || $(currentModule.getParameters()).not(decodedParameters).length !== 0 || WebIDE.currentEditor !== mode) {
@@ -3427,7 +3434,6 @@ require(required , function ($, Translations, SH, xm) {
       if($(menuNodeBlock).find('.editorOtherFieldsBlockContent').is(':visible')) {
         if(type === 3) { // Save the preferences about shortcuts
           window.localStorage['XWiki.extension.XWebIDE.displayShortcuts'] = 1;
-          console.log('1111');
         }
         $(menuNodeBlock).find('.editorDisplayAdvancedFields').html($('#hierarchyOpenBlock').html());
         $(menuNodeBlock).css({
@@ -3437,7 +3443,6 @@ require(required , function ($, Translations, SH, xm) {
       else {
         if(type === 3) { // Save the preferences about shortcuts
           window.localStorage['XWiki.extension.XWebIDE.displayShortcuts'] = 0;
-          console.log('0000');
         }
         $(menuNodeBlock).find('.editorDisplayAdvancedFields').html('&lt;span title="'+title+'" class="fa '+icon+'"&gt;&lt;/span&gt;');
         $(menuNodeBlock).css({
