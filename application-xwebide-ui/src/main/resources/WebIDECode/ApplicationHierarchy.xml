@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1450778045000</date>
+  <date>1450780731000</date>
   <contentUpdateDate>1450714772000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -123,11 +123,12 @@
     </property>
     <property>
       <code>var syntaxHURL = document.getElementById('syntaxHURL').value;
+var translationsURL = document.getElementById('translationsURL').value;
 if(require.toUrl('xwiki-meta').substr(0,7) === '/xwiki/') {
-  var required = ['jquery', '/xwiki/bin/jsx/WebIDECode/JSTranslations', syntaxHURL, 'xwiki-meta'];
+  var required = ['jquery', translationsURL, syntaxHURL, 'xwiki-meta'];
 }
 else {
-  var required = ['jquery', '/xwiki/bin/jsx/WebIDECode/JSTranslations', syntaxHURL];
+  var required = ['jquery', translationsURL, syntaxHURL];
 }
 var WebIDESavedContent = []; //WebIDE plugins (such as RealTime) should be able to modify the value of the saved content
 require(required , function ($, Translations, SH, xm) {
