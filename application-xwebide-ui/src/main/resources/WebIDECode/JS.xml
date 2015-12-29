@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434954547000</creationDate>
-  <date>1447338548000</date>
-  <contentUpdateDate>1443170830000</contentUpdateDate>
+  <date>1451378397000</date>
+  <contentUpdateDate>1448966573000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -239,83 +239,10 @@ $(function(){
         if(bootstrap) {
           $('#modalProjectSelection').modal('show');
         }
-        /*else {
-          $('button[data-dismiss="modal"]').click(function() {
-            $('#modalProjectSelection').hide();
-          });
-          $('#modalProjectSelection').css({
-            "width" : "40%",
-            "border" : "1px solid black",
-            "backgroundColor" : "#CCCCCC",
-            "borderRadius" : "5px",
-            "position" : "absolute",
-            "left" : "30%",
-            "top" : "20%",
-            "padding" : "10px"
-          });
-          $('.modal-header .close').css({
-            "float" : "right",
-            "position" : "absolute",
-            "right" : "5px",
-            "top" : "5px"
-          });
-          $('.modal-header .modal-title').css({
-            "marginTop" : "0px"
-          });
-        }*/
       }
     }
 
   });
-
-  var hierarchyStatus = false;
-  function displayHierarchy(masterSpace, masterName) {
-    if(!hierarchyStatus &amp;&amp; !document.getElementById('hierarchyBlock') &amp;&amp; XWiki.editor == "class") {
-      hierarchyStatus = true;
-      var visibleSpaces = getCookieHierarchy(encodeURIComponent(masterName), 'visibleSpaces');
-      var visiblePages = getCookieHierarchy(encodeURIComponent(masterName), 'visiblePages');
-      var visibleCategory = getCookieHierarchy(encodeURIComponent(masterName), 'visibleCategory');
-      var wikiGetURL = '/'+XWiki.webapppath+''+XWiki.servletpath+'get/';
-      var remotePageName = currentPageEscaped;
-      var remoteSpaceName = currentSpaceEscaped;
-      var currentTree = getCookieHierarchy(encodeURIComponent(masterName), 'currentTree') || 'logical';
-      if(hashURL.size() == 3) {
-        var sourcePage = hashURL[1];
-        var sourceSpace = hashURL[2];
-        remotePageName = encodeURIComponent(sourcePage.replace(/\\/g, '\\\\').replace(/\./g, '\\\.'));
-        remoteSpaceName = encodeURIComponent(sourceSpace.replace(/\\/g, '\\\\').replace(/\./g, '\\\.'));
-        window.location.hash = '#!XWebIDE';
-      }
-      if(window.docgeturl.indexOf('/get/') != 0) wikiGetURL = window.docgeturl.substring(0,window.docgeturl.indexOf('/get/')+5);
-      $.ajax({
-        url: wikiGetURL+"WebIDECode/ApplicationHierarchy?xpage=plain&amp;action="+XWiki.contextaction+"&amp;editor="+XWiki.editor+"&amp;masterPage="+encodeURI(masterSpace)+"."+encodeURI(masterName)+"&amp;remotePage="+remoteSpaceName+"."+remotePageName+"&amp;visibleSpaces="+encodeURIComponent(visibleSpaces)+"&amp;visiblePages="+encodeURIComponent(visiblePages)+"&amp;visibleCategory="+encodeURIComponent(visibleCategory)+"&amp;treeview="+currentTree,
-        type: "GET",
-        contentType: "text/plain",
-      }).success(function(data){
-        var mainBlock = '';
-        mainBlock = '#propupdate';
-        $(mainBlock).before('&lt;div id="hierarchyBlock" &gt;'+data+'&lt;/div&gt;');
-        $('head').append('&lt;link rel="stylesheet" type="text/css" href="/'+XWiki.webapppath+''+XWiki.servletpath+'ssx/WebIDECode/ApplicationHierarchy"/&gt;');
-        $('head').append('&lt;script type="text/javascript" src="/'+XWiki.webapppath+''+XWiki.servletpath+'jsx/WebIDECode/ApplicationHierarchy" defer="defer"&gt;&lt;/script&gt;');
-        $(mainBlock).css({
-          "overflow" : "auto",
-          "display" : "block",
-          "padding" : "20px"
-        });
-      });
-    }
-  }
-
-  function getCookieHierarchy(masterName, cname) {
-    var name = masterName+"-"+cname + "=";
-    var ca = document.cookie.split(';');
-    for(var i=0; i&lt;ca.length; i++) {
-      var c = ca[i];
-      while (c.charAt(0)==' ') c = c.substring(1);
-      if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
-    }
-    return "";
-  }
 
   /**
    * Check if Nested spaces are available if that version of XWiki
@@ -326,23 +253,6 @@ $(function(){
       return true;
     else
       return false;
-  }
-
-  /**
-   * @param spaces The string describing spaces with XWiki classic format 'A.B'
-   * @return The string describing spaces with XWiki REST format 'spaces/A/spaces/B'
-   */
-  function getRestSpacesString(spaces) {
-    if(NESTED_SPACES) {
-      var spacesEnc = spaces.replace(/%5C\./g, '%5C%2E').replace(/\\\./g, '%5C%2E');
-      var spacesList = spacesEnc.split('.');
-      var restFormat = '';
-      for(var i=0; i&lt;spacesList.length; i++) {
-        restFormat += 'spaces/'+spacesList[i].replace('%5C%2E', '\.')+'/';
-      }
-      return restFormat.substring(0, restFormat.length - 1);
-    }
-    else return 'spaces/'+spaces+'';
   }
 
   /**
