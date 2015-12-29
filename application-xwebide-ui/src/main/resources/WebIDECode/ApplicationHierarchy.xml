@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1450793281000</date>
+  <date>1451378827000</date>
   <contentUpdateDate>1450714772000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -210,7 +210,7 @@ require(required , function ($, Translations, SH, xm) {
         $('.hierarchyChangeTree').off('click', Hierarchy.changeTreeView);
         $('.hierarchyChangeTree.active').removeClass('active');
         WebIDE.currentTree = 'logical';
-        setCookieHierarchy('currentTree', 'logical', 31);
+        setCookieHierarchy('currentTree', 'logical');
         $(this).addClass('active');
         Hierarchy.reload();
       }
@@ -218,7 +218,7 @@ require(required , function ($, Translations, SH, xm) {
         $('.hierarchyChangeTree').off('click', Hierarchy.changeTreeView);
         $('.hierarchyChangeTree.active').removeClass('active');
         WebIDE.currentTree = 'physical';
-        setCookieHierarchy('currentTree', 'physical', 31);
+        setCookieHierarchy('currentTree', 'physical');
         $(this).addClass('active');
         Hierarchy.reload();
       }
@@ -457,7 +457,7 @@ require(required , function ($, Translations, SH, xm) {
           }
           $(document.getElementById('hierarchyFolderIcon_'+spaceToggle)).find('span').attr('class', 'fa fa-caret-down');
         }
-        setCookieHierarchy('visibleSpaces', WebIDE.visibleSpaces, 365);
+        setCookieHierarchy('visibleSpaces', WebIDE.visibleSpaces);
       });
       // Display or hide the details of a page by clicking on its name
       $('.hierarchy-displayPage').off('click');
@@ -477,7 +477,7 @@ require(required , function ($, Translations, SH, xm) {
           }
           $(this).find('.hierarchyDisplayPageIcon &gt; span').attr('class', 'fa fa-caret-down');
         }
-        setCookieHierarchy('visiblePages', WebIDE.visiblePages, 365);
+        setCookieHierarchy('visiblePages', WebIDE.visiblePages);
       });
       $('.hierarchy-toggleCategory').off('click');
       $('.hierarchy-toggleCategory').on('click', function(){
@@ -496,7 +496,7 @@ require(required , function ($, Translations, SH, xm) {
           }
           $(this).find('.hierarchyDisplayPageIcon &gt; span').attr('class', 'fa fa-caret-down');
         }
-        setCookieHierarchy('visibleCategory', WebIDE.visibleCategory, 365);
+        setCookieHierarchy('visibleCategory', WebIDE.visibleCategory);
       });
       // Add a folder (if no bootstrap)
       $('.newFolder').off('click');
@@ -3767,21 +3767,11 @@ require(required , function ($, Translations, SH, xm) {
    * Cookies management
    * Create or read cookies whose name begin with "NameOfTheMasterPage-"
    */
-  function setCookieHierarchy(cname, cvalue, exdays) {
-    var d = new Date();
-    d.setTime(d.getTime() + (exdays*24*60*60*1000));
-    var expires = "expires="+d.toUTCString();
-    document.cookie = WebIDE.masterPage+"-"+cname + "=" + cvalue + "; " + expires + ";path=/";
+  function setCookieHierarchy(name, value) {
+    window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.'+name] = value;
   }
-  function getCookieHierarchy(cname) {
-    var name = WebIDE.masterPage+"-"+cname + "=";
-    var ca = document.cookie.split(';');
-    for(var i=0; i&lt;ca.length; i++) {
-      var c = ca[i];
-      while (c.charAt(0)==' ') c = c.substring(1);
-      if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
-    }
-    return "";
+  function getCookieHierarchy(name) {
+    return window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.'+name] || '';
   }
   /**
    * Call a function everytime the height of a specified element change
