@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--
  *
  * See the NOTICE file distributed with this work for additional
@@ -51,6 +50,30 @@
       <name>Yann Flory</name>
     </developer>
   </developers>
+  <repositories>
+    <repository>
+      <id>xwiki-snapshots</id>
+      <name>XWiki Nexus Snapshot Repository Proxy</name>
+      <url>http://nexus.xwiki.org/nexus/content/groups/public-snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>xwiki-releases</id>
+      <name>XWiki Nexus Releases Repository Proxy</name>
+      <url>http://nexus.xwiki.org/nexus/content/groups/public</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
   <modules>
     <module>application-xwebide-ui</module>
   </modules>
