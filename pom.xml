@@ -41,7 +41,7 @@
   <scm>
     <connection>scm:git:git://github.com/xwiki-contrib/application-xwebide.git</connection>
     <developerConnection>scm:git:git@github.com:xwiki-contrib/application-xwebide.git</developerConnection>
-    <url>https://github.com/xwiki-contrib/application-xwebide</url>
+    <url>https://github.com/xwiki-contrib/application-xwebide/tree/master/</url>
     <tag>HEAD</tag>
   </scm>
   <developers>
