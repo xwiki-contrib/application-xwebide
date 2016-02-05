@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347285000</creationDate>
-  <date>1450714504000</date>
-  <contentUpdateDate>1450176503000</contentUpdateDate>
+  <date>1454690451000</date>
+  <contentUpdateDate>1454690451000</contentUpdateDate>
   <version>1.1</version>
   <title>LogicalTree</title>
   <defaultTemplate/>
@@ -75,7 +75,7 @@
       #set($pageName = $element[0].replace('\', '\\').replace('.', '\.'))##'
       #set($localeList = $xwiki.getDocument("$spaceName.$pageName").getTranslationList())
       #set($localeList = $sorttool.sort($localeList))
-      #if($localeList.size() &gt; 0)
+      #if($localeList &amp;&amp; $localeList.size() &gt; 0)
         #set($ok = $localeList.add(0, $xwiki.getDocument("$spaceName.$pageName").defaultLanguage))
       #end
       #if(!$allPagesList.contains(["$spaceName.$pageName", $localeList]))
@@ -119,7 +119,7 @@
   #set($pageFullName = $pageData[0])
   #set($classCount = $xwiki.getClass($pageFullName).properties.size())
   #set($document = $xwiki.getDocument($pageFullName))
-  #if($classCount &gt; 0 || $document.getObject('XWiki.DocumentSheetBinding').sheet == 'XWiki.ClassSheet')
+  #if(($classCount &gt; 0 || $document.getObject('XWiki.DocumentSheetBinding').sheet == 'XWiki.ClassSheet') &amp;&amp; $document.hasAccessLevel("view"))
     #set($ok = $classesInProjectList.add($pageFullName))
     #set($ok = $pagesInClassesList.add($pageFullName))
     #set($pageFullNameEscaped = $escapetool.url($pageFullName).replace("+", "%20"))
@@ -231,197 +231,199 @@
   #set($pageFullName = $pageFullNameData[0])
   #set($pageLocaleList = $pageFullNameData[1])
   #set($pageDoc = $xwiki.getDocument($pageFullName))
-  #set($space = $pageDoc.space)
-  #set($page = $pageDoc.name)
-  ## Get objects in the page
-  #set($jsxList = $pageDoc.getObjects('XWiki.JavaScriptExtension'))
-  #set($ssxList = $pageDoc.getObjects('XWiki.StyleSheetExtension'))
-  #set($docSheetList = $pageDoc.getObjects('XWiki.DocumentSheetBinding'))
-  ## START - Remove from the "Pages" category elements that should be displayed separately
-  #set($macrosList = $pageDoc.getObjects('XWiki.WikiMacroClass'))
-  #set($panelsList = $pageDoc.getObjects('Panels.PanelClass'))
-  #set($translationsList = $pageDoc.getObjects('XWiki.TranslationDocumentClass'))
-  #set($uIXList = $pageDoc.getObjects('XWiki.UIExtensionClass'))
-  #set($ok = $allJSList.addAll($jsxList))
-  #set($ok = $allCSSList.addAll($ssxList))
-  #set($ok = $allMacrosList.addAll($macrosList))
-  #set($ok = $allPanelsList.addAll($panelsList))
-  #set($ok = $allTranslationsList.addAll($translationsList))
-  #set($ok = $allUIXList.addAll($uIXList))
-  #set($isInClassesList = $pagesInClassesList.contains($pageFullName)) ## Classes should not be displayed in the 'pages' tree
-  #set($isGlobal = false)
-  #if(($space == $codeSpace &amp;&amp; ($page == 'JS' &amp;&amp; $pageDoc.getObjects('XWiki.JavaScriptExtension', 'use', 'always').size()&gt;0) || ($page == 'CSS' &amp;&amp; $pageDoc.getObjects('XWiki.StyleSheetExtension', 'use', 'always').size()&gt;0)) || $macrosList.size()&gt;0 || $panelsList.size()&gt;0 || $translationsList.size()&gt;0)
-    #set($isGlobal = true) ## Means the page won't be displayed in the "Pages" category
-  #end
-  ## END - Remove
-  ## Compute space elements
-  #if($space != $oldSpace)
-    #set($oldSpace = $space)
-    #set($spaceInListInit = $spacesListInit.contains($space)) ##Spaces in the 'spaces' object property
-    #set($spaceInListNested = $spacesListNested.contains($space)) ##Spaces to displays
-    #set($spaceEscaped = $escapetool.url($space).replace("+", "%20"))
-    ## Determine the level of depth of the space to know the number of starrs (level of sublist)
-    #set($depthLevel = -1)
-    #set($tlist = $space.replace("\.", "%5C%2E").split('\.'))
-    #set($spacePath = "")
-    #set($Integer = 0)
-    #foreach($item in $tlist)
-      #set($spacePath = "${spacePath}$item.replace('%5C%2E', '\.')")
-      #if($spacesListNested.contains($spacePath))
-        #set($depthLevel = $depthLevel+1)
+  #if($pageDoc.hasAccessLevel("view"))
+    #set($space = $pageDoc.space)
+    #set($page = $pageDoc.name)
+    ## Get objects in the page
+    #set($jsxList = $pageDoc.getObjects('XWiki.JavaScriptExtension'))
+    #set($ssxList = $pageDoc.getObjects('XWiki.StyleSheetExtension'))
+    #set($docSheetList = $pageDoc.getObjects('XWiki.DocumentSheetBinding'))
+    ## START - Remove from the "Pages" category elements that should be displayed separately
+    #set($macrosList = $pageDoc.getObjects('XWiki.WikiMacroClass'))
+    #set($panelsList = $pageDoc.getObjects('Panels.PanelClass'))
+    #set($translationsList = $pageDoc.getObjects('XWiki.TranslationDocumentClass'))
+    #set($uIXList = $pageDoc.getObjects('XWiki.UIExtensionClass'))
+    #set($ok = $allJSList.addAll($jsxList))
+    #set($ok = $allCSSList.addAll($ssxList))
+    #set($ok = $allMacrosList.addAll($macrosList))
+    #set($ok = $allPanelsList.addAll($panelsList))
+    #set($ok = $allTranslationsList.addAll($translationsList))
+    #set($ok = $allUIXList.addAll($uIXList))
+    #set($isInClassesList = $pagesInClassesList.contains($pageFullName)) ## Classes should not be displayed in the 'pages' tree
+    #set($isGlobal = false)
+    #if(($space == $codeSpace &amp;&amp; ($page == 'JS' &amp;&amp; $pageDoc.getObjects('XWiki.JavaScriptExtension', 'use', 'always').size()&gt;0) || ($page == 'CSS' &amp;&amp; $pageDoc.getObjects('XWiki.StyleSheetExtension', 'use', 'always').size()&gt;0)) || $macrosList.size()&gt;0 || $panelsList.size()&gt;0 || $translationsList.size()&gt;0)
+      #set($isGlobal = true) ## Means the page won't be displayed in the "Pages" category
+    #end
+    ## END - Remove
+    ## Compute space elements
+    #if($space != $oldSpace)
+      #set($oldSpace = $space)
+      #set($spaceInListInit = $spacesListInit.contains($space)) ##Spaces in the 'spaces' object property
+      #set($spaceInListNested = $spacesListNested.contains($space)) ##Spaces to displays
+      #set($spaceEscaped = $escapetool.url($space).replace("+", "%20"))
+      ## Determine the level of depth of the space to know the number of starrs (level of sublist)
+      #set($depthLevel = -1)
+      #set($tlist = $space.replace("\.", "%5C%2E").split('\.'))
+      #set($spacePath = "")
+      #set($Integer = 0)
+      #foreach($item in $tlist)
+        #set($spacePath = "${spacePath}$item.replace('%5C%2E', '\.')")
+        #if($spacesListNested.contains($spacePath))
+          #set($depthLevel = $depthLevel+1)
+        #end
+        #set($spacePath = "${spacePath}.")
       #end
-      #set($spacePath = "${spacePath}.")
-    #end
-    #set($addStars = $stringtool.repeat('*', $depthLevel))
-      ##Determine the name of the subspace (without its parents), use when renaming the folder
-    #set($subspaceNameIndex = $tlist.size() - 1)
-    #set($subspaceName = $tlist.get($subspaceNameIndex).replace('%5C%2E', '.'))
-    #set($subspaceNameEscaped = $escapetool.url($subspaceName).replace("+", "%20"))
-    #if($nestedSpaces)
-      #set($spaceEscapedBackslash = $escapetool.url($space).replace("+", "%20"))
-    #else
-      #set($spaceEscapedBackslash = $escapetool.url($space.replace('\', '\\').replace('.', '\.')).replace("+", "%20")) ##"'
-    #end
-    #if($visibleSpaces.contains($spaceEscapedBackslash) || $spaceParentList.contains($space))
-      #set($contentDisplay = "")
-      #set($iconBulletToggle = "(% id='hierarchyFolderIcon_$spaceEscapedBackslash'%){{html clean='false'}}&lt;span class='fa fa-caret-down'&gt;&lt;/span&gt;{{/html}}") ##'"
-    #else
-      #set($contentDisplay = " hierarchy-hidden")
-      #set($iconBulletToggle = "(% id='hierarchyFolderIcon_$spaceEscapedBackslash'%){{html clean='false'}}&lt;span class='fa fa-caret-right'&gt;&lt;/span&gt;{{/html}}") ##'"
-    #end
-    #if($pageCount &amp;&amp; $pageCount == 0)
-      $addStars*** $services.localization.render('webide.menu.empty')
-    #end
-    #set($spaceCount = $spaceCount + 1)
-    #set($renameButton = "")
-    #set($renameForm = "")
-    #set($removeLinks = "")
-    #set($removeBlock = "")
-    #set($addLinks = "&lt;li&gt;&lt;a href='#' class='newPage' data-toggle='modal' data-space='$spaceEscaped' data-target='#hierarchyPageModal'&gt;$services.localization.render('webide.menu.category.pages.addPage')&lt;/a&gt;&lt;/li&gt;") ##'"
-    #if($spaceInListInit &amp;&amp; $masterDoc.hasAccessLevel('edit'))
-      #set($removeLinks = "&lt;li&gt;&lt;a href='#' data-space='$spaceEscaped' class='hierarchy-remove-folder'&gt;$services.localization.render('webide.menu.remove.project')&lt;/a&gt;&lt;/li&gt;") ##'"
-    #end
-    #if($spaceInListNested &amp;&amp; $masterDoc.hasAccessLevel('edit') &amp;&amp; $xwiki.hasAccessLevel('edit', "$spaceEscaped.$reservedDocumentName"))
-      #set($renameButton = "{{html clean=false}}&lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span title='$services.localization.render('webide.menu.rename.space', [$subspaceNameEscaped])' data-subspace='$subspaceNameEscaped' data-space='$spaceEscaped' class='hierarchyAddNewElementButton hierarchy-rename-folder'&gt;&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;{{/html}}") ##'"
-      #set($renameForm = "{{html clean=false}}&lt;input type='text' id='renameFolder_$spaceEscaped' style='display:none;'/&gt;{{/html}}") ##'"
-    #end
-    #if("$!removeLinks" != "")
-      #set($removeBlock = "$beginRemoveButton$removeLinks$endRemoveButton")
-    #end
-    $addStars** $beginAddButton$addLinks$endAddButton$!removeBlock$!renameButton$!renameForm (% class="hierarchy-toggleFolder" data-space="$spaceEscapedBackslash" %)((($iconBulletToggle (%%){{html clean='false'}}&lt;span class='fa fa-folder'&gt;&lt;/span&gt;{{/html}} (% id="hierarchyDisplaySpace_$spaceEscaped" class="hierarchySpaceName" %)$subspaceName(%%) )))
-    (% id="hierarchySpace_$spaceEscapedBackslash" class="hierarchy-list${contentDisplay}" %)
-    #set($pageCount = 0)
-  #end
-  #if(!$isInClassesList &amp;&amp; !$isGlobal)
-    ## Compute page elements
-    #if(!$pageDoc.isNew())
-      #set($pageEscaped = $escapetool.url($page).replace("+", "%20"))
+      #set($addStars = $stringtool.repeat('*', $depthLevel))
+        ##Determine the name of the subspace (without its parents), use when renaming the folder
+      #set($subspaceNameIndex = $tlist.size() - 1)
+      #set($subspaceName = $tlist.get($subspaceNameIndex).replace('%5C%2E', '.'))
+      #set($subspaceNameEscaped = $escapetool.url($subspaceName).replace("+", "%20"))
       #if($nestedSpaces)
-        #set($pageEscapedBackslash = $escapetool.url($page).replace("+", "%20"))
+        #set($spaceEscapedBackslash = $escapetool.url($space).replace("+", "%20"))
       #else
-        #set($pageEscapedBackslash = $escapetool.url($page.replace('\', '\\').replace('.', '\.')).replace("+", "%20")) ##"'
+        #set($spaceEscapedBackslash = $escapetool.url($space.replace('\', '\\').replace('.', '\.')).replace("+", "%20")) ##"'
       #end
-      #set($pageInPagesList = $pagesList.contains($pageFullName))
-      #set($pageFullNameEscaped = $escapetool.url($pageFullName).replace("+", "%20"))
-      #set($pageRawTitleEscaped = $escapetool.url($pageDoc.title).replace("+", "%20"))
-      #set($pageParentEscaped = $escapetool.url($pageDoc.parent).replace("+", "%20"))
-      #set($pageClassHidden = " hierarchy-hidden")
-      #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%){{html clean='false'}}&lt;span class='fa fa-caret-right'&gt;&lt;/span&gt;{{/html}}")
-      #if($visiblePages.contains($pageFullNameEscaped) || $pageFullName == $currentDoc.fullName)
-        #set($pageClassHidden = "")
-        #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%){{html clean='false'}}&lt;span class='fa fa-caret-down'&gt;&lt;/span&gt;{{/html}}")
+      #if($visibleSpaces.contains($spaceEscapedBackslash) || $spaceParentList.contains($space))
+        #set($contentDisplay = "")
+        #set($iconBulletToggle = "(% id='hierarchyFolderIcon_$spaceEscapedBackslash'%){{html clean='false'}}&lt;span class='fa fa-caret-down'&gt;&lt;/span&gt;{{/html}}") ##'"
+      #else
+        #set($contentDisplay = " hierarchy-hidden")
+        #set($iconBulletToggle = "(% id='hierarchyFolderIcon_$spaceEscapedBackslash'%){{html clean='false'}}&lt;span class='fa fa-caret-right'&gt;&lt;/span&gt;{{/html}}") ##'"
       #end
-      #set($pageName = "(% id='hierarchyDisplayPage_$pageFullNameEscaped' class='hierarchyPageName'%)$page)))") ##'"
-      #if($xwiki.getDocument($pageFullName).hasAccessLevel('edit'))
-        #set($pageCount = $pageCount + 1)
-        #set($itemPage = "")
-        #if($pageDoc.getObject("WebIDECode.ApplicationClass"))
-          #set($itemPage = "WebIDECode.ApplicationClass")
+      #if($pageCount &amp;&amp; $pageCount == 0)
+        $addStars*** $services.localization.render('webide.menu.empty')
+      #end
+      #set($spaceCount = $spaceCount + 1)
+      #set($renameButton = "")
+      #set($renameForm = "")
+      #set($removeLinks = "")
+      #set($removeBlock = "")
+      #set($addLinks = "&lt;li&gt;&lt;a href='#' class='newPage' data-toggle='modal' data-space='$spaceEscaped' data-target='#hierarchyPageModal'&gt;$services.localization.render('webide.menu.category.pages.addPage')&lt;/a&gt;&lt;/li&gt;") ##'"
+      #if($spaceInListInit &amp;&amp; $masterDoc.hasAccessLevel('edit'))
+        #set($removeLinks = "&lt;li&gt;&lt;a href='#' data-space='$spaceEscaped' class='hierarchy-remove-folder'&gt;$services.localization.render('webide.menu.remove.project')&lt;/a&gt;&lt;/li&gt;") ##'"
+      #end
+      #if($spaceInListNested &amp;&amp; $masterDoc.hasAccessLevel('edit') &amp;&amp; $xwiki.hasAccessLevel('edit', "$spaceEscaped.$reservedDocumentName"))
+        #set($renameButton = "{{html clean=false}}&lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span title='$services.localization.render('webide.menu.rename.space', [$subspaceNameEscaped])' data-subspace='$subspaceNameEscaped' data-space='$spaceEscaped' class='hierarchyAddNewElementButton hierarchy-rename-folder'&gt;&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;{{/html}}") ##'"
+        #set($renameForm = "{{html clean=false}}&lt;input type='text' id='renameFolder_$spaceEscaped' style='display:none;'/&gt;{{/html}}") ##'"
+      #end
+      #if("$!removeLinks" != "")
+        #set($removeBlock = "$beginRemoveButton$removeLinks$endRemoveButton")
+      #end
+      $addStars** $beginAddButton$addLinks$endAddButton$!removeBlock$!renameButton$!renameForm (% class="hierarchy-toggleFolder" data-space="$spaceEscapedBackslash" %)((($iconBulletToggle (%%){{html clean='false'}}&lt;span class='fa fa-folder'&gt;&lt;/span&gt;{{/html}} (% id="hierarchyDisplaySpace_$spaceEscaped" class="hierarchySpaceName" %)$subspaceName(%%) )))
+      (% id="hierarchySpace_$spaceEscapedBackslash" class="hierarchy-list${contentDisplay}" %)
+      #set($pageCount = 0)
+    #end
+    #if(!$isInClassesList &amp;&amp; !$isGlobal)
+      ## Compute page elements
+      #if(!$pageDoc.isNew())
+        #set($pageEscaped = $escapetool.url($page).replace("+", "%20"))
+        #if($nestedSpaces)
+          #set($pageEscapedBackslash = $escapetool.url($page).replace("+", "%20"))
         #else
-          #foreach($className in $classesInProjectList)
-            #if($pageDoc.getObject($className))
-              #set($itemPage = $className)
-              #break
-            #end
-          #end
+          #set($pageEscapedBackslash = $escapetool.url($page.replace('\', '\\').replace('.', '\.')).replace("+", "%20")) ##"'
         #end
-        #set($renameButton = "")
-        #set($renameForm = "")
-        #set($removeLinks = "")
-        #set($removeBlock = "")
-        #if($pageInPagesList &amp;&amp; $masterDoc.hasAccessLevel('edit'))
-          #set($removeLinks = "&lt;li&gt;&lt;a href='#' data-pageid='$pageFullNameEscaped' class='hierarchy-remove-page'&gt;$services.localization.render('webide.menu.remove.project')&lt;/a&gt;&lt;/li&gt;") ##'"
+        #set($pageInPagesList = $pagesList.contains($pageFullName))
+        #set($pageFullNameEscaped = $escapetool.url($pageFullName).replace("+", "%20"))
+        #set($pageRawTitleEscaped = $escapetool.url($pageDoc.title).replace("+", "%20"))
+        #set($pageParentEscaped = $escapetool.url($pageDoc.parent).replace("+", "%20"))
+        #set($pageClassHidden = " hierarchy-hidden")
+        #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%){{html clean='false'}}&lt;span class='fa fa-caret-right'&gt;&lt;/span&gt;{{/html}}")
+        #if($visiblePages.contains($pageFullNameEscaped) || $pageFullName == $currentDoc.fullName)
+          #set($pageClassHidden = "")
+          #set($iconBulletToggle = "(% class='hierarchyDisplayPageIcon'%){{html clean='false'}}&lt;span class='fa fa-caret-down'&gt;&lt;/span&gt;{{/html}}")
         #end
-        #if($masterDoc.hasAccessLevel('edit') &amp;&amp; $currentDoc.hasAccessLevel('edit'))
-          #if($pageLocaleList.size() == 0)
-            #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deletePage' data-space='$spaceEscaped' data-page='$pageEscaped' data-locale='default'&gt;$services.localization.render('webide.menu.remove.page')&lt;/a&gt;&lt;/li&gt;") ##'"
-          #end
-          #set($renameButton = "{{html clean=false}}&lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span title='$services.localization.render('webide.menu.rename.page', [$pageFullNameEscaped])' data-pageid='$pageFullNameEscaped' class='hierarchyAddNewElementButton hierarchy-rename-page'&gt;&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;{{/html}}") ##'"
-          #set($renameForm = "{{html clean=false}}&lt;input type='text' data-pageinlist='$pageInPagesList' id='renamePage_$pageFullNameEscaped' style='display:none;' value='$pageFullName'/&gt;{{/html}}") ##'"
-        #end
-        #if("$!removeLinks" != "")
-          #set($removeBlock = "$beginRemoveButton$removeLinks$endRemoveButton")
-        #end
-        #if("$!itemPage" != "") ##It's an "Item" page
-          $addStars*** $!removeBlock$!renameButton$!renameForm {{html clean='false'}}&lt;span class='fa fa-hdd-o'&gt;&lt;/span&gt;{{/html}} [[$page&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="$itemPage" data-objectnumber="0" data-locale="default" class='editObject']]
-        #else ##It's an "Content" page
-          #set($objectsTotalSize = $jsxList.size() + $ssxList.size() + $docSheetList.size() + $pageLocaleList.size())
-          #set($addLinks = "&lt;li&gt;&lt;a href='#' class='newJSObject newLocalObject' data-space='$spaceEscaped' data-page='$pageEscaped'&gt;$services.localization.render('webide.menu.add.localJS')&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='#' class='newCSSObject newLocalObject' data-space='$spaceEscaped' data-page='$pageEscaped'&gt;$services.localization.render('webide.menu.add.localCSS')&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='#' class='newSheet newLocalObject' data-space='$spaceEscaped' data-page='$pageEscaped'&gt;$services.localization.render('webide.menu.add.localSheet')&lt;/a&gt;&lt;/li&gt;") ##'"
-          #if($objectsTotalSize == 0)
-            $addStars*** $beginAddButton$addLinks$endAddButton$!removeBlock$!renameButton$!renameForm {{html clean='false'}}&lt;span class='fa fa-file'&gt;&lt;/span&gt;{{/html}} [[$page&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="default" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" data-parent="$pageParentEscaped" data-hidden="$pageDoc.getTranslatedDocument($pageLocale).isHidden()" class='editPage']]
+        #set($pageName = "(% id='hierarchyDisplayPage_$pageFullNameEscaped' class='hierarchyPageName'%)$page)))") ##'"
+        #if($xwiki.getDocument($pageFullName).hasAccessLevel('edit'))
+          #set($pageCount = $pageCount + 1)
+          #set($itemPage = "")
+          #if($pageDoc.getObject("WebIDECode.ApplicationClass"))
+            #set($itemPage = "WebIDECode.ApplicationClass")
           #else
-            $addStars*** $beginAddButton$addLinks$endAddButton$!removeBlock$!renameButton$!renameForm (% data-pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((($iconBulletToggle (%%){{html clean='false'}}&lt;span class='fa fa-file'&gt;&lt;/span&gt;{{/html}} $pageName
-          (% id='hierarchyPageDetails_$spaceEscapedBackslash.$pageEscapedBackslash' class='hierarchy-list${pageClassHidden}' %)
+            #foreach($className in $classesInProjectList)
+              #if($pageDoc.getObject($className))
+                #set($itemPage = $className)
+                #break
+              #end
+            #end
+          #end
+          #set($renameButton = "")
+          #set($renameForm = "")
+          #set($removeLinks = "")
+          #set($removeBlock = "")
+          #if($pageInPagesList &amp;&amp; $masterDoc.hasAccessLevel('edit'))
+            #set($removeLinks = "&lt;li&gt;&lt;a href='#' data-pageid='$pageFullNameEscaped' class='hierarchy-remove-page'&gt;$services.localization.render('webide.menu.remove.project')&lt;/a&gt;&lt;/li&gt;") ##'"
+          #end
+          #if($masterDoc.hasAccessLevel('edit') &amp;&amp; $currentDoc.hasAccessLevel('edit'))
             #if($pageLocaleList.size() == 0)
-              #set($ok = $pageLocaleList.add('default'))
+              #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deletePage' data-space='$spaceEscaped' data-page='$pageEscaped' data-locale='default'&gt;$services.localization.render('webide.menu.remove.page')&lt;/a&gt;&lt;/li&gt;") ##'"
             #end
-            #foreach($pageLocale in $pageLocaleList)
-              #set($pageLocaleDisplay = "")
-              #if($pageLocale != "default" &amp;&amp; "$!pageLocale" != "")
-                #set($pageLocaleDisplay = " ($pageLocale)")
+            #set($renameButton = "{{html clean=false}}&lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span title='$services.localization.render('webide.menu.rename.page', [$pageFullNameEscaped])' data-pageid='$pageFullNameEscaped' class='hierarchyAddNewElementButton hierarchy-rename-page'&gt;&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;{{/html}}") ##'"
+            #set($renameForm = "{{html clean=false}}&lt;input type='text' data-pageinlist='$pageInPagesList' id='renamePage_$pageFullNameEscaped' style='display:none;' value='$pageFullName'/&gt;{{/html}}") ##'"
+          #end
+          #if("$!removeLinks" != "")
+            #set($removeBlock = "$beginRemoveButton$removeLinks$endRemoveButton")
+          #end
+          #if("$!itemPage" != "") ##It's an "Item" page
+            $addStars*** $!removeBlock$!renameButton$!renameForm {{html clean='false'}}&lt;span class='fa fa-hdd-o'&gt;&lt;/span&gt;{{/html}} [[$page&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="$itemPage" data-objectnumber="0" data-locale="default" class='editObject']]
+          #else ##It's an "Content" page
+            #set($objectsTotalSize = $jsxList.size() + $ssxList.size() + $docSheetList.size() + $pageLocaleList.size())
+            #set($addLinks = "&lt;li&gt;&lt;a href='#' class='newJSObject newLocalObject' data-space='$spaceEscaped' data-page='$pageEscaped'&gt;$services.localization.render('webide.menu.add.localJS')&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='#' class='newCSSObject newLocalObject' data-space='$spaceEscaped' data-page='$pageEscaped'&gt;$services.localization.render('webide.menu.add.localCSS')&lt;/a&gt;&lt;/li&gt;&lt;li&gt;&lt;a href='#' class='newSheet newLocalObject' data-space='$spaceEscaped' data-page='$pageEscaped'&gt;$services.localization.render('webide.menu.add.localSheet')&lt;/a&gt;&lt;/li&gt;") ##'"
+            #if($objectsTotalSize == 0)
+              $addStars*** $beginAddButton$addLinks$endAddButton$!removeBlock$!renameButton$!renameForm {{html clean='false'}}&lt;span class='fa fa-file'&gt;&lt;/span&gt;{{/html}} [[$page&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="default" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" data-parent="$pageParentEscaped" data-hidden="$pageDoc.getTranslatedDocument($pageLocale).isHidden()" class='editPage']]
+            #else
+              $addStars*** $beginAddButton$addLinks$endAddButton$!removeBlock$!renameButton$!renameForm (% data-pageid="$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((($iconBulletToggle (%%){{html clean='false'}}&lt;span class='fa fa-file'&gt;&lt;/span&gt;{{/html}} $pageName
+            (% id='hierarchyPageDetails_$spaceEscapedBackslash.$pageEscapedBackslash' class='hierarchy-list${pageClassHidden}' %)
+              #if($pageLocaleList.size() == 0)
+                #set($ok = $pageLocaleList.add('default'))
+              #end
+              #foreach($pageLocale in $pageLocaleList)
+                #set($pageLocaleDisplay = "")
+                #if($pageLocale != "default" &amp;&amp; "$!pageLocale" != "")
+                  #set($pageLocaleDisplay = " ($pageLocale)")
+                  #set($removeLinks = "")
+                  #set($removeBlock = "")
+                  #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deletePage' data-space='$spaceEscaped' data-page='$pageEscaped' data-locale='$pageLocale'&gt;$services.localization.render('webide.menu.remove.page')&lt;/a&gt;&lt;/li&gt;") ##'"
+                  #if("$!removeLinks" != "")
+                    #set($removeBlock = "$beginRemoveButton$removeLinks$endRemoveButton")
+                  #end
+                #end
+                #if($velocityCount == 1)
+                  #set($pageLocale = 'default')
+                #end
+                $addStars**** $!removeBlock {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} [[$services.localization.render('webide.menu.view.logical.editWiki')$!pageLocaleDisplay&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="$pageLocale" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" data-parent="$pageParentEscaped" data-hidden="$pageDoc.getTranslatedDocument($pageLocale).isHidden()" class='editPage']]
+              #end
+              #foreach($jsxObject in $jsxList)
+                #if($jsxObject.getProperty('use').value == "onDemand" || $jsxObject.getProperty('use').value == "currentPage" || !$jsxObject.getProperty('use').value)
+                  #set($removeLinks = "")
+                  #set($removeBlock = "")
+                  #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deleteObject' data-space='$spaceEscaped' data-page='$pageEscaped' data-object='XWiki.JavaScriptExtension' data-objectnumber='$jsxObject.number'&gt;$services.localization.render('webide.menu.remove.object')&lt;/a&gt;&lt;/li&gt;") ##'"
+                  #if("$!removeLinks" != "")
+                    #set($removeBlock = "$beginRemoveButton$removeLinks$endRemoveButton")
+                  #end
+                  $addStars**** $!removeBlock {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} [[$services.localization.render('webide.menu.view.logical.edit') JS-$jsxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.JavaScriptExtension" data-objectnumber="$jsxObject.number" class='editObject']]
+                #end
+              #end
+              #foreach($ssxObject in $ssxList)
                 #set($removeLinks = "")
                 #set($removeBlock = "")
-                #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deletePage' data-space='$spaceEscaped' data-page='$pageEscaped' data-locale='$pageLocale'&gt;$services.localization.render('webide.menu.remove.page')&lt;/a&gt;&lt;/li&gt;") ##'"
+                #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deleteObject' data-space='$spaceEscaped' data-page='$pageEscaped' data-object='XWiki.StyleSheetExtension' data-objectnumber='$ssxObject.number'&gt;$services.localization.render('webide.menu.remove.object')&lt;/a&gt;&lt;/li&gt;") ##'"
                 #if("$!removeLinks" != "")
                   #set($removeBlock = "$beginRemoveButton$removeLinks$endRemoveButton")
                 #end
+                #if($ssxObject.getProperty('use').value == "onDemand" || $ssxObject.getProperty('use').value == "currentPage" || !$ssxObject.getProperty('use').value)
+                  $addStars**** $!removeBlock {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} [[$services.localization.render('webide.menu.view.logical.edit') CSS-$ssxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.StyleSheetExtension" data-objectnumber="$ssxObject.number" class='editObject']]
+                #end
               #end
-              #if($velocityCount == 1)
-                #set($pageLocale = 'default')
-              #end
-              $addStars**** $!removeBlock {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} [[$services.localization.render('webide.menu.view.logical.editWiki')$!pageLocaleDisplay&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-locale="$pageLocale" data-space='$spaceEscaped' data-page='$pageEscaped' data-rawtitle="$pageRawTitleEscaped" data-parent="$pageParentEscaped" data-hidden="$pageDoc.getTranslatedDocument($pageLocale).isHidden()" class='editPage']]
-            #end
-            #foreach($jsxObject in $jsxList)
-              #if($jsxObject.getProperty('use').value == "onDemand" || $jsxObject.getProperty('use').value == "currentPage" || !$jsxObject.getProperty('use').value)
+              #foreach($docSheetObj in $docSheetList)
                 #set($removeLinks = "")
                 #set($removeBlock = "")
-                #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deleteObject' data-space='$spaceEscaped' data-page='$pageEscaped' data-object='XWiki.JavaScriptExtension' data-objectnumber='$jsxObject.number'&gt;$services.localization.render('webide.menu.remove.object')&lt;/a&gt;&lt;/li&gt;") ##'"
+                #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deleteObject' data-space='$spaceEscaped' data-page='$pageEscaped' data-object='XWiki.DocumentSheetBinding' data-objectnumber='$docSheetObj.number'&gt;$services.localization.render('webide.menu.remove.object')&lt;/a&gt;&lt;/li&gt;") ##'"
                 #if("$!removeLinks" != "")
                   #set($removeBlock = "$beginRemoveButton$removeLinks$endRemoveButton")
                 #end
-                $addStars**** $!removeBlock {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} [[$services.localization.render('webide.menu.view.logical.edit') JS-$jsxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.JavaScriptExtension" data-objectnumber="$jsxObject.number" class='editObject']]
+                #set($sheetDoc = $xwiki.getDocument($docSheetObj.sheet))
+                $addStars**** $!removeBlock {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} [[$services.localization.render('webide.menu.view.logical.edit') Sheet-$docSheetObj.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.DocumentSheetBinding" data-objectnumber="$docSheetObj.number" class='editObject']]
               #end
-            #end
-            #foreach($ssxObject in $ssxList)
-              #set($removeLinks = "")
-              #set($removeBlock = "")
-              #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deleteObject' data-space='$spaceEscaped' data-page='$pageEscaped' data-object='XWiki.StyleSheetExtension' data-objectnumber='$ssxObject.number'&gt;$services.localization.render('webide.menu.remove.object')&lt;/a&gt;&lt;/li&gt;") ##'"
-              #if("$!removeLinks" != "")
-                #set($removeBlock = "$beginRemoveButton$removeLinks$endRemoveButton")
-              #end
-              #if($ssxObject.getProperty('use').value == "onDemand" || $ssxObject.getProperty('use').value == "currentPage" || !$ssxObject.getProperty('use').value)
-                $addStars**** $!removeBlock {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} [[$services.localization.render('webide.menu.view.logical.edit') CSS-$ssxObject.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.StyleSheetExtension" data-objectnumber="$ssxObject.number" class='editObject']]
-              #end
-            #end
-            #foreach($docSheetObj in $docSheetList)
-              #set($removeLinks = "")
-              #set($removeBlock = "")
-              #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deleteObject' data-space='$spaceEscaped' data-page='$pageEscaped' data-object='XWiki.DocumentSheetBinding' data-objectnumber='$docSheetObj.number'&gt;$services.localization.render('webide.menu.remove.object')&lt;/a&gt;&lt;/li&gt;") ##'"
-              #if("$!removeLinks" != "")
-                #set($removeBlock = "$beginRemoveButton$removeLinks$endRemoveButton")
-              #end
-              #set($sheetDoc = $xwiki.getDocument($docSheetObj.sheet))
-              $addStars**** $!removeBlock {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} [[$services.localization.render('webide.menu.view.logical.edit') Sheet-$docSheetObj.number&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceEscaped' data-page='$pageEscaped' data-object="XWiki.DocumentSheetBinding" data-objectnumber="$docSheetObj.number" class='editObject']]
             #end
           #end
         #end
@@ -651,7 +653,7 @@
   #end
 #end
 #if($allTranslationsList.size() == 0)
- ** //Empty//
+ ** $services.localization.render('webide.menu.empty')
 #end
 {{html clean=false}}
 &lt;div id="hierarchyUpdatedClassList" class="hierarchy-hidden"&gt;#foreach($class in $classesInProjectList)
