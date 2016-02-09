@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347285000</creationDate>
-  <date>1454690451000</date>
-  <contentUpdateDate>1454690451000</contentUpdateDate>
+  <date>1455030617000</date>
+  <contentUpdateDate>1455030617000</contentUpdateDate>
   <version>1.1</version>
   <title>LogicalTree</title>
   <defaultTemplate/>
@@ -173,7 +173,7 @@
           #if("$!removeLinks" != "")
             #set($removeBlock = "$beginRemoveButton$removeLinks$endRemoveButton")
           #end
-          *** $beginAddButton$addLinks$endAddButton {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} $!removeBlock [[$services.localization.render('webide.menu.view.logical.editSheet')$addName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceSheetEscaped' data-page='$!pageSheetEscaped' data-locale="default" data-rawtitle='$titleSheetEscaped' data-parent="$pageParentEscaped" data-hidden="$sheetDoc.isHidden()" class='editPage']]
+          *** $beginAddButton$addLinks$endAddButton {{html clean='false'}}&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;{{/html}} $!removeBlock [[$services.localization.render('webide.menu.view.logical.editSheet')$addName&gt;&gt;path:$masterDoc.getURL('view', '#!XWebIDE')||data-space='$spaceSheetEscaped' data-page='$!pageSheetEscaped' data-locale="default" data-rawtitle="$titleSheetEscaped" data-parent="$pageParentEscaped" data-hidden="$sheetDoc.isHidden()" class='editPage']]
           #if($sheetDoc.getObjects('XWiki.JavaScriptExtension').size() != 0 || $sheetDoc.getObjects('XWiki.StyleSheetExtension').size() != 0)
             (% class="hierarchy-list" %)
           #end
@@ -303,7 +303,7 @@
         #set($removeLinks = "&lt;li&gt;&lt;a href='#' data-space='$spaceEscaped' class='hierarchy-remove-folder'&gt;$services.localization.render('webide.menu.remove.project')&lt;/a&gt;&lt;/li&gt;") ##'"
       #end
       #if($spaceInListNested &amp;&amp; $masterDoc.hasAccessLevel('edit') &amp;&amp; $xwiki.hasAccessLevel('edit', "$spaceEscaped.$reservedDocumentName"))
-        #set($renameButton = "{{html clean=false}}&lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span title='$services.localization.render('webide.menu.rename.space', [$subspaceNameEscaped])' data-subspace='$subspaceNameEscaped' data-space='$spaceEscaped' class='hierarchyAddNewElementButton hierarchy-rename-folder'&gt;&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;{{/html}}") ##'"
+        #set($renameButton = "{{html clean=false}}&lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span title=${escapetool.q}$services.localization.render('webide.menu.rename.space', [$subspaceNameEscaped])${escapetool.q} data-subspace='$subspaceNameEscaped' data-space='$spaceEscaped' class='hierarchyAddNewElementButton hierarchy-rename-folder'&gt;&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;{{/html}}") ##'"
         #set($renameForm = "{{html clean=false}}&lt;input type='text' id='renameFolder_$spaceEscaped' style='display:none;'/&gt;{{/html}}") ##'"
       #end
       #if("$!removeLinks" != "")
@@ -357,7 +357,7 @@
             #if($pageLocaleList.size() == 0)
               #set($removeLinks = "$!removeLinks&lt;li&gt;&lt;a href='#' class='deletePage' data-space='$spaceEscaped' data-page='$pageEscaped' data-locale='default'&gt;$services.localization.render('webide.menu.remove.page')&lt;/a&gt;&lt;/li&gt;") ##'"
             #end
-            #set($renameButton = "{{html clean=false}}&lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span title='$services.localization.render('webide.menu.rename.page', [$pageFullNameEscaped])' data-pageid='$pageFullNameEscaped' class='hierarchyAddNewElementButton hierarchy-rename-page'&gt;&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;{{/html}}") ##'"
+            #set($renameButton = "{{html clean=false}}&lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span title=${escapetool.q}$services.localization.render('webide.menu.rename.page', [$pageFullNameEscaped])${escapetool.q} data-pageid='$pageFullNameEscaped' class='hierarchyAddNewElementButton hierarchy-rename-page'&gt;&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;{{/html}}") ##'"
             #set($renameForm = "{{html clean=false}}&lt;input type='text' data-pageinlist='$pageInPagesList' id='renamePage_$pageFullNameEscaped' style='display:none;' value='$pageFullName'/&gt;{{/html}}") ##'"
           #end
           #if("$!removeLinks" != "")
@@ -538,7 +538,7 @@
         #set($pageFullName = $objDoc.fullName)
         #set($pageFullNameEscaped = $escapetool.url($objDoc.fullName).replace("+", "%20"))
         #set($pageInPagesList = $pagesList.contains($pageFullName))
-        #set($renameButton = "{{html clean=false}}&lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span title='$services.localization.render('webide.menu.rename.page', [$pageFullNameEscaped])' data-pageid='$pageFullNameEscaped' class='hierarchyAddNewElementButton hierarchy-rename-page'&gt;&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;{{/html}}") ##'"
+        #set($renameButton = "{{html clean=false}}&lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span title=${escapetool.q}$services.localization.render('webide.menu.rename.page', [$pageFullNameEscaped])${escapetool.q} data-pageid='$pageFullNameEscaped' class='hierarchyAddNewElementButton hierarchy-rename-page'&gt;&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;{{/html}}") ##'"
         #set($renameForm = "{{html clean=false}}&lt;input type='text' data-pageinlist='$pageInPagesList' id='renamePage_$pageFullNameEscaped' style='display:none;' value='$pageFullName'/&gt;{{/html}}") ##'"
       #end
       #set($removeLinks = "")
@@ -625,7 +625,7 @@
   #set($renameButton = "")
   #set($renameForm = "")
   #if($objDoc.hasAccessLevel('edit'))
-    #set($renameButton = "{{html clean=false}}&lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span title='$services.localization.render('webide.menu.rename.page', [$pageFullNameEscaped])' data-pageid='$pageFullNameEscaped' class='hierarchyAddNewElementButton hierarchy-rename-page'&gt;&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;{{/html}}") ##'"
+    #set($renameButton = "{{html clean=false}}&lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span title=${escapetool.q}$services.localization.render('webide.menu.rename.page', [$pageFullNameEscaped])${escapetool.q} data-pageid='$pageFullNameEscaped' class='hierarchyAddNewElementButton hierarchy-rename-page'&gt;&lt;span class='fa fa-pencil'&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;{{/html}}") ##'"
     #set($renameForm = "{{html clean=false}}&lt;input type='text' data-pageinlist='$pageInPagesList' id='renamePage_$pageFullNameEscaped' style='display:none;' value='$pageFullName'/&gt;{{/html}}") ##'"
   #end
   ** $beginAddButton$addLinks$endAddButton$!renameButton$!renameForm (% data-pageid="Tr-$spaceEscapedBackslash.$pageEscapedBackslash" class="hierarchy-displayPage" %)((($iconBulletToggle  (%%){{html clean='false'}}&lt;span class='fa fa-file'&gt;&lt;/span&gt;{{/html}} (%%)$docName )))
