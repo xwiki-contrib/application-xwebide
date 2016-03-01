@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1449764426000</creationDate>
-  <date>1450779844000</date>
-  <contentUpdateDate>1450778443000</contentUpdateDate>
+  <date>1456837418000</date>
+  <contentUpdateDate>1456837418000</contentUpdateDate>
   <version>1.1</version>
   <title>Translations in JS</title>
   <defaultTemplate/>
@@ -81,7 +81,7 @@
 webide.js.panel.advanced=Advanced fields
 webide.js.panel.related=Related elements
 webide.js.panel.shortcuts=Shortcuts
-webide.js.shortcuts=&lt;h4&gt;Syntax highlighting editor&lt;/h4&gt;&lt;b&gt;Ctrl+F&lt;/b&gt; : Search&lt;br&gt;&lt;b&gt;Ctrl+G&lt;/b&gt; : Find next&lt;br&gt;&lt;b&gt;Ctrl+Shift+G&lt;/b&gt; : Find previous&lt;br&gt;&lt;b&gt;Alt+F&lt;/b&gt; : Persistent Search&lt;hr&gt;&lt;h4&gt;Web IDE&lt;/h4&gt;&lt;b&gt;Alt+S&lt;/b&gt; : Save and view&lt;br&gt;&lt;b&gt;Alt+Shift+S&lt;/b&gt; : Save and continue&lt;br&gt;&lt;b&gt;Alt+C&lt;/b&gt; : View current page&lt;br&gt;&lt;b&gt;Alt+Shift+C&lt;/b&gt; : View current page (new tab)&lt;br&gt;
+webide.js.shortcuts=&lt;h4&gt;Syntax highlighting editor&lt;/h4&gt;&lt;b&gt;Ctrl+F&lt;/b&gt; : Search&lt;br&gt;&lt;b&gt;Ctrl+G&lt;/b&gt; : Find next&lt;br&gt;&lt;b&gt;Ctrl+Shift+G&lt;/b&gt; : Find previous&lt;br&gt;&lt;b&gt;Alt+F&lt;/b&gt; : Persistent Search&lt;hr&gt;&lt;h4&gt;Web IDE&lt;/h4&gt;&lt;b&gt;Alt+S&lt;/b&gt; : Save and view&lt;br&gt;&lt;b&gt;Alt+Shift+S&lt;/b&gt; : Save and continue&lt;br&gt;&lt;b&gt;Alt+C&lt;/b&gt; : View current page&lt;br&gt;&lt;b&gt;Alt+Shift+C&lt;/b&gt; : View current page (new tab)
 ##Hierarchy
 webide.js.hierarchy.reloading=Reloading the menu...
 webide.js.hierarchy.renaming=Renaming in progress...

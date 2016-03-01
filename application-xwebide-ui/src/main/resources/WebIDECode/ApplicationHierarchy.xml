@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
@@ -32,8 +31,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1454689421000</date>
-  <contentUpdateDate>1452614802000</contentUpdateDate>
+  <date>1456839527000</date>
+  <contentUpdateDate>1454949841000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -1401,7 +1400,7 @@ require(required , function ($, Translations, SH, xm) {
         $.ajax({
           url: url,
           type: "GET",
-          contentType: "text/html"
+          contentType : "text/html"
         }).success(function(dataContent){
           var dataContentTmp = $('&lt;div/&gt;').html(dataContent);
           var tabAdd = 'tab'+currentTabNumber+'_';
@@ -2671,7 +2670,7 @@ require(required , function ($, Translations, SH, xm) {
       return unsaved;
     },
     displayShortcutsInfo : function(shortcutBlock) {
-      $(shortcutBlock).html(Translations.shortcuts);
+      $(shortcutBlock).html(Translations.shortcuts + $('#editorHelpPanel').html());
     },
     init : function() {
       setCurrentPage(getDocumentReferenceData('page'));

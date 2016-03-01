@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1449753999000</creationDate>
-  <date>1450715198000</date>
-  <contentUpdateDate>1450711455000</contentUpdateDate>
+  <date>1456837677000</date>
+  <contentUpdateDate>1456837677000</contentUpdateDate>
   <version>1.1</version>
   <title>Translations</title>
   <defaultTemplate/>
@@ -247,6 +247,8 @@ webide.sheet.howto.improveXP.linkSH=Syntax Highlighting documentation
 webide.sheet.howto.improveXP.linkAC=Auto-Completion documentation
 
 webide.sheet.howto.doc=To learn about other features of the XWiki WebIDE, see the [[Online Documentation&gt;&gt;{0}]] on xwiki.org.
+
+webide.sheet.helpPanel=Scripting Documentation
 ##Sheet buttons
 webide.sheet.button.delete.title=Remove the content from XWiki
 webide.sheet.button.savecontinue=Save &amp; Continue
