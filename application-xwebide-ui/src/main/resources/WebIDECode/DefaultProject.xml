@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1446739211000</creationDate>
-  <date>1447338052000</date>
-  <contentUpdateDate>1446739211000</contentUpdateDate>
+  <date>1465294038000</date>
+  <contentUpdateDate>1459245115000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -58,7 +58,7 @@
         <name>codeSpace</name>
         <number>5</number>
         <picker>0</picker>
-        <prettyName>codeSpace</prettyName>
+        <prettyName>Code space</prettyName>
         <size>30</size>
         <unmodifiable>0</unmodifiable>
         <validationMessage/>

@@ -1,0 +1,1004 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc reference="WebIDECode.WebIDE_object" locale="">
+  <web>WebIDECode</web>
+  <name>WebIDE_object</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <parent>WebIDECode.LogicalTree</parent>
+  <creator>xwiki:XWiki.Admin</creator>
+  <author>xwiki:XWiki.Admin</author>
+  <customClass/>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <creationDate>1465294209000</creationDate>
+  <date>1465303984000</date>
+  <contentUpdateDate>1465294209000</contentUpdateDate>
+  <version>1.1</version>
+  <title>WebIDE_object</title>
+  <defaultTemplate/>
+  <validationScript/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>false</hidden>
+  <object>
+    <class>
+      <name>XWiki.JavaScriptExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage|onDemand|always</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <name>WebIDECode.WebIDE_object</name>
+    <number>0</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>86145d62-f30e-44c9-ad4c-17c48c92fa97</guid>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>//---------- ObjectEditor Module ----------
+/**
+ * ----- Internal variables -----
+ * currentObject
+ *   The class of the object displayed in the current tab
+ * currentNumber
+ *   The number of the object displayed in the current tab
+ * ----- Internal methods -----
+ * _addModalShortcut()
+ *   Add shortcuts when the "page" modal is opened
+ * _setCurrentObject(objName)
+ * _setCurrentNumber(objNumber)
+ */
+define(['jquery'], function($) {
+  return {
+    init : function(WebIDE, Hierarchy, SH, Translations, Modules) {
+
+      var ObjectEditor = {};
+
+      var editor = ObjectEditor.editor = 'object';
+      var currentObject = ObjectEditor.currentObject = '';
+      var currentNumber = ObjectEditor.currentNumber = '';
+      /**
+     * Get the list of object in the current page
+     */
+      var load = ObjectEditor.load = function(loadAllTabs) {
+        if(WebIDE.currentEditor === ObjectEditor.editor) {
+          WebIDE.setLoadingState(true);
+          var selectedObjectURL = '';
+          if(ObjectEditor._getCurrentObject(false) &amp;&amp; ObjectEditor._getCurrentObject(false) !== 'XWiki.WikiMacroClass') {
+            selectedObjectURL = '/'+ObjectEditor._getCurrentObject(false)+'/'+ObjectEditor.currentNumber;
+          }
+          var restSpaces = WebIDE.getCurrentSpace(false, false, true);
+          $.ajax({
+            url: '/'+XWiki.webapppath+'rest/wikis/'+WebIDE.getDocumentReferenceData('wiki')+'/'+restSpaces+'/pages/'+WebIDE.getCurrentPage(false)+'/objects'+selectedObjectURL,
+            type: "GET",
+            contentType: "application/xml"
+          }).success(function(dataContent){
+            var tabId = WebIDE.getTabId(ObjectEditor.editor, WebIDE.getCurrentSpace(false), WebIDE.getCurrentPage(false), ObjectEditor.getParameters());
+            var jQueryTabId = '#'+tabId;
+            // Creation of the list of objects in the page
+            if(!ObjectEditor._getCurrentObject(false) || ObjectEditor._getCurrentObject(false) == 'XWiki.WikiMacroClass') {
+              if(!ObjectEditor._getCurrentObject(false)) {
+                var objectsList = $(dataContent).find('objectSummary');
+              }
+              else {
+                var objectsList = $(dataContent).find('objectSummary').filter(function(i, elmt) {
+                  return ($(elmt).find('className').text() === 'XWiki.WikiMacroClass' || $(elmt).find('className').text() === 'XWiki.WikiMacroParameterClass');
+                });
+              }
+              objectsList.sort(function(a, b){
+                if($(a).find('className').text()&gt;$(b).find('className').text()) return 1;
+                else if($(a).find('className').text()&lt;$(b).find('className').text()) return -1;
+                else return (parseInt($(a).find('number').text())-parseInt($(b).find('number').text()));
+              });
+            }
+            else {
+              var objectsList = $(dataContent).find('object');
+            }
+            ObjectEditor._startDisplayObjects(jQueryTabId, objectsList, loadAllTabs);
+          }).error(function(xhr) {
+            WebIDE.setLoadingState(false, xhr.statusText, 4000, 'red');
+          });
+        }
+      };
+      /**
+     * Start the loading of the object editor. Create the main DOM elements and call the function to continue the loading process.
+     * @input String jQueryTabId : id of the div where to put the data
+     * @input List objectsList : list of objects to display from XWiki Rest API
+     */
+      var _startDisplayObjects = ObjectEditor._startDisplayObjects = function(jQueryTabId, objectsList, loadAllTabs) {
+        var form_token = WebIDE.getDocumentReferenceData('form_token');
+        var currentTabNumber = WebIDE.getTabNumber(jQueryTabId);
+        var urlSpaces = WebIDE.getCurrentSpace(false, true);
+        var file = WebIDE.getCurrentPage(false);
+        var objectsListSize = objectsList.size();
+        $(jQueryTabId).html('');
+        var menuNode = null;
+        var addObjectNode = null;
+        // Creation of the page structure
+        if(!ObjectEditor._getCurrentObject(false)) {
+          menuNode = $('&lt;div id="tab'+currentTabNumber+'_editorObjectMenuContent" class="editorObjectMenuContent"&gt;&lt;/div&gt;').appendTo($('&lt;div id="tab'+currentTabNumber+'_editorObjectMenu" class="editorObjectMenu"&gt;&lt;span id="tab'+currentTabNumber+'_editorObjectMenuTitle" class="editorObjectMenuTitle"&gt;'+Translations.objects.quickAccess+'&lt;/span&gt;&lt;/div&gt;').appendTo($(jQueryTabId)));
+          addObjectNode = $('&lt;div id="tab'+currentTabNumber+'_addObjectBlock" class="addObjectBlock"&gt;&lt;/div&gt;').appendTo($(jQueryTabId));
+        }
+        var dataNode = $('&lt;form method="post" action="/'+XWiki.webapppath+''+XWiki.servletpath+'save/'+urlSpaces+'/'+file+'" id="tab'+currentTabNumber+'_objectIDEform" class="objectIDEform"&gt;&lt;input type="hidden" name="form_token" value="'+form_token+'" /&gt;&lt;/form&gt;').appendTo($(jQueryTabId));
+        if(ObjectEditor._getCurrentObject(false)) {
+          var advancedBlock = WebIDE.initOtherFieldsBlock(dataNode, jQueryTabId, 1, Translations.panel.advanced);
+          WebIDE.initOtherFieldsBlock(dataNode, jQueryTabId, 3, Translations.panel.shortcuts);
+          menuNode = advancedBlock.find('.editorOtherFieldsBlockContent');
+          if(ObjectEditor._getCurrentObject(false) === 'XWiki.WikiMacroClass') {
+            $('&lt;input type="hidden" id="tab'+currentTabNumber+'_addClassList" value="XWiki.WikiMacroParameterClass" /&gt;&lt;button class="btn btn-success" id="tab'+currentTabNumber+'_editorObjectAddButton"&gt;'+Translations.objects.macroAddParam+'&lt;/button&gt;&lt;button class="btn btn-default" id="tab'+currentTabNumber+'_editorExpandAllButton"&gt;'+Translations.objects.expand+'&lt;/button&gt;&lt;button class="btn btn-default" id="tab'+currentTabNumber+'_editorCollapseAllButton"&gt;'+Translations.objects.collapse+'&lt;/button&gt;&lt;br&gt;').appendTo(menuNode);
+          }
+          ObjectEditor._loadObjectsDetails(jQueryTabId, objectsList, 0, objectsListSize, '', menuNode, dataNode, null, loadAllTabs);
+        }
+        else {
+          // Add the list which propose the user to add an object from a selected class
+          var url = WebIDE.wikiViewURL+"WebIDECode/ApplicationObjects?xpage=plain&amp;allClasses=1";
+          $.ajax({
+            url: url,
+            type: "GET",
+            contentType: "plain/text",
+          }).success(function(dataContent){
+            var dataContentTmp = $('&lt;div/&gt;').html(dataContent);
+            var tabAdd = 'tab'+currentTabNumber+'_';
+            WebIDE.fixIds(dataContentTmp, tabAdd);
+            addObjectNode.html(dataContentTmp.html());
+            // loadObjectsDetails : Add details recursively for each object and call the finalizing function
+            ObjectEditor._loadObjectsDetails(jQueryTabId, objectsList, 0, objectsListSize, '', menuNode, dataNode, null, loadAllTabs);
+          });
+        }
+      };
+      /**
+     * Load details for each object recursively and display them in the page.
+     * Call the finilazing function at the end
+     * @input String jQueryTabId : id of the div where to put the data
+     * @input List objectsList : the list of objects in the page
+     * @input Int index : the object to display in the list
+     * @input Int objectsListSize : the objects list size
+     * @input String oldClass : the class of the previous object displayed
+     * @input DOMElements menuNode, dataNode : The element in which object details have to be added
+     */
+      var _loadObjectsDetails = ObjectEditor._loadObjectsDetails = function(jQueryTabId, objectsList, index, objectsListSize, oldClass, menuNode, dataNode, currentClassNode, loadAllTabs) {
+        if(objectsListSize == 0) {ObjectEditor._endDisplayObjects(jQueryTabId, objectsListSize, loadAllTabs);}
+        else {
+          var currentTabNumber = WebIDE.getTabNumber(jQueryTabId);
+          var className = $(objectsList[index]).find('className').text();
+          var number = $(objectsList[index]).find('number').text();
+          if(className != oldClass &amp;&amp; !ObjectEditor._getCurrentObject(false)) {
+            // Create the new class block
+            dataNode.append('&lt;h2 class="wikigeneratedheader editorObjectClassTitle" data-classname="'+className+'"&gt;&lt;span class="fa fa-caret-down"&gt;&lt;/span&gt; '+className+'&lt;/h2&gt;');
+            var currentClassNode = $('&lt;div id="tab'+currentTabNumber+'_editorObjects-'+className+'" class="editorObjectClassDetails"&gt;&lt;/div&gt;').appendTo(dataNode);
+          }
+          else if(!ObjectEditor._getCurrentObject(false)) {
+            // Not a new class : insert data in the previous class block (objects are ordered by class)
+            var currentClassNode = $('.editorObjectClassDetails:last');
+          }
+          else {
+            // Only one object displayed (JSX, SSX, ...) : no class block displayed
+            var currentClassNode = dataNode;
+          }
+          var isSelectedObject = '';
+          if(ObjectEditor._getCurrentObject(false)) {
+            isSelectedObject = '&amp;selectedObject';
+          }
+          var url = WebIDE.wikiViewURL+"WebIDECode/ApplicationObjects?xpage=plain&amp;docFullName="+WebIDE.getCurrentSpace(true)+'.'+WebIDE.getCurrentPage(true)+'&amp;className='+className+'&amp;number='+number+isSelectedObject;
+          $.ajax({
+            url: url,
+            type: "GET",
+            contentType: "text/html"
+          }).success(function(dataContent){
+            var dataContentTmp = $('&lt;div/&gt;').html(dataContent);
+            var tabAdd = 'tab'+currentTabNumber+'_';
+            WebIDE.fixIds(dataContentTmp, tabAdd);
+            dataContent = dataContentTmp.html();
+            if(ObjectEditor._getCurrentObject(false)) {
+              // Display the code field in the main block, and all other fields in the right-hand menu. If there is no code field, the object should be displayed in the main block. If the object is a macro with parameters (objectsListSize &gt; 1), it's parameters should be displayed in the right-hand menu :
+              if($(dataContent).find('.editorCodeField').length &gt; 0) {
+                $(menuNode).append(dataContent);
+                var currentMainBlock = $('&lt;div class="editorDisplayedObject"&gt;&lt;/div&gt;').appendTo(currentClassNode);
+                $(menuNode).find('.editorCodeField').detach().appendTo(currentMainBlock);
+                $(dataNode).addClass('editorObjectWithCode');
+              }
+              else if(objectsListSize &gt; 1) {
+                $(menuNode).append(dataContent);
+              }
+              else {
+                var currentMainBlock = $('&lt;div class="editorDisplayedObject"&gt;&lt;/div&gt;').appendTo(currentClassNode);
+                $(currentMainBlock).append(dataContent);
+                if($(menuNode).is(':empty')) {
+                  $(menuNode).parent().remove();
+                }
+              }
+            }
+            else {
+              var anchor = $('&lt;div /&gt;').append(dataContent).find('h4').attr('id');
+              menuNode.append('&lt;a href="#'+anchor+'" class="editorObjectMenuLink" data-classname="'+className+'" data-number="'+number+'"&gt;'+className+' - '+number+'&lt;/a&gt;&lt;br&gt;');
+              currentClassNode.append('&lt;div class="editorDisplayedObject"&gt;'+dataContent+'&lt;/div&gt;');
+            }
+          }).error(function(xhr) {
+            currentClassNode.append(Translations.objects.loadError+' '+className+' '+number+' : '+xhr.statusText+'&lt;br&gt;');
+          }).complete(function(xhr) {
+            index++;
+            if(index &lt; objectsListSize) {ObjectEditor._loadObjectsDetails(jQueryTabId, objectsList, index, objectsListSize, className, menuNode, dataNode, currentClassNode, loadAllTabs);}
+            else {ObjectEditor._endDisplayObjects(jQueryTabId, objectsListSize, loadAllTabs);}
+          });
+        }
+      };
+      /**
+     * Complete the loading of object editor
+     * @input String jQueryTabId : id of the div where to put the data
+     * @input number of objects in the page
+     */
+      var _endDisplayObjects = ObjectEditor._endDisplayObjects = function(jQueryTabId, objectsListSize, loadAllTabs) {
+        // Initialize the events (click on link/buttons) for all the objects
+        ObjectEditor._initEvents(true, jQueryTabId);
+        // Objects should be hidden if there are more than 2
+        if(objectsListSize &lt; 3) {
+          $(jQueryTabId+' .editorObjectDetails').show();
+          $(jQueryTabId+' .editorObjectTitle h4 span.fa').attr('class', 'fa fa-caret-down');
+        }
+        // Start the code mirror instances for objects with a textarea field
+        if(WebIDE.syntaxHighlighting) {ObjectEditor.initCodeMirror(jQueryTabId);}
+        var tabNumberId = WebIDE.getTabNumber(jQueryTabId);
+        WebIDE.setSavedContent(tabNumberId);
+        WebIDE.setLoadingState(false, Translations.states.loaded, 2500);
+        if(loadAllTabs) {
+          WebIDE.continueLoadAll();
+        }
+      };
+      /**
+     * Initialize the different events related to object editor
+     * Show/hide objects with click events
+     * Add/Remove objects with click events
+     */
+      var _initEvents = ObjectEditor._initEvents = function(allObjects, jQueryTabId){
+        var currentTabNumber = WebIDE.getTabNumber(jQueryTabId);
+
+        $(jQueryTabId+' textarea').attr('spellcheck','false');
+        $(jQueryTabId+' textarea').attr('autocomplete','off');
+
+        function setArrows(element, content) {
+          if(content &amp;&amp; $(content).length &amp;&amp; $(content).is(':visible')) {
+            $(element).find('span.fa').attr('class', 'fa fa-caret-down');
+          }
+          else {
+            $(element).find('span.fa').attr('class', 'fa fa-caret-right');
+          }
+        }
+        function clickOnClass() {
+          var divSelector = 'div[id="tab'+currentTabNumber+'_editorObjects-'+$(this).attr('data-classname')+'"]';
+          $(divSelector).toggle();
+          // If the textarea was initially hidden, Syntax Highlighting editor will only appear when the user click on the textarea : force the click with jQuery
+          $(divSelector+' textarea').click();
+          setArrows(this, divSelector);
+        }
+        function clickOnObject() {
+          var divSelector = 'div[id="tab'+currentTabNumber+'_editorObject-'+$(this).parent().attr('data-classname')+'-'+$(this).parent().attr('data-number')+'"]';
+          $(divSelector).toggle();
+          setArrows(this, divSelector);
+          // If the textarea was initially hidden, Syntax Highlighting editor will only appear when the user click on the textarea : force the click with jQuery
+          $(divSelector+' textarea').click();
+        }
+        function clickOnMenu(e) {
+          $(jQueryTabId+' .editorObjectDetails').hide();
+          setArrows($(jQueryTabId+' .editorObjectTitle h4'), false);
+          var divSelector = 'div[id="tab'+currentTabNumber+'_editorObjects-'+$(this).attr('data-classname')+'"]';
+          var divSelectorInternal = 'div[id="tab'+currentTabNumber+'_editorObject-'+$(this).attr('data-classname')+'-'+$(this).attr('data-number')+'"]';
+          $(divSelector).show();
+          $(divSelectorInternal).show();
+          $(divSelector+' textarea').click();
+          setArrows($(divSelectorInternal).siblings('.editorObjectTitle').find('h4'), divSelectorInternal);
+        }
+        function clickOnRemoveObject(e) {
+          e.preventDefault();
+          $('#editorDeletedObjectModalInfo').html($(this).attr('data-classname')+' - '+$(this).attr('data-number'));
+          $('#editorDeleteObjectConfirmed').attr('data-classname', $(this).attr('data-classname'));
+          $('#editorDeleteObjectConfirmed').attr('data-number', $(this).attr('data-number'));
+          if(WebIDE.bootstrap()) {
+            $('#editorDeleteObjectModal').modal('show');
+          }
+          else {
+            WebIDE.openModalNoBootstrap('#editorDeleteObjectModal');
+          }
+        }
+        $(jQueryTabId+' .editorObjectClassTitle').unbind('click');
+        $(jQueryTabId+' .editorObjectTitle h4').unbind('click');
+        $(jQueryTabId+' .editorObjectMenuLink').unbind('click');
+        $(jQueryTabId+' .editorRemoveObject').unbind('click');
+        $(jQueryTabId+' .editorObjectClassTitle').on('click', clickOnClass);
+        $(jQueryTabId+' .editorObjectTitle h4').on('click', clickOnObject);
+        $(jQueryTabId+' .editorObjectMenuLink').on('click', clickOnMenu);
+        $(jQueryTabId+' .editorRemoveObject').on('click', clickOnRemoveObject);
+
+        if(allObjects) { //Executed only when the page is loaded for the first time (not when an object is added)
+          // Event : Expand/Collapse objects list
+          $('#tab'+currentTabNumber+'_editorExpandAllButton').on('click', function(e) {
+            e.preventDefault();
+            $(jQueryTabId+' .editorObjectDetails, '+jQueryTabId+' .editorObjectClassDetails').show();
+            $(jQueryTabId+' .editorObjectDetails textarea').click();
+            setArrows($(jQueryTabId+' .editorObjectTitle h4'), $(jQueryTabId+' .editorObjectDetails'));
+          });
+          $('#tab'+currentTabNumber+'_editorCollapseAllButton').on('click', function(e) {
+            e.preventDefault();
+            $(jQueryTabId+' .editorObjectClassDetails').show();
+            $(jQueryTabId+' .editorObjectDetails').hide();
+            setArrows($(jQueryTabId+' .editorObjectTitle h4'), false);
+          });
+          // Event : Add an object
+          $('#tab'+currentTabNumber+'_editorObjectAddButton').on('click', function(e) {
+            e.preventDefault();
+            var selectedObj = $('#tab'+currentTabNumber+'_addClassList').val();
+            ObjectEditor.add(jQueryTabId, selectedObj);
+          });
+        }
+      };
+      /**
+     * Save the displayed objects
+     * @input String folder: The folder where is located the document to save
+     * @input String file: The file whose objects have to be saved
+     * @input String objName: name of the object displayed (JSX, SSX, macro) when single-object editor
+     * @input String objNumber: number of the object displayed (JSX, SSX, macro) when single-object editor
+     * @input Boolean changeSavedContent: true = change the value of savedContent, false = don't change the value, the tab is going to be closed
+     * @input Boolean continueEditing: true = stay in the editor, false = go to the view mode of the page after saving
+     */
+      var save = ObjectEditor.save = function(tabNumberId, changeSavedContent, continueEditing, saveAll, tokenUpToDate) {
+        if(!WebIDE.SAVING || saveAll) {
+          if(!saveAll) {
+            WebIDE.setSavingState(true);
+          }
+          if(WebIDE.syntaxHighlighting) {
+            WebIDE.synchronizeCodeMirrorContent();
+          }
+          $.ajax({
+            url: $('#tab'+tabNumberId+'_objectIDEform').attr('action'),
+            type: $('#tab'+tabNumberId+'_objectIDEform').attr('method'),
+            data: $('#tab'+tabNumberId+'_objectIDEform').serialize(),
+            success: function() {
+              if(changeSavedContent) {
+                WebIDE.setSavedContent(tabNumberId);
+              }
+              WebIDE.setStar(false, tabNumberId);
+              if(!saveAll) {
+                WebIDE.setSavingState(false, Translations.states.saved, 2500);
+                if(continueEditing) return true;
+                else window.location.href = WebIDE.wikiViewURL+space+'/'+page;
+              }
+              else {
+                WebIDE.continueSaveAll(true);
+              }
+            },
+            error : function(xhr) {
+              if(!saveAll) {
+                WebIDE.setSavingState(false, xhr.statusText, 5000, 'red');
+              }
+              if(xhr.status == 401 &amp;&amp; !tokenUpToDate){
+                ObjectEditor._getUpdatedToken(ObjectEditor.save, [tabNumberId, changeSavedContent, continueEditing, saveAll]);
+              }
+              else {
+                WebIDE.continueSaveAll(false, xhr, folder, file);
+              }
+            }
+          });
+        }
+      };
+      var getParameters = ObjectEditor.getParameters = function() {
+        return [ObjectEditor._getCurrentObject(false), ObjectEditor.currentNumber];
+      };
+      var setParameters = ObjectEditor.setParameters = function(parameters) {
+        ObjectEditor._setCurrentObject(parameters[0]);
+        ObjectEditor._setCurrentNumber(parameters[1]);
+      };
+      var resetParameters = ObjectEditor.resetParameters = function() {
+        ObjectEditor._setCurrentObject(null);
+        ObjectEditor._setCurrentNumber(null);
+      };
+      var getTabButtonParameters = ObjectEditor.getTabButtonParameters = function(parameters) {
+        return (parameters[0]) ? 'data-object="'+encodeURI(parameters[0])+'" data-objectnumber="'+parameters[1]+'"' : '';
+      };
+      var getParametersFromTab = ObjectEditor.getParametersFromTab = function(tabButton) {
+        var tabObj = tabButton.attr('data-object') || null;
+        var tabObjNumber = tabButton.attr('data-objectnumber') || null;
+        return [tabObj, tabObjNumber];
+      };
+      var getMenuElement = ObjectEditor.getMenuElement = function(folder, file, parameters) {
+        return (parameters[0]) ? $('.editObject[data-space="'+folder+'"][data-page="'+file+'"][data-object="'+parameters[0]+'"][data-objectnumber="'+parameters[1]+'"]') : $('.editObject[data-space="'+folder+'"][data-page="'+file+'"]').not('[data-object]');
+      };
+      var getTabName = ObjectEditor.getTabName = function(folder, file, parameters) {
+        return (parameters[0]) ? '('+ObjectEditor._getObjectShortName(parameters[0])+') '+file+' ('+decodeURIComponent(folder)+')' : file+' ('+decodeURIComponent(folder)+')';
+      };
+      /**
+     * Get a short name for objects which can be displayed alone (JS, CSS, Macro) to be able to better identified a tab
+     * @input String className: The class of the object
+     */
+      var _getObjectShortName = ObjectEditor._getObjectShortName = function(className) {
+        if(className === 'XWiki.JavaScriptExtension') {
+          return 'JSX';
+        }
+        else if(className === 'XWiki.StyleSheetExtension') {
+          return 'SSX';
+        }
+        else if(className === 'XWiki.WikiMacroClass') {
+          return 'Macro';
+        }
+        else {
+          return className || '';
+        }
+      };
+      var getCurrentContent = ObjectEditor.getCurrentContent = function (tabElement) {
+        var arrayVal = ObjectEditor._getObjectInputFields(tabElement);
+        var content = "";
+        arrayVal.each(function(elemt, index) {
+          content += $(index).val();
+        });
+        return content;
+      };
+      var initCodeMirror = ObjectEditor.initCodeMirror = function(id) {
+        var selector = [
+          [id+" textarea[name^='XWiki.StyleSheetExtension_'][name$='_code']", 'css'],
+          [id+" textarea[name^='XWiki.JavaScriptExtension_'][name$='_code']", 'javascript'],
+          [id+" textarea[name^='XWiki.XWikiSkins_'][name$='.css']", 'css'],
+          [id+" textarea[name^='XWiki.XWikiSkins_'][name$='.js']", 'javascript'],
+          [id+" textarea[name^='XWiki.XWikiSkins_'][name$='.vm']", 'velocity'],
+          [id+" textarea[name^='XWiki.WikiMacroClass_'][name$='_code']", XWiki.docsyntax],
+          [id+" textarea[name^='XWiki.ComponentMethodClass_'][name$='_code']", XWiki.docsyntax],
+          [id+" textarea[name^='Panels.PanelClass_'][name$='_content']", XWiki.docsyntax],
+          [id+" textarea[name^='XWiki.UIExtensionClass'][name$='_content']", XWiki.docsyntax]
+        ];
+        id = id.replace( /(:|\.|\[|\]|,)/g, "\\$1" );
+        $(selector).each(function(ind, elmt) {
+          SH.initCodeMirror(elmt[0], elmt[1], WebIDE.codeMirrorParams);
+        });
+      };
+      var initHash = ObjectEditor.initHash = function(hashArray) {
+        if(hashArray.size() === 7) {
+          ObjectEditor.setParameters([decodeURIComponent(hashArray[5]), hashArray[6]]);
+        }
+      };
+      /**
+     * Change the effect of the "delete" button at the bottom of the editor to make it delete an object (if single object editor).
+     * If the editor is the classic object editor, make the button delete the whole page.
+     */
+      var setDeleteButton = ObjectEditor.setDeleteButton = function() {
+        if(ObjectEditor._getCurrentObject(false) &amp;&amp; ObjectEditor._getCurrentObject(false) !== 'Panels.PanelClass' &amp;&amp; ObjectEditor._getCurrentObject(false) !== 'XWiki.WikiMacroClass') { // Single object editor : delete only the object displayed in the page
+          $('#hierarchyDeleteButtonIDE').val(Translations.commons.deleteAction);
+          $('#hierarchyDeleteButtonIDE').off('click');
+          $('#hierarchyDeleteButtonIDE').on('click', function() {
+            $('#editorDeletedObjectModalInfo').html(ObjectEditor._getCurrentObject(false)+' - '+ObjectEditor.currentNumber);
+            $('#editorDeleteObjectConfirmed').attr('data-classname', ObjectEditor._getCurrentObject(false));
+            $('#editorDeleteObjectConfirmed').attr('data-number', ObjectEditor.currentNumber);
+            if(WebIDE.bootstrap()) {
+              $('#editorDeleteObjectModal').modal('show');
+            }
+            else {
+              WebIDE.openModalNoBootstrap('#editorDeleteObjectModal');
+            }
+          });
+        }
+        else { // Multiple object editor : delete the whole page
+          $('#hierarchyDeleteButtonIDE').val(Translations.commons.deleteAction);
+          $('#hierarchyDeleteButtonIDE').off('click');
+          $('#hierarchyDeleteButtonIDE').on('click', function() {
+            $('#editorDeleteMultipleObjectsModalInfo').html(WebIDE.getCurrentSpace()+'.'+WebIDE.getCurrentPage());
+            $('#editorDeleteMultipleObjectsModal').modal('show');
+          });
+        }
+      };
+      /**
+     * Contains all events that have to be registered again each time the hierarchy is updated (mostly "click" events on elements in the hierarchy)
+     */
+      var initMenu = ObjectEditor.initMenu = function() {
+        // Add an existing page (if no bootstrap)
+        $('.newLocalObject, .newGlobalObject').off('click');
+        $('.newLocalObject, .newGlobalObject').on('click', function(e){
+          e.preventDefault();
+          var modal = true;
+          var folder = $(this).attr('data-space') || '';
+          var file = $(this).attr('data-page') || '';
+          $('#hierarchyObjectPageInput').attr('disabled', false);
+          $('#hierarchyObjectSpace').html(folder);
+          $('#hierarchyObjectPageInputDefault').val('');
+          $('#hierarchyObjectPageInput').val('');
+          $('#hierarchyObjectPage').html('');
+          var objType = Translations.objects.js;
+
+          // Manage the case of each type of object that can be added from the logical view.
+          // Cf ObjectEditor.initModals() below to add extras properties to the object, if necessary, when the user validates
+          if($(this).hasClass('newJSObject')) {
+            $('#hierarchyObjectClassName').val('XWiki.JavaScriptExtension');
+          }
+          else if($(this).hasClass('newCSSObject')) {
+            objType = Translations.objects.css;
+            $('#hierarchyObjectClassName').val('XWiki.StyleSheetExtension');
+          }
+          else if($(this).hasClass('newMacroObject')) {
+            objType = Translations.objects.macro;
+            $('#hierarchyObjectClassName').val('XWiki.WikiMacroClass');
+          }
+          else if($(this).hasClass('newPanelObject')) {
+            objType = Translations.objects.panel;
+            $('#hierarchyObjectClassName').val('Panels.PanelClass');
+          }
+          else if($(this).hasClass('newTranslationObject')) {
+            objType = Translations.objects.translation;
+            $('#hierarchyObjectClassName').val('XWiki.TranslationDocumentClass');
+          }
+          else if($(this).hasClass('newSheet')) {
+            objType = Translations.objects.sheet;
+            $('#hierarchyObjectClassName').val('XWiki.DocumentSheetBinding');
+          }
+          else if($(this).hasClass('newUIXObject')) {
+            objType = Translations.objects.uix;
+            $('#hierarchyObjectPageInput').attr('disabled', true);
+            $('#hierarchyObjectClassName').val('XWiki.UIExtensionClass');
+          }
+
+          if($(this).hasClass('newGlobalObject')) {
+            $('#hierarchyAddObject').attr('data-scope', 'global');
+            $('#hierarchyObjectPageInput').val(file);
+            $('#hierarchyObjectPageInputDefault').val(file);
+            $('#hierarchyObjectPageBlock').hide();
+            $('#hierarchyObjectPageInputBlock').show();
+          }
+          else if($(this).hasClass('newLocalObject')) {
+            // Add the object without modal
+            $('#hierarchyAddObject').attr('data-scope', 'local');
+            var className = $('#hierarchyObjectClassName').val();
+            ObjectEditor.add(null, className, true, folder, file, false, true);
+            modal = false;
+          }
+          $('#hierarchyAddObject').html(Translations.commons.add+' '+objType);
+          if(!WebIDE.bootstrap() &amp;&amp; modal) {
+            WebIDE.openModalNoBootstrap('#hierarchyObjectModal');
+            ObjectEditor._addModalShortcut();
+          }
+        });
+        $('.editObject').off('click');
+        $('.editObject').on('click', function(e){
+          e.preventDefault();
+          if(!WebIDE.SAVING &amp;&amp; !WebIDE.LOADING) {
+            var folder = $(this).attr('data-space');
+            var file = $(this).attr('data-page');
+            var objectSelected = null;
+            var objectNumber = null;
+            if($(this).attr('data-object') &amp;&amp; $(this).attr('data-objectnumber')) {
+              objectSelected = $(this).attr('data-object');
+              objectNumber = $(this).attr('data-objectnumber');
+            }
+            WebIDE.goToNewPage(ObjectEditor.editor, file, folder, [objectSelected, objectNumber]);
+          }
+        });
+        $('.deleteObject').off('click');
+        $('.deleteObject').on('click', function(e){
+          e.preventDefault();
+          if(!WebIDE.SAVING &amp;&amp; !WebIDE.LOADING) {
+            var folder = $(this).attr('data-space');
+            var file = $(this).attr('data-page');
+            var objectSelected = null;
+            var objectNumber = null;
+            if($(this).attr('data-object') &amp;&amp; $(this).attr('data-objectnumber')) {
+              objectSelected = $(this).attr('data-object');
+              objectNumber = $(this).attr('data-objectnumber');
+              $('#editorDeletedObjectModalInfo').html(objectSelected+' - '+objectNumber);
+              $('#editorDeleteObjectConfirmed').attr('data-classname', objectSelected);
+              $('#editorDeleteObjectConfirmed').attr('data-number', objectNumber);
+              $('#editorDeleteObjectConfirmed').attr('data-space', folder);
+              $('#editorDeleteObjectConfirmed').attr('data-page', file);
+              if(WebIDE.bootstrap()) {
+                $('#editorDeleteObjectModal').modal('show');
+              }
+              else {
+                WebIDE.openModalNoBootstrap('#editorDeleteObjectModal');
+              }
+            }
+          }
+        });
+      };
+      /**
+     * Initialize the modals (with or without Bootstrap) and their one-time events (shown, hidden, clicks)
+     */
+      var initModals = ObjectEditor.initModals = function() {
+        $('#hierarchyObjectModal').on('shown.bs.modal', ObjectEditor._addModalShortcut);
+        $('#hierarchyObjectModal').on('hidden.bs.modal', WebIDE.removeEnterShortcut);
+        $('#hierarchyAddObject').click(function(e){
+          $('body').removeClass('modal-open');
+          e.preventDefault();
+          // Get page and object data
+          var folder = $('#hierarchyObjectSpace').html();
+          var file = !$('#hierarchyObjectPage').is(':empty') ? $('#hierarchyObjectPage').html() : ($('#hierarchyObjectPageInput').val() !== '' ?  $('#hierarchyObjectPageInput').val() : $('#hierarchyObjectPageInputDefault').val());
+          var className = $('#hierarchyObjectClassName').val();
+          if(folder &amp;&amp; file &amp;&amp; className &amp;&amp; folder.trim() &amp;&amp; file.trim() &amp;&amp; className.trim()) {
+            var global = ($('#hierarchyAddObject').attr('data-scope') === 'global');
+            var properties = null;
+            var redirect = true;
+            // Manage the different types of object that can be added from the logical view
+            if(global &amp;&amp; className === 'XWiki.JavaScriptExtension') {
+              properties = encodeURIComponent('{"name" : "'+file.replace(/"/g, '\"')+'"}');
+              file = 'JS';
+            }
+            else if(global &amp;&amp; className === 'XWiki.StyleSheetExtension') {
+              properties = encodeURIComponent('{"name" : "'+file.replace(/"/g, '\"')+'"}');
+              file = 'CSS';
+            }
+            else if(global &amp;&amp; className === 'XWiki.WikiMacroClass') {
+              var macroName = file.charAt(0).toLowerCase() + file.slice(1);
+              properties = encodeURIComponent('{"id" : "'+macroName.replace(/"/g, '\"')+'", "name" : "'+file.replace(/"/g, '\"')+'"}');
+              file = WebIDE.fixName(file, 'macros');
+            }
+            else if(global &amp;&amp; className === 'XWiki.TranslationDocumentClass') {
+              properties = encodeURIComponent('{"scope" : "WIKI"}');
+              redirect = false; // Translation must be opened by the wiki editor
+            }
+            else if(global &amp;&amp; className === 'XWiki.UIExtensionClass') {
+              file = 'UIX';
+            }
+            // Add the object
+            ObjectEditor.add(null, className, true, folder, file, global, redirect, properties);
+          }
+          else {
+            $('#hierarchyObjectModalError').html(Translations.commons.modalError).show().delay(4000).queue(function(n) {
+              $(this).hide().html('');
+              n();
+            });
+          }
+        });
+        $('#editorDeleteObjectConfirmed').click(function(e){
+          $('body').removeClass('modal-open');
+          e.preventDefault();
+          var page = $(this).attr('data-page') || WebIDE.getCurrentPage(false);
+          var space = $(this).attr('data-space') || WebIDE.getCurrentSpace(false);
+          ObjectEditor.remove(space, page, $(this).attr('data-classname'), $(this).attr('data-number'));
+          $(this).removeAttr('data-page');
+          $(this).removeAttr('data-space');
+          $(this).removeAttr('data-classname');
+          $(this).removeAttr('data-number');
+        });
+        $('#editorDeleteMultipleObjectConfirmed').on('click', function(e) {
+          $('body').removeClass('modal-open');
+          e.preventDefault();
+          var page = WebIDE.getCurrentPage(false);
+          var space = WebIDE.getCurrentSpace(false);
+          ObjectEditor.remove(space, page);
+        });
+      };
+      var _getCurrentObject = ObjectEditor._getCurrentObject = function(escaped) {
+        if(escaped) {return (ObjectEditor.currentObject === null) ? null : WebIDE.getEscapedValue(ObjectEditor.currentObject);}
+        else {return ObjectEditor.currentObject;}
+      };
+      var _addModalShortcut = ObjectEditor._addModalShortcut = function() {
+        $('#hierarchyObjectPageInput').focus();
+        shortcut.add("Enter", function() {
+          $('#hierarchyAddObject').click();
+        });
+      };
+      /**
+     * Add the selected object to the page
+     * @input String jQueryTabId : id of the div where to put the data
+     * @input String className : class of the object to add
+     */
+      var add = ObjectEditor.add = function(jQueryTabId, className, newTab, space, page, global, redirect, properties, type) {
+        if(!WebIDE.SAVING &amp;&amp; !WebIDE.LOADING) {
+          WebIDE.setSavingState(true);
+          WebIDE.setLoadingState(true);
+          var objPage = page || WebIDE.getCurrentPage(true);
+          var objSpace = space || WebIDE.getCurrentSpace(true);
+          var isSelectedObject = '';
+          var isGlobal = '';
+          var addProperties = '';
+          if(!newTab) {
+            var currentTabNumber = WebIDE.getTabNumber(jQueryTabId);
+            var unsavedStateBefore = (WebIDESavedContent[currentTabNumber] !== WebIDE.getCurrentContent(currentTabNumber));
+          }
+          if(ObjectEditor._getCurrentObject(false) || newTab) {
+            isSelectedObject = '&amp;selectedObject';
+          }
+          if(global) {
+            isGlobal = '&amp;isGlobal';
+          }
+          if(properties) {
+            addProperties = '&amp;properties='+properties;
+          }
+          if(className != "") {
+            $.ajax({
+              url: WebIDE.wikiViewURL+"WebIDECode/ApplicationObjects?xpage=plain&amp;addObject="+className+"&amp;docFullName="+objSpace+'.'+objPage+isSelectedObject+isGlobal+addProperties,
+              type: "GET",
+              dataType: "html"
+            }).error(function(xhr) {
+              WebIDE.setSavingState(false, Translations.objects.loadUnable+' '+xhr.statusText, 4000, 'red');
+            }).success(function(dataContent) {
+              WebIDE.setSavingState(false, Translations.states.saved, 2500);
+              var number = $('&lt;div/&gt;').append(dataContent).find('div[data-number]').attr('data-number');
+              if(newTab) { // Add an object from the menu
+                WebIDE.setLoadingState(false, Translations.states.loaded, 2500);
+                if(redirect) { // Create an object and redirect to a new tab with that object
+                  WebIDE.goToNewPage(ObjectEditor.editor, page, space, [className, number]);
+                }
+                Hierarchy.reload();
+              }
+              else { // Add an object from an object editor tab
+                var divSelector = 'div[id="tab'+currentTabNumber+'_editorObjects-'+className+'"]';
+                var dataContentTmp = $('&lt;div/&gt;').html(dataContent);
+                var tabAdd = 'tab'+currentTabNumber+'_';
+                WebIDE.fixIds(dataContentTmp, tabAdd);
+                dataContent = dataContentTmp.html();
+                var anchor = $('&lt;div /&gt;').append(dataContent).find('h4').attr('id');
+                var newObjectId = '#tab'+currentTabNumber+'_editorObject-'+className+'-'+number;
+                if(ObjectEditor._getCurrentObject(false)) { // Single object editor : add in the "other fields" block (e.g. : macro parameters)
+                  $(jQueryTabId+' .editorOtherFieldsBlock').append(dataContent);
+                  // Collapse the existing parameters/fields and expand only the new object
+                  $(jQueryTabId+' .editorObjectDetails').hide();
+                  $(jQueryTabId+' .editorObjectDetails:last').show();
+                }
+                else { // Classic object editor
+                  // Add the object in the right class if an object of that class is already in that page
+                  if($(divSelector).length){
+                    $(divSelector).show();
+                    $(divSelector).append('&lt;div class="editorDisplayedObject"&gt;'+dataContent+'&lt;/div&gt;');
+                  }
+                  // Else add the object at the end of the page and quick access menu
+                  else {
+                    $('#tab'+currentTabNumber+'_objectIDEform').append('&lt;h2 class="wikigeneratedheader editorObjectClassTitle" data-classname="'+className+'"&gt;'+className+'&lt;/h2&gt;&lt;div id="tab'+currentTabNumber+'_editorObjects-'+className+'" class="editorObjectClassDetails"&gt;&lt;div class="editorDisplayedObject"&gt;'+dataContent+'&lt;/div&gt;&lt;/div&gt;');
+                  }
+                  // Add the shortcut in the Quick Access Menu
+                  if($('#tab'+currentTabNumber+'_editorObjectMenu a[data-classname="'+className+'"]:last').length) {
+                    $('#tab'+currentTabNumber+'_editorObjectMenu a[data-classname="'+className+'"]:last').after('&lt;br&gt;&lt;a href="#'+anchor+'" class="editorObjectMenuLink" data-classname="'+className+'" data-number="'+number+'"&gt;'+className+' - '+number+'&lt;/a&gt;');
+                  }
+                  else if($('#tab'+currentTabNumber+'_editorObjectMenu a:last').length) {
+                    $('#tab'+currentTabNumber+'_editorObjectMenu a:last').after('&lt;br&gt;&lt;a href="#'+anchor+'" class="editorObjectMenuLink" data-classname="'+className+'" data-number="'+number+'"&gt;'+className+' - '+number+'&lt;/a&gt;');
+                  }
+                  else {
+                    $('#tab'+currentTabNumber+'_editorObjectMenuContent').append('&lt;a href="#'+anchor+'" class="editorObjectMenuLink" data-classname="'+className+'" data-number="'+number+'"&gt;'+className+' - '+number+'&lt;/a&gt;');
+                  }
+                }
+                ObjectEditor._initEvents(false, jQueryTabId);
+                if(WebIDE.syntaxHighlighting) {
+                  ObjectEditor.initCodeMirror(newObjectId);
+                }
+              }
+            }).complete(function() {
+              $('#hierarchyObjectModal').modal('hide');
+              $('#hierarchyPageModal').modal('hide');
+              // If all the content was initially saved, update the new "savedContent" value (the new object is automatically saved)
+              if(!newTab &amp;&amp; !unsavedStateBefore) {
+                WebIDE.setSavedContent(currentTabNumber);
+              }
+              var unsavedState = (WebIDESavedContent[currentTabNumber] !== WebIDE.getCurrentContent(currentTabNumber));
+              WebIDE.setStar(unsavedState, currentTabNumber);
+              WebIDE.setLoadingState(false, Translations.states.complete, 2500);
+            });
+          }
+        }
+      };
+      /**
+     * Remove the specified object from the page
+     * @input String className: the class of the object to remove
+     * @input String number: the number of the object to remove
+     */
+      var remove = ObjectEditor.remove = function(space, page, className, number) {
+        if(!WebIDE.SAVING &amp;&amp; !WebIDE.LOADING) {
+          WebIDE.setSavingState(true, Translations.objects.deleting);
+          WebIDE.setLoadingState(true, Translations.objects.removing);
+          // Find the current tab number
+          var jQueryTabId = '#'+WebIDE.getTabId(ObjectEditor.editor, WebIDE.getCurrentSpace(), WebIDE.getCurrentPage(), ObjectEditor.getParameters());
+          var currentTabNumber = WebIDE.getTabNumber(jQueryTabId);
+          // Check if the deleted element is opened in another tab and find the related tab number.
+          // If className == undefined, the users wants to delete the whole current page and so the related tab number is the current tab number. (Prevent issues with macros and panels)
+          var jQueryTabIdObj = '#'+WebIDE.getTabId(ObjectEditor.editor, space, page, [className, number]);
+          var objectTabNumber = (!className) ? currentTabNumber : WebIDE.getTabNumber(jQueryTabIdObj);
+          // Check if the tab was saved before removing the object (the savedContent value will have to be updated at the end if that's the case)
+          var unsavedStateBefore = (WebIDESavedContent[currentTabNumber] !== WebIDE.getCurrentContent(currentTabNumber));
+          // Determine if the object deleted is in the tab (multiple or single object editor)
+          var isCurrentSingleObject = (ObjectEditor._getCurrentObject(false) &amp;&amp; currentTabNumber&gt;0 &amp;&amp; currentTabNumber === objectTabNumber);
+          var isInCurrentTab = (isCurrentSingleObject || (WebIDE.currentEditor === ObjectEditor.editor &amp;&amp; page === WebIDE.getCurrentPage() &amp;&amp; space === WebIDE.getCurrentSpace() &amp;&amp; !ObjectEditor._getCurrentObject(false)));
+          // Ajax queyr data
+          var restCurrentSpaces = WebIDE.getRestSpacesString(space);
+          var ajaxUrl = '';
+          var httpMethod = '';
+          if(!className) { // Remove the whole page from the wiki (Multiple object editor, Panels, Macros...)
+            ajaxUrl = WebIDE.wikiViewURL+"WebIDECode/ApplicationObjects?xpage=plain&amp;removePage=1&amp;docSpace="+space+'&amp;docPage='+page;
+            httpMethod = "GET";
+          }
+          else { // Remvoe only one object from the page
+            ajaxUrl = '/'+XWiki.webapppath+'rest/wikis/'+WebIDE.getDocumentReferenceData('wiki')+'/'+restCurrentSpaces+'/pages/'+page+'/objects/'+className+'/'+number;
+            httpMethod = "DELETE";
+          }
+          $.ajax({
+            url: ajaxUrl,
+            type: httpMethod,
+          }).success(function(dataContent){
+            WebIDE.setSavingState(false, Translations.commons.deleted, 2500);
+            // Case 1: object editor of the concerned page = remove the object from the current tab
+            if(isInCurrentTab &amp;&amp; !isCurrentSingleObject &amp;&amp; className) { // Current tab + Current Multiple Objects editor + Only 1 object removed
+              var divSelectorInternal = 'div[id="tab'+currentTabNumber+'_editorObject-'+className+'-'+number+'"]';
+              $(divSelectorInternal).parent().remove();
+              $('#tab'+currentTabNumber+'_editorObjectMenu a[data-classname="'+className+'"][data-number="'+number+'"]').next('br').remove();
+              $('#tab'+currentTabNumber+'_editorObjectMenu a[data-classname="'+className+'"][data-number="'+number+'"]').remove();
+              Hierarchy.reload();
+            }
+            // Case 2: object not displayed in the current tab or tab with that object only = remove the tab
+            else {
+              if(objectTabNumber &gt; 0) {
+                var element = $('.editorTabButton[data-tabnumber="'+objectTabNumber+'"]');
+                WebIDE.removeTab(element, objectTabNumber);
+              }
+              Hierarchy.reload();
+            }
+            if(WebIDE.bootstrap()) {
+              $('#editorDeleteObjectModal').modal('hide');
+              $('#editorDeleteMultipleObjectsModal').modal('hide');
+            }
+            else {
+              WebIDE.closeModalNoBootstrap();
+            }
+          }).error(function(xhr){
+            WebIDE.setSavingState(true, xhr.statusText, 5000, 'red');
+          }).complete(function() {
+            $('#editorDeletedObjectModalInfo').html('');
+            if(isInCurrentTab &amp;&amp; !isCurrentSingleObject &amp;&amp; className) {
+              // If all the content was initially saved, update the new "saved" value (the removed object is automatically saved)
+              if(!unsavedStateBefore) {
+                WebIDE.setSavedContent(currentTabNumber);
+              }
+              var unsavedState = (WebIDESavedContent[currentTabNumber] !== WebIDE.getCurrentContent(currentTabNumber));
+              WebIDE.setStar(unsavedState, currentTabNumber);
+            }
+            WebIDE.setLoadingState(false, Translations.commons.removed, 2500);
+          });
+        }
+      };
+      /**
+     * Update the CSRF token for the current user (the token can be wrong if the wiki has been restarted)
+     * @input (opt) Function callback : the function to call when the token is updated
+     * @input (opt) Array args : the arguments to apply to the callback function when it is called
+     */
+      var _getUpdatedToken = ObjectEditor._getUpdatedToken = function(callback, args) {
+        if(!WebIDE.LOADING) {
+          WebIDE.setLoadingState(true, Translations.objects.updatingToken);
+          $.ajax({
+            url: WebIDE.wikiViewURL+"WebIDECode/ApplicationObjects?xpage=plain&amp;updateToken",
+            type: "GET",
+            dataType: "html"
+          }).success(function(dataContent) {
+            var newToken = $('&lt;div /&gt;').append(dataContent).find('#currentToken p').html();
+            if(newToken !== WebIDE.getDocumentReferenceData('form_token')) {
+              if(xm) {
+                xm.form_token = newToken;
+              }
+              else {
+                $('meta[name="form_token"]').attr('content', newToken);
+              }
+              $('input[name="form_token"]').val(newToken);
+              WebIDE.setLoadingState(false, Translations.objects.updatedToken, 2500);
+              if(callback &amp;&amp; args) {
+                args.push(true);
+                callback.apply(null, args);
+              }
+            }
+            else {
+              WebIDE.setLoadingState(false, Translations.objects.errorToken, 1000);
+            }
+          }).error(function(xhr) {
+            WebIDE.setLoadingState(false, xhr.statusText, 4000, 'red');
+          });
+        }
+      };
+      /**
+     * Get all the inputs (input, textarea, select, etc.) in the object editor, except those created by CodeMirror
+     * @input DOM tabElement: a div element containing the data of a tab
+     * @return List[DOM elements] The list of editable elements in the selected object editor tab
+     */
+      var _getObjectInputFields = ObjectEditor._getObjectInputFields = function(tabElement) {
+        return $(tabElement).find('.editorDisplayedObject textarea, .editorDisplayedObject input, .editorDisplayedObject select').not('.CodeMirror textarea, .SHcheckbox')
+      };
+      /**
+     * Set data about the current document edited
+     * @input String file/folder/objName/objNumber: the value currently used in the editor
+     */
+      var _setCurrentObject = ObjectEditor._setCurrentObject = function(objName) {
+        ObjectEditor.currentObject = objName;
+      };
+      var _setCurrentNumber = ObjectEditor._setCurrentNumber = function(objNumber) {
+        ObjectEditor.currentNumber = objNumber;
+      };
+
+      return ObjectEditor;
+    }
+  };
+});</code>
+    </property>
+    <property>
+      <name>WebIDE Object module</name>
+    </property>
+    <property>
+      <parse>0</parse>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
+  <content/>
+</xwikidoc>

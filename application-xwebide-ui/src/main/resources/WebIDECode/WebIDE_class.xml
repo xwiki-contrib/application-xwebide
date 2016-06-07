@@ -1,0 +1,566 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc reference="WebIDECode.WebIDE_class" locale="">
+  <web>WebIDECode</web>
+  <name>WebIDE_class</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <parent>WebIDECode.WebIDE_object</parent>
+  <creator>xwiki:XWiki.Admin</creator>
+  <author>xwiki:XWiki.Admin</author>
+  <customClass/>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <creationDate>1465302206000</creationDate>
+  <date>1465303829000</date>
+  <contentUpdateDate>1465302206000</contentUpdateDate>
+  <version>1.1</version>
+  <title>WebIDE_class</title>
+  <defaultTemplate/>
+  <validationScript/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>false</hidden>
+  <object>
+    <class>
+      <name>XWiki.JavaScriptExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage|onDemand|always</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <name>WebIDECode.WebIDE_class</name>
+    <number>0</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>9dafa5fd-eb24-43a5-b0fa-5e6b112960e8</guid>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>//---------- AWMClassEditor Module ----------
+define(['jquery'], function($) {
+  return {
+    init : function(WebIDE, Hierarchy, SH, Translations, Modules) {
+
+      var AWMClassEditor = {};
+      //---------- ClassEditor Module ----------
+      var editor = AWMClassEditor.editor = 'awm';
+      var load = AWMClassEditor.load = function(loadAllTabs) {
+        if(WebIDE.currentEditor === AWMClassEditor.editor) {
+          WebIDE.setLoadingState(true);
+          var tabId = WebIDE.getTabId(WebIDE.currentEditor, WebIDE.getCurrentSpace(false), WebIDE.getCurrentPage(false), AWMClassEditor.getParameters());
+          var jQueryTabId = '#'+tabId;
+          var tabNumberId = WebIDE.getTabNumber(jQueryTabId);
+          var advancedFieldBlock = WebIDE.initOtherFieldsBlock($(jQueryTabId), jQueryTabId, 1, Translations.panel.advanced);
+          advancedFieldBlock = advancedFieldBlock.find('.editorOtherFieldsBlockContent');
+          WebIDE.initOtherFieldsBlock($(jQueryTabId), jQueryTabId, 3, Translations.panel.shortcuts);
+          var classEditorStorage = window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.classEditor'] || 'basic';
+          classEditorStorage = (classEditorStorage === 'advanced') ? 'advanced' : 'basic';
+          var urlIframe = (classEditorStorage === 'basic') ? "/xwiki/bin/edit/"+WebIDE.getCurrentSpace(false)+"/"+WebIDE.getCurrentPage(false)+"?editor=inline&amp;sheet=AppWithinMinutes.ClassEditSheet" : "/xwiki/bin/edit/"+WebIDE.getCurrentSpace(false)+"/"+WebIDE.getCurrentPage(false)+"?editor=class";
+          AWMClassEditor.iFrameLoading = true;
+          var ifrm = $('&lt;iframe allowtransparency="true" id="tab'+tabNumberId+'_awm" data-type="'+classEditorStorage+'" name="tab'+tabNumberId+'_awm" class="editorIframe"/&gt;').attr('src', urlIframe).appendTo($('&lt;div class="editorClassTabContent"&gt;&lt;/div&gt;').appendTo(jQueryTabId));
+          AWMClassEditor._initIframe(ifrm, tabNumberId);
+          var nextEditor = 'advanced';
+          var buttonText = Translations.classes.switchAdvanced;
+          if(classEditorStorage === 'advanced') {
+            nextEditor = 'basic';
+            buttonText = Translations.classes.switchBasic;
+          }
+          $('&lt;input type="button" class="btn btn-default editorAWMSwitch" value="'+buttonText+'"/&gt;').appendTo(advancedFieldBlock).on('click', function() {
+            if(WebIDESavedContent[tabNumberId] != WebIDE.getCurrentContent(tabNumberId)) {$('#editorSwitchClassModal').modal('show');}
+            else{AWMClassEditor._switchClassEditor(ifrm, tabNumberId);}
+          });
+          WebIDE.setLoadingState(false, Translations.states.loaded, 2500);
+          if(loadAllTabs) {
+            WebIDE.continueLoadAll();
+          }
+        }
+      };
+      var _switchClassEditor = AWMClassEditor._switchClassEditor = function(ifrm, tabNumberId) {
+        if(!AWMClassEditor.iFrameLoading) {
+          var oldType = $(ifrm).attr('data-type');
+          var tabDiv = $('.editorTab[data-tabnumber="'+tabNumberId+'"]');
+          AWMClassEditor.iFrameLoading = true;
+          if(oldType === 'basic') {
+            $(ifrm).attr('src', "/xwiki/bin/edit/"+WebIDE.getCurrentSpace(false)+"/"+WebIDE.getCurrentPage(false)+"?editor=class")
+            $(ifrm).attr('data-type', 'advanced');
+            window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.classEditor'] = 'advanced';
+          }
+          else {
+            $(ifrm).attr('src', "/xwiki/bin/edit/"+WebIDE.getCurrentSpace(false)+"/"+WebIDE.getCurrentPage(false)+"?editor=inline&amp;sheet=AppWithinMinutes.ClassEditSheet")
+            $(ifrm).attr('data-type', 'basic');
+            window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.classEditor'] = 'basic';
+          }
+          var buttonText = Translations.classes.switchAdvanced;
+          if(oldType === 'basic') {
+            buttonText = Translations.classes.switchBasic;
+          }
+          $(tabDiv).find('.editorAWMSwitch').val(buttonText);
+          AWMClassEditor._initIframe(ifrm, tabNumberId);
+        }
+      };
+      var save = AWMClassEditor.save = function(tabNumberId, changeSavedContent, continueEditing, saveAll) {
+        if(!WebIDE.SAVING || saveAll) {
+          var tabButtonElement = $('.editorTabButton[data-tabnumber="'+tabNumberId+'"]');
+          var page = decodeURIComponent($(tabButtonElement).attr('data-page'));
+          var space = decodeURIComponent($(tabButtonElement).attr('data-space'));
+          var tabId = WebIDE.getTabId(WebIDE.currentEditor, space, page, []);
+          var jQueryTabId = '#'+tabId;
+          var ifrm = $(jQueryTabId+' iframe');
+          $(ifrm).contents().find('input[name="xaction_saveandcontinue"], input[name="action_saveandcontinue"]').click();
+          if(changeSavedContent) {
+            WebIDE.setSavedContent(tabNumberId);
+          }
+          WebIDE.setStar(false, tabNumberId);
+          if(!saveAll) {
+            //WebIDE.setSavingState(false, 'Saved', 2500);
+            if(continueEditing) return true;
+            else window.location.href = WebIDE.wikiViewURL+space+'/'+page;
+          }
+          else {
+            WebIDE.continueSaveAll(true);
+          }
+        }
+      };
+      var getParameters = AWMClassEditor.getParameters = function() {
+        return [];
+      };
+      var setParameters = AWMClassEditor.setParameters = function(parameters) {
+        return true;
+      };
+      var resetParameters = AWMClassEditor.resetParameters = function() {
+        return true;
+      };
+      var getTabButtonParameters = AWMClassEditor.getTabButtonParameters = function(parameters) {
+        return '';
+      };
+      var getParametersFromTab = AWMClassEditor.getParametersFromTab = function(tabButton) {
+        return [];
+      };
+      var getMenuElement = AWMClassEditor.getMenuElement = function(folder, file, parameters) {
+        return $('.editAWM[data-space="'+folder+'"][data-page="'+file+'"]')
+      };
+      var getTabName = AWMClassEditor.getTabName = function(folder, file, parameters) {
+        return file+' ('+folder+'.'+file+')';
+      };
+      var getCurrentContent = AWMClassEditor.getCurrentContent = function (tabElement) {
+        var arrayVal = AWMClassEditor._getObjectInputFields(tabElement);
+        var content = "";
+        arrayVal.each(function(elemt, index) {
+          content += $(index).val();
+        });
+        return content;
+      };
+      var initHash = AWMClassEditor.initHash = function(hashArray) {
+        return true;
+      };
+      var setDeleteButton = AWMClassEditor.setDeleteButton = function() {
+        $('#hierarchyDeleteButtonIDE').val(Translations.commons.deleteAction);
+        $('#hierarchyDeleteButtonIDE').off('click');
+        $('#hierarchyDeleteButtonIDE').on('click', function() {
+          $('#editorDeletedClassModalInfo').html(WebIDE.getCurrentSpace(false)+' - '+WebIDE.getCurrentPage(false));
+          $('#editorDeleteClassConfirmed').attr('data-page', WebIDE.getCurrentPage(false));
+          $('#editorDeleteClassConfirmed').attr('data-space', WebIDE.getCurrentSpace(false));
+          if(WebIDE.bootstrap()) {
+            $('#editorDeleteClassModal').modal('show');
+          }
+          else {
+            WebIDE.openModalNoBootstrap('#editorDeleteClassModal');
+          }
+        });
+      };
+      /**
+     * Contains all events that have to be registered again each time the hierarchy is updated (mostly "click" events on elements in the hierarchy) :
+     */
+      var initMenu = AWMClassEditor.initMenu = function() {
+        // User wants to edit a new page
+        $('.editAWM').off('click');
+        $('.editAWM').on('click', function(e){
+          e.preventDefault();
+          if(!WebIDE.SAVING &amp;&amp; !WebIDE.LOADING) {
+            var folder = $(this).attr('data-space');
+            var file = $(this).attr('data-page');
+            WebIDE.goToNewPage(AWMClassEditor.editor, file, folder, []);
+          }
+        });
+        $('.newAWMClass').off('click');
+        $('.newAWMClass').on('click', function(e){
+          e.preventDefault();
+          $('#hierarchyAddSheetBlock').hide();
+          var folder = $(this).attr('data-space') || '';
+          var file = $(this).attr('data-page') || '';
+
+          $('#hierarchyClassSpace').html(folder);
+          $('#hierarchyClassInput').val('');
+
+          if($(this).hasClass('newClass')) {
+            $('#hierarchyAddClass').attr('data-type', 'class');
+          }
+          else if($(this).hasClass('newSheet')) {
+            $('#hierarchyAddSheetBlock').show();
+            $('#hierarchyClassSheet').val('');
+            var classFile = file; // e.g.: ApplicationClass
+            file = file.substr(0, file.length - 5); // e.g.: Application
+            $('#hierarchyClassInput').val(decodeURIComponent(file)+"Sheet");
+            $('#hierarchyAddClass').attr('data-type', 'sheet');
+            $('#hierarchyAddClass').attr('data-classname', classFile);
+            $('#hierarchyClassSheet').on('change', function() {
+              var action = $(this).val();
+              var actionName = (action === '') ? '' : action.charAt(0).toUpperCase() + action.slice(1);
+              $('#hierarchyClassInput').val(file+actionName+"Sheet");
+            });
+          }
+          else if($(this).hasClass('newTemplate')) {
+            var classFile = folder+'.'+file;
+            AWMClassEditor.add(classFile, 'template');
+          }
+        });
+        // User wants to delete a class
+        $('.deleteAWM').off('click');
+        $('.deleteAWM').on('click', function(e){
+          e.preventDefault();
+          if(!WebIDE.SAVING &amp;&amp; !WebIDE.LOADING) {
+            var folder = $(this).attr('data-space');
+            var file = $(this).attr('data-page');
+            $('#editorDeletedClassModalInfo').html(folder+'.'+file);
+            $('#editorDeleteClassConfirmed').attr('data-page', file);
+            $('#editorDeleteClassConfirmed').attr('data-space', folder);
+            if(WebIDE.bootstrap()) {
+              $('#editorDeleteClassModal').modal('show');
+            }
+            else {
+              WebIDE.openModalNoBootstrap('#editorDeleteClassModal');
+            }
+          }
+        });
+      };
+      /**
+    * Initialize the modals (with or without Bootstrap) and their one-time events (shown, hidden, clicks)
+    */
+      var initModals = AWMClassEditor.initModals = function() {
+        $('#hierarchyClassModal').on('shown.bs.modal', AWMClassEditor._addModalShortcut);
+        $('#hierarchyClassModal').on('hidden.bs.modal', WebIDE.removeEnterShortcut);
+        $('#hierarchyAddClass').on('click', function(e){
+          $('body').removeClass('modal-open');
+          e.preventDefault();
+          var folder = $('#hierarchyClassSpace').text();
+          var file = encodeURIComponent($('#hierarchyClassInput').val());
+          var sheetName;
+          var sheetType;
+          var className;
+          var type; // Check if it is a class or a sheet
+          if($(this).attr('data-type')) {
+            type = $('#hierarchyAddClass').attr('data-type');
+          }
+          if(folder &amp;&amp; file &amp;&amp; type &amp;&amp; folder.trim() &amp;&amp; file.trim()) {
+            if(type === 'sheet') {
+              className = folder+'.'+$('#hierarchyAddClass').attr('data-className');
+              sheetName = file;
+              sheetType = $('#hierarchyClassSheet').val();
+            }
+            else if(type === 'class') {
+              file = WebIDE.fixName(file, type);
+              className = folder+'.'+file;
+            }
+            AWMClassEditor.add(className, type, sheetType, sheetName);
+          }
+          else {
+            $('#hierarchyClassModalError').html(Translations.commons.modalError).show().delay(4000).queue(function(n) {
+              $(this).hide().html('');
+              n();
+            });
+          }
+        });
+        $('#hierarchySaveAndSwitchClassModal, #hierarchyDiscardAndAndSwitchClassModal').click(function(e){
+          e.preventDefault();
+          if(!WebIDE.SAVING &amp;&amp; !WebIDE.LOADING) {
+            var tabId = WebIDE.getTabId(WebIDE.currentEditor, WebIDE.getCurrentSpace(), WebIDE.getCurrentPage(), AWMClassEditor.getParameters());
+            var jQueryTabId = '#'+tabId;
+            var ifrm = $(jQueryTabId+' iframe');
+            var tabNumberId = WebIDE.getTabNumber(jQueryTabId);
+            $('body').removeClass('modal-open');
+            $('#editorSwitchClassModal').modal('hide');
+            if($(this).attr('id') === 'hierarchySaveAndSwitchClassModal') {
+              AWMClassEditor.switchEditor = true;
+              Modules[AWMClassEditor.editor].save(tabNumberId, false, true, false);
+            }
+            else {
+              AWMClassEditor._switchClassEditor(ifrm, tabNumberId);
+            }
+          }
+        });
+        $('#editorDeleteClassConfirmed').click(function(e){
+          $('body').removeClass('modal-open');
+          e.preventDefault();
+          var removeSheet = $('#editorDeleteClassSheet').is(':checked');
+          var removeTemplate = $('#editorDeleteClassTemplate').is(':checked');
+          AWMClassEditor.remove($(this).attr('data-space'), $(this).attr('data-page'), removeSheet, removeTemplate);
+        });
+      };
+      /**
+     * Add shortcuts when the "page" modal is opened
+     */
+      var _addModalShortcut = AWMClassEditor._addModalShortcut = function() {
+        $('#hierarchyClassInput').focus();
+        shortcut.add("Enter", function() {
+          $('#hierarchyAddClass').click();
+        });
+      };
+      /**
+    * Delete a class from the wiki :
+    */
+      var remove = AWMClassEditor.remove = function(space, page, removeSheet, removeTemplate) {
+        if(!WebIDE.LOADING) {
+          WebIDE.setLoadingState(true, Translations.commons.deleting);
+          var addRemoveSheet = '';
+          var addRemoveTemplate = '';
+          if(removeSheet) {
+            addRemoveSheet = '&amp;removeSheet=1';
+          }
+          if(removeTemplate) {
+            addRemoveTemplate = '&amp;removeTemplate=1';
+          }
+          $.ajax({
+            url: WebIDE.wikiViewURL+"WebIDECode/ClassCreation?outputSyntax=plain&amp;xpage=plain&amp;removeClass=1&amp;space="+space+"&amp;page="+page+""+addRemoveSheet+addRemoveTemplate,
+            type: "GET",
+            contentType: "application/json",
+          }).success(function(data){
+            var dataJson = $.parseJSON(data);
+            $(dataJson['delete']).each(function(index, elmt){
+              var selector = '_'+encodeURIComponent(elmt.space).replace(/\./g, '2E').replace(/%/g, '')+'_'+encodeURIComponent(elmt.name).replace(/\./g, '2E').replace(/%/g, '');
+              var elements = $('.editorTab[id*="'+selector+'"]');
+              elements.each(function(i, innerElmt) {
+                var tabNumberId = $(innerElmt).attr('data-tabnumber');
+                var element = $('.editorTabButton[data-tabnumber="'+tabNumberId+'"]');
+                WebIDE.removeTab(element, tabNumberId);
+              });
+            });
+            $('#editorDeleteClassModal').modal('hide');
+            Hierarchy.reload();
+            WebIDE.setLoadingState(false, Translations.commons.deleted, 2500);
+          }).error(function(xhr){
+            WebIDE.setLoadingState(false, xhr.statusText, 4000, 'red');
+          });
+        }
+      };
+      /**
+    * Add a clas in the project :
+    */
+      var add = AWMClassEditor.add = function(className, type, sheetType, sheetName) {
+        if(!WebIDE.SAVING &amp;&amp; !WebIDE.LOADING) {
+          WebIDE.setSavingState(true);
+          if(className &amp;&amp; className != "") {
+            var error = 0;
+            var addSheetParameters = '';
+            if((sheetType || sheetType === '') &amp;&amp; sheetName) {
+              addSheetParameters = '&amp;sheetType='+sheetType+'&amp;sheetName='+sheetName;
+            }
+            $.ajax({
+              url: WebIDE.wikiViewURL+"WebIDECode/ClassCreation?xpage=plain&amp;className="+className+"&amp;type="+type+addSheetParameters,
+              type: "GET"
+            }).error(function(xhr) {
+              WebIDE.setSavingState(false, 'Unable to add '+type+': '+xhr.statusText, 4000, 'red');
+            }).success(function(dataContent) {
+              error = $('&lt;div/&gt;').append(dataContent).find('#editorAddClassError').length;
+              if(error) {
+                $('#hierarchyClassModalError').html(Translations.wiki.nameUsedError).show().delay(4000).queue(function(n) {
+                  $(this).hide().html('');
+                  n();
+                });
+                WebIDE.setSavingState(false, Translations.wiki.nameUsedError, 4000, 'red');
+              }
+              else {
+                WebIDE.setSavingState(false, Translations.commons.saved, 2500);
+                Hierarchy.reload();
+              }
+            }).complete(function() {
+              if(!error) {
+                $('#hierarchyClassModal').modal('hide');
+              }
+            });
+          }
+        }
+      };
+      var _initIframe = AWMClassEditor._initIframe = function(ifrm,tabNumberId) {
+        $(ifrm).off('load');
+        $(ifrm).on('load', function() {
+          // Hide some UI elements from the iframe and show only the main edit area
+          $(ifrm).contents().find('body').css({"overflow" : "hidden", "min-height":"300px"});
+          $(ifrm).contents().find('body').addClass('main');
+          $(ifrm).contents().find('#menuview, #rightPanels, #leftPanels, .bottombuttons, #hierarchy, #footerglobal, .row, .leftmenu2').hide();
+          $(ifrm).contents().find('#classname').parent().remove();
+          $(ifrm).contents().find('#options').find('#updateClassSheet, #updateClassTranslations').attr('checked', false); // Basic mode only
+          $(ifrm).contents().find('.switch-xclass, .xclass-title, #editPanels').hide(); // Advanced mode only
+          $(ifrm).contents().find('div.main').css({
+            "left" : "0%",
+            "width" : "100%",
+            "box-shadow" : "none",
+            "padding" : "0px"
+          });
+          var initIframeHeight = $(ifrm).contents().find('body').height();
+          $(ifrm).css({
+            "height" : initIframeHeight+"px"
+          });
+          WebIDE.onElementHeightChange(document.getElementById('tab'+tabNumberId+'_awm').contentDocument.body, function() {
+            $(ifrm).css({
+              "height" : $(ifrm).contents().find('body').height()+"px"
+            });
+          });
+          // Remove the iframe's keyboard shortcuts to prevent the user from browsing the wiki in the iframe. Keep only Save&amp;Continue (Alt+Shift+S)
+          window.setTimeout(function() {
+            for (binding in document.getElementById('tab'+tabNumberId+'_awm').contentWindow.shortcut.all_shortcuts) {
+              document.getElementById('tab'+tabNumberId+'_awm').contentWindow.shortcut.remove(binding);
+            }
+            document.getElementById('tab'+tabNumberId+'_awm').contentWindow.shortcut.add("Alt+Shift+S", function() {
+              $('#hierarchySaveButtonIDE').click();
+            });
+          }, 250);
+          // Capture the save/saved events to display the notifications in the WebIDE
+          // Hide the default notification container (in the iframe)
+          $('#tab'+tabNumberId+'_awm').contents().find('body').on('DOMNodeInserted', function(e) {
+            $(ifrm).contents().find('.xnotification-container').css({
+              "visibility" : "hidden"
+            });
+          });
+          document.getElementById('tab'+tabNumberId+'_awm').contentDocument.observe("xwiki:actions:save", function(event){
+            WebIDE.setSavingState(true);
+          });
+          document.getElementById('tab'+tabNumberId+'_awm').contentDocument.observe("xwiki:document:saved", function(event){
+            if(AWMClassEditor.switchEditor) {
+              AWMClassEditor.switchEditor = false;
+              AWMClassEditor._switchClassEditor(ifrm, tabNumberId);
+            }
+            WebIDE.setSavingState(false, Translations.commons.saved, 2500);
+          });
+          $(ifrm).contents().find('form#inline').find('input:first').click();
+          window.setTimeout(function() {
+            WebIDE.setSavedContent(tabNumberId);
+            $(ifrm).contents().find('body').on('click keyup', function(){
+              var unsavedState = (WebIDESavedContent[tabNumberId] !== WebIDE.getCurrentContent(tabNumberId));
+              WebIDE.setStar(unsavedState, tabNumberId);
+            });
+            AWMClassEditor.iFrameLoading = false;
+          }, 500);
+          return false;
+        });
+      };
+      var switchEditor = AWMClassEditor.switchEditor = false;
+      var iFrameLoading = AWMClassEditor.iFrameLoading = false;
+      /**
+       * Get all the inputs (input, textarea, select, etc.) in the object editor, except those created by CodeMirror
+       * @input DOM tabElement: a div element containing the data of a tab
+       * @return List[DOM elements] The list of editable elements in the selected object editor tab
+       */
+      var _getObjectInputFields = AWMClassEditor._getObjectInputFields = function(tabElement) {
+        var tabNumberId = $(tabElement).attr('data-tabnumber');
+        var ifrm = document.getElementById('tab'+tabNumberId+'_awm');
+        if($(ifrm).contents().find('#propupdate').length) { // Advanced
+          return $(ifrm).contents().find('form#propupdate').find('textarea, input, select')
+        }
+        else {
+          return $(ifrm).contents().find('form#inline').find('textarea[name^="field-"], input[name^="field-"], select[name^="field-"], textarea[name^="'+WebIDE.getCurrentSpace()+'."], input[name^="'+WebIDE.getCurrentSpace()+'."]')
+        }
+      }
+
+      return AWMClassEditor;
+    }
+  };
+});</code>
+    </property>
+    <property>
+      <name>WebIDE AWM Class module</name>
+    </property>
+    <property>
+      <parse>0</parse>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
+  <content/>
+</xwikidoc>
