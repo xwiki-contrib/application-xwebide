@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1465303282000</date>
-  <contentUpdateDate>1459245114000</contentUpdateDate>
+  <date>1467126168000</date>
+  <contentUpdateDate>1465374088000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -124,24 +124,29 @@
     <property>
       <code>var syntaxHURL = document.getElementById('syntaxHURL').value;
 var translationsURL = document.getElementById('translationsURL').value;
+
+#set ($menuRef = $services.model.resolveDocument("WebIDECode.WebIDE_menu"))
+#set ($wikiRef = $services.model.resolveDocument("WebIDECode.WebIDE_wiki"))
+#set ($objectRef = $services.model.resolveDocument("WebIDECode.WebIDE_object"))
+#set ($classRef = $services.model.resolveDocument("WebIDECode.WebIDE_class"))
 if(require.toUrl('xwiki-meta').substr(0,7) === '/xwiki/') {
   var required = ['jquery',
                   translationsURL,
                   syntaxHURL,
-                  '/xwiki/bin/jsx/WebIDECode/WebIDE_menu',
-                  '/xwiki/bin/jsx/WebIDECode/WebIDE_wiki',
-                  '/xwiki/bin/jsx/WebIDECode/WebIDE_object',
-                  '/xwiki/bin/jsx/WebIDECode/WebIDE_class',
+                  "$xwiki.getURL($menuRef, 'jsx')",
+                  "$xwiki.getURL($wikiRef, 'jsx')",
+                  "$xwiki.getURL($objectRef, 'jsx')",
+                  "$xwiki.getURL($classRef, 'jsx')",
                   'xwiki-meta'];
 }
 else {
   var required = ['jquery',
                   translationsURL,
                   syntaxHURL,
-                  '/xwiki/bin/jsx/WebIDECode/WebIDE_menu',
-                  '/xwiki/bin/jsx/WebIDECode/WebIDE_wiki',
-                  '/xwiki/bin/jsx/WebIDECode/WebIDE_object',
-                  '/xwiki/bin/jsx/WebIDECode/WebIDE_class'];
+                  "$xwiki.getURL($menuRef, 'jsx')",
+                  "$xwiki.getURL($wikiRef, 'jsx')",
+                  "$xwiki.getURL($objectRef, 'jsx')",
+                  "$xwiki.getURL($classRef, 'jsx')"];
 }
 var WebIDESavedContent = []; //Global variable : WebIDE plugins (such as RealTime) should be able to modify the value of the saved content
 require(required , function ($, Translations, SH, HierarchyJS, WikiEditorJS, ObjectEditorJS, AWMClassEditorJS, xm) {
@@ -1358,7 +1363,7 @@ require(required , function ($, Translations, SH, HierarchyJS, WikiEditorJS, Obj
       <name>Hierarchy panel</name>
     </property>
     <property>
-      <parse>0</parse>
+      <parse>1</parse>
     </property>
     <property>
       <use>onDemand</use>
