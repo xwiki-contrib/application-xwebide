@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1467126168000</date>
-  <contentUpdateDate>1465374088000</contentUpdateDate>
+  <date>1467809293000</date>
+  <contentUpdateDate>1467803105000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
   <defaultTemplate/>
@@ -1901,8 +1901,8 @@ require(required , function ($, Translations, SH, HierarchyJS, WikiEditorJS, Obj
           &lt;div id="hierarchyAddPageTypeBlock"&gt;&lt;br&gt;
 
           {{info}}
-            **$services.localization.render('webide.modals.add.page.type.content')**: $services.localization.render('webide.modals.add.page.info.content')&lt;br&gt;
-            **$services.localization.render('webide.modals.add.page.type.item')**: $services.localization.render('webide.modals.add.page.info.content')
+            **$services.localization.render('webide.modals.add.page.type.content')**: $services.localization.render('webide.modals.add.page.info.content')
+            **$services.localization.render('webide.modals.add.page.type.item')**: $services.localization.render('webide.modals.add.page.info.item')
           {{/info}}
 
           &lt;dt&gt;&lt;label&gt;$services.localization.render('webide.modals.add.page.type')&lt;/label&gt;&lt;/dt&gt;
