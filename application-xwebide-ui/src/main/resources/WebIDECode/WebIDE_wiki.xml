@@ -32,7 +32,7 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1465294200000</creationDate>
-  <date>1467809283000</date>
+  <date>1467809654000</date>
   <contentUpdateDate>1465374088000</contentUpdateDate>
   <version>1.1</version>
   <title>WebIDE_wiki</title>
@@ -240,7 +240,7 @@ define(['jquery'], function($) {
         }
       };
       var getParameters = WikiEditor.getParameters = function() {
-        var locale = WikiEditor.currentLocale || 'default';
+        var locale = currentLocale || 'default';
         return [locale];
       };
       var setParameters = WikiEditor.setParameters = function(parameters) {
