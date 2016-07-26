@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1461078662000</creationDate>
-  <date>1467803129000</date>
-  <contentUpdateDate>1465374088000</contentUpdateDate>
+  <date>1469540131000</date>
+  <contentUpdateDate>1469520743000</contentUpdateDate>
   <version>1.1</version>
   <title>WebIDE_menu</title>
   <defaultTemplate/>
@@ -70,6 +70,7 @@
       </cache>
       <code>
         <disabled>0</disabled>
+        <editor>PureText</editor>
         <name>code</name>
         <number>2</number>
         <prettyName>Code</prettyName>
@@ -138,7 +139,7 @@
  * Hierarchy._addFolderModalShortcut()
  * Hierarchy._addExistingPageModalShortcut()
  */
-define(['jquery'], function($) {
+define(['jquery', 'bootstrap'], function($) {
   return {
     init : function(WebIDE, Translations, Modules) {
       var Hierarchy = {};
@@ -323,22 +324,12 @@ define(['jquery'], function($) {
               data: "property#spaces="+encodeURIComponent(spaceArray),
             }).success(function(){
               $('#hierarchyNewFolderName').val('');
-              if(WebIDE.bootstrap()) {
-                $('#hierarchyFolderModal').modal('hide');
-              }
-              else {
-                WebIDE.closeModalNoBootstrap();
-              }
+              $('#hierarchyFolderModal').modal('hide');
               WebIDE.setHierarchyState(Translations.hierarchy.folder.added, 2500);
               reload();
             }).error(function(xhr){
               $('#hierarchyNewFolderName').val('');
-              if(WebIDE.bootstrap()) {
-                $('#hierarchyFolderModal').modal('hide');
-              }
-              else {
-                WebIDE.closeModalNoBootstrap();
-              }
+              $('#hierarchyFolderModal').modal('hide');
               WebIDE.setHierarchyState(xhr.statusText, 4000, 'red');
             });
           }
@@ -388,22 +379,12 @@ define(['jquery'], function($) {
                 data: "property#pages="+encodeURIComponent(pageArray),
               }).success(function(){
                 $('#hierarchyExistingPageName').val('');
-                if(WebIDE.bootstrap()) {
-                  $('#hierarchyExistingPageModal').modal('hide');
-                }
-                else {
-                  WebIDE.closeModalNoBootstrap();
-                }
+                $('#hierarchyExistingPageModal').modal('hide');
                 WebIDE.setHierarchyState(Translations.hierarchy.page.added, 2500);
                 reload();
               }).error(function(xhr){
                 $('#hierarchyExistingPageName').val('');
-                if(WebIDE.bootstrap()) {
-                  $('#hierarchyExistingPageModal').modal('hide');
-                }
-                else {
-                  WebIDE.closeModalNoBootstrap();
-                }
+                $('#hierarchyExistingPageModal').modal('hide');
                 WebIDE.setHierarchyState(xhr.statusText, 4000, 'red');
               });
             }
@@ -471,24 +452,6 @@ define(['jquery'], function($) {
             $(this).find('.hierarchyDisplayPageIcon &gt; span').attr('class', 'fa fa-caret-down');
           }
           WebIDE.setCookieHierarchy('visibleCategory', WebIDE.visibleCategory);
-        });
-        // Add a folder (if no bootstrap)
-        $('.newFolder').off('click');
-        $('.newFolder').on('click', function(e){
-          e.preventDefault();
-          if(!WebIDE.bootstrap()) {
-            WebIDE.openModalNoBootstrap('#hierarchyFolderModal');
-            _addFolderModalShortcut();
-          }
-        });
-        // Add an existing page (if no bootstrap)
-        $('.newExistingPage').off('click');
-        $('.newExistingPage').on('click', function(e){
-          e.preventDefault();
-          if(!WebIDE.bootstrap()) {
-            WebIDE.openModalNoBootstrap('#hierarchyExistingPageModal');
-            _addExistingPageModalShortcut();
-          }
         });
 
         // Remove a folder by clicking on the cross
@@ -570,39 +533,12 @@ define(['jquery'], function($) {
       };
 
       /**
-       * Initialize the modals (with or without Bootstrap) and their one-time events (shown, hidden, clicks)
+       * Initialize the modals and their one-time events (shown, hidden, clicks)
        */
       var initModals = Hierarchy.initModals = function() {
         for (var editor in Modules) {
           Modules[editor].initModals();
         }
-        // If Bootstrap is disabled (Colibri skin), create custom modals. Let a delay before testing bootstrap in case it is loaded after the Web IDE.
-        window.setTimeout(function () {
-          if(!WebIDE.bootstrap()) {
-            $('button[data-dismiss="modal"]').click(function() {
-              WebIDE.closeModalNoBootstrap();
-            });
-            $('.modal').css({
-              "width" : "40%",
-              "border" : "1px solid black",
-              "backgroundColor" : "#FFFFFF",
-              "borderRadius" : "5px",
-              "position" : "fixed",
-              "left" : "30%",
-              "top" : "20%",
-              "padding" : "10px",
-              "zIndex" : "1000"
-            });
-            $('.modal-header .close').css({
-              "float" : "right",
-              "position" : "absolute",
-              "right" : "5px",
-              "top" : "5px"
-            });
-            // Add support for the bootstrap buttons in Colibri skin (.btn, .btn-primary, .btn-success, .btn-danger, .btn-default)
-            $('html &gt; head').append($('&lt;style&gt;.btn{border-radius:5px;padding:3px;color:white;cursor:pointer;}.btn-primary{background-color:#337AB7;border-color:#2E6DA4;}.btn-success{background-color:#5CB85C;border-color:#4CAE4C;}.btn-danger{background-color:#C9302C;border-color:#AC2925;}.btn-default{border-color:#000000;color:black;}&lt;/style&gt;'));
-          }
-        }, 100);
         $('input[type=radio][name=hierarchyAddPageType]').change(function() {
           if(this.value == 'content') {
             $('#hierarchyAddPageItemBlock').hide();
@@ -612,7 +548,6 @@ define(['jquery'], function($) {
             $('#hierarchyAddPageItem').html($('#hierarchyUpdatedClassList').html());
           }
         });
-        $('#backgroundModalNoBootstrap').click(WebIDE.closeModalNoBootstrap);
         // Reset the tab to close when the user cancel the action :
         $('#hierarchyCloseTabModal').on('hidden.bs.modal', WebIDE.resetTabToClose);
         // Autofocus on text inputs when a modal appears and "Enter" shortcut:
@@ -661,12 +596,7 @@ define(['jquery'], function($) {
             var closedTab = WebIDE.nextTabToClose;
             var tabNumberId = $(closedTab).attr('data-tabnumber');
             $('body').removeClass('modal-open');
-            if(WebIDE.bootstrap()) {
-              $('#hierarchyCloseTabModal').modal('hide');
-            }
-            else {
-              WebIDE.closeModalNoBootstrap();
-            }
+            $('#hierarchyCloseTabModal').modal('hide');
             // Determine the editor used in the selected tab
             var selectedTabEditor = $(closedTab).attr('data-editor');
             if($(this).attr('id') === 'hierarchySaveAndCloseModal') {

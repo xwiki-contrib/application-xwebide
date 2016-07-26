@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1465294209000</creationDate>
-  <date>1467803125000</date>
-  <contentUpdateDate>1465374089000</contentUpdateDate>
+  <date>1469541139000</date>
+  <contentUpdateDate>1469520744000</contentUpdateDate>
   <version>1.1</version>
   <title>WebIDE_object</title>
   <defaultTemplate/>
@@ -70,6 +70,7 @@
       </cache>
       <code>
         <disabled>0</disabled>
+        <editor>PureText</editor>
         <name>code</name>
         <number>2</number>
         <prettyName>Code</prettyName>
@@ -135,7 +136,7 @@
  * _setCurrentObject(objName)
  * _setCurrentNumber(objNumber)
  */
-define(['jquery'], function($) {
+define(['jquery', 'bootstrap'], function($) {
   return {
     init : function(WebIDE, Hierarchy, SH, Translations, Modules) {
 
@@ -379,12 +380,7 @@ define(['jquery'], function($) {
           $('#editorDeletedObjectModalInfo').html($(this).attr('data-classname')+' - '+$(this).attr('data-number'));
           $('#editorDeleteObjectConfirmed').attr('data-classname', $(this).attr('data-classname'));
           $('#editorDeleteObjectConfirmed').attr('data-number', $(this).attr('data-number'));
-          if(WebIDE.bootstrap()) {
-            $('#editorDeleteObjectModal').modal('show');
-          }
-          else {
-            WebIDE.openModalNoBootstrap('#editorDeleteObjectModal');
-          }
+          $('#editorDeleteObjectModal').modal('show');
         }
         $(jQueryTabId+' .editorObjectClassTitle').unbind('click');
         $(jQueryTabId+' .editorObjectTitle h4').unbind('click');
@@ -551,12 +547,7 @@ define(['jquery'], function($) {
             $('#editorDeletedObjectModalInfo').html(ObjectEditor._getCurrentObject(false)+' - '+ObjectEditor.currentNumber);
             $('#editorDeleteObjectConfirmed').attr('data-classname', ObjectEditor._getCurrentObject(false));
             $('#editorDeleteObjectConfirmed').attr('data-number', ObjectEditor.currentNumber);
-            if(WebIDE.bootstrap()) {
-              $('#editorDeleteObjectModal').modal('show');
-            }
-            else {
-              WebIDE.openModalNoBootstrap('#editorDeleteObjectModal');
-            }
+            $('#editorDeleteObjectModal').modal('show');
           });
         }
         else { // Multiple object editor : delete the whole page
@@ -572,7 +563,6 @@ define(['jquery'], function($) {
      * Contains all events that have to be registered again each time the hierarchy is updated (mostly "click" events on elements in the hierarchy)
      */
       var initMenu = ObjectEditor.initMenu = function() {
-        // Add an existing page (if no bootstrap)
         $('.newLocalObject, .newGlobalObject').off('click');
         $('.newLocalObject, .newGlobalObject').on('click', function(e){
           e.preventDefault();
@@ -632,10 +622,6 @@ define(['jquery'], function($) {
             modal = false;
           }
           $('#hierarchyAddObject').html(Translations.commons.add+' '+objType);
-          if(!WebIDE.bootstrap() &amp;&amp; modal) {
-            WebIDE.openModalNoBootstrap('#hierarchyObjectModal');
-            ObjectEditor._addModalShortcut();
-          }
         });
         $('.editObject').off('click');
         $('.editObject').on('click', function(e){
@@ -668,18 +654,13 @@ define(['jquery'], function($) {
               $('#editorDeleteObjectConfirmed').attr('data-number', objectNumber);
               $('#editorDeleteObjectConfirmed').attr('data-space', folder);
               $('#editorDeleteObjectConfirmed').attr('data-page', file);
-              if(WebIDE.bootstrap()) {
-                $('#editorDeleteObjectModal').modal('show');
-              }
-              else {
-                WebIDE.openModalNoBootstrap('#editorDeleteObjectModal');
-              }
+              $('#editorDeleteObjectModal').modal('show');
             }
           }
         });
       };
       /**
-     * Initialize the modals (with or without Bootstrap) and their one-time events (shown, hidden, clicks)
+     * Initialize the modals and their one-time events (shown, hidden, clicks)
      */
       var initModals = ObjectEditor.initModals = function() {
         $('#hierarchyObjectModal').on('shown.bs.modal', ObjectEditor._addModalShortcut);
@@ -907,13 +888,8 @@ define(['jquery'], function($) {
               }
               Hierarchy.reload();
             }
-            if(WebIDE.bootstrap()) {
-              $('#editorDeleteObjectModal').modal('hide');
-              $('#editorDeleteMultipleObjectsModal').modal('hide');
-            }
-            else {
-              WebIDE.closeModalNoBootstrap();
-            }
+            $('#editorDeleteObjectModal').modal('hide');
+            $('#editorDeleteMultipleObjectsModal').modal('hide');
           }).error(function(xhr){
             WebIDE.setSavingState(true, xhr.statusText, 5000, 'red');
           }).complete(function() {

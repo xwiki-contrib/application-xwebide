@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1435138565000</creationDate>
-  <date>1450695581000</date>
-  <contentUpdateDate>1450695581000</contentUpdateDate>
+  <date>1469541154000</date>
+  <contentUpdateDate>1469520743000</contentUpdateDate>
   <version>1.1</version>
   <title>XWiki Web IDE</title>
   <defaultTemplate/>
@@ -70,6 +70,7 @@
       </cache>
       <code>
         <disabled>0</disabled>
+        <editor>PureText</editor>
         <name>code</name>
         <number>2</number>
         <prettyName>Code</prettyName>
@@ -148,62 +149,20 @@
   }); // end of doc observe for auto-suggest
 })();
 
-require(['jquery'], function ($) {
+require(['jquery', 'bootstrap'], function ($) {
   $(function(){
 
-    var bootstrap = (typeof($.fn.modal) !== 'undefined');
-    $('html &gt; head').append($('&lt;style&gt;#backgroundModalNoBootstrap{position:fixed;left:0px;top:0px;right:0px;bottom:0px;z-index:999;background-color:black;opacity:0.3;display:none;}.webide-hidden{display:none;} .webide-addElementInput{width:90% !important;} .webide-addElementButton{width:10%; float:right; margin: 0;}&lt;/style&gt;'));
-    if(!bootstrap) {
-      $('html &gt; head').append($('&lt;style&gt;.btn{border-radius:5px;padding:3px;color:white;cursor:pointer;}.btn-primary{background-color:#337AB7;border-color:#2E6DA4;}.btn-success{background-color:#5CB85C;border-color:#4CAE4C;}.btn-danger{background-color:#C9302C;border-color:#AC2925;}.btn-default{border-color:#000000;color:black;}&lt;/style&gt;'));
-      function openModalNoBootstrap(modalId) {
-        $(modalId).show();
-        $('#backgroundModalNoBootstrap').show();
-      }
-      function closeModalNoBootstrap() {
-        $('#backgroundModalNoBootstrap').hide();
-        $('.modal').hide();
-      }
-      $('#backgroundModalNoBootstrap').click(function () {
-        closeModalNoBootstrap();
-      });
-    }
+    $('html &gt; head').append($('&lt;style&gt;.webide-hidden{display:none;} .webide-addElementInput{width:90% !important;} .webide-addElementButton{width:10%; float:right; margin: 0;}&lt;/style&gt;'));
+
     $('#modalProjectCreation').hide();
 
     $('#openCreationBlock').click(function(e){
-      $('#modalProjectCreation').show();
       e.preventDefault();
+      $('#modalProjectCreation').show();
       $('#projectCreationName').show();
       $('#projectCreationSpaces, #projectCreationPages').hide();
       $('#projectName, #spacesList, #pagesList').val('');
-      if(bootstrap) {
-        $('#modalProjectCreation').modal('show');
-      }
-      else {
-        openModalNoBootstrap('#backgroundModalNoBootstrap');
-        $('button[data-dismiss="modal"]').click(function() {
-          closeModalNoBootstrap();
-        });
-        $('.modal').css({
-          "width" : "40%",
-          "border" : "1px solid black",
-          "backgroundColor" : "#FFFFFF",
-          "borderRadius" : "5px",
-          "position" : "fixed",
-          "left" : "30%",
-          "top" : "20%",
-          "padding" : "10px",
-          "zIndex" : "1000"
-        });
-        $('.modal-header .close').css({
-          "float" : "right",
-          "position" : "absolute",
-          "right" : "5px",
-          "top" : "5px"
-        });
-        $('.modal-header .modal-title').css({
-          "marginTop" : "0px"
-        });
-      }
+      $('#modalProjectCreation').modal('show');
       $('#projectName').focus();
     });
 

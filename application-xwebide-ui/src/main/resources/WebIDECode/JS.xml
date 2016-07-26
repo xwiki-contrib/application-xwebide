@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434954547000</creationDate>
-  <date>1451378397000</date>
-  <contentUpdateDate>1448966573000</contentUpdateDate>
+  <date>1469540825000</date>
+  <contentUpdateDate>1469520743000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -70,6 +70,7 @@
       </cache>
       <code>
         <disabled>0</disabled>
+        <editor>PureText</editor>
         <name>code</name>
         <number>2</number>
         <prettyName>Code</prettyName>
@@ -133,7 +134,6 @@ $(function(){
     XWiki.webapppath = XWiki.webapppath.substr(1,(XWiki.webapppath.length-1));
   }
   var wikiViewURL = '/'+XWiki.webapppath+''+XWiki.servletpath+'view/';
-  var bootstrap = (typeof($.fn.modal) !== 'undefined'); // Modal won't work without bootstrap
   if(window.docviewurl.indexOf('/'+XWiki.currentSpace+'/') &gt;= 0) {
     wikiViewURL = window.docviewurl.substring(0,window.docviewurl.indexOf('/'+XWiki.currentSpace+'/')+1);
   }
@@ -236,9 +236,7 @@ $(function(){
         }
         $('#modalProjectSelection').remove();
         $('&lt;div id="modalProjectSelection" class="modal fade" role="dialog"&gt;&lt;div class="modal-dialog"&gt;&lt;div class="modal-content"&gt;&lt;div class="modal-header"&gt;&lt;button type="button" class="close" data-dismiss="modal"&gt;&amp;times;&lt;/button&gt;&lt;h4 class="modal-title"&gt;XWebIDE editor&lt;/h4&gt;&lt;/div&gt;&lt;div class="modal-body"&gt;&lt;p&gt;'+message+'&lt;/p&gt;&lt;p&gt;'+projectURLList+'&lt;/p&gt;&lt;/div&gt;&lt;div class="modal-footer"&gt;&lt;button type="button" class="btn btn-default" data-dismiss="modal"&gt;Close&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;').appendTo('body');
-        if(bootstrap) {
-          $('#modalProjectSelection').modal('show');
-        }
+        $('#modalProjectSelection').modal('show');
       }
     }
 

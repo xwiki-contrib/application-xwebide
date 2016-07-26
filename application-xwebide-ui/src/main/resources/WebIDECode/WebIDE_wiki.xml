@@ -32,8 +32,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1465294200000</creationDate>
-  <date>1467809654000</date>
-  <contentUpdateDate>1465374088000</contentUpdateDate>
+  <date>1469539900000</date>
+  <contentUpdateDate>1469520744000</contentUpdateDate>
   <version>1.1</version>
   <title>WebIDE_wiki</title>
   <defaultTemplate/>
@@ -70,6 +70,7 @@
       </cache>
       <code>
         <disabled>0</disabled>
+        <editor>PureText</editor>
         <name>code</name>
         <number>2</number>
         <prettyName>Code</prettyName>
@@ -133,7 +134,7 @@
  * _setCurrentLocale()
  *   Set the value of currentLocale
  */
-define(['jquery'], function($) {
+define(['jquery', 'bootstrap'], function($) {
   return {
     init : function(WebIDE, Hierarchy, SH, Translations, Modules) {
 
@@ -240,7 +241,7 @@ define(['jquery'], function($) {
         }
       };
       var getParameters = WikiEditor.getParameters = function() {
-        var locale = currentLocale || 'default';
+        var locale = WikiEditor.currentLocale || 'default';
         return [locale];
       };
       var setParameters = WikiEditor.setParameters = function(parameters) {
@@ -283,19 +284,14 @@ define(['jquery'], function($) {
           $('#editorDeletePageConfirmed').attr('data-space', WebIDE.getCurrentSpace(false));
           var locale = currentLocale || 'default';
           $('#editorDeletePageConfirmed').attr('data-locale', locale);
-          if(WebIDE.bootstrap()) {
-            $('#editorDeletePageModal').modal('show');
-          }
-          else {
-            WebIDE.openModalNoBootstrap('#editorDeletePageModal');
-          }
+          $('#editorDeletePageModal').modal('show');
         });
       };
       /**
        * Contains all events that have to be registered again each time the hierarchy is updated (mostly "click" events on elements in the hierarchy) :
        */
       var initMenu = WikiEditor.initMenu = function() {
-        // Add a page (if no bootstrap) / Change the folder to use when adding a new page
+        // Change the folder to use when adding a new page
         $('.newPage').off('click');
         $('.newPage').on('click', function(e){
           e.preventDefault();
@@ -326,10 +322,6 @@ define(['jquery'], function($) {
             $('#hierarchyAddPageTitle').html(Translations.wiki.modalAddPage);
             $('#hierarchyAddPage').attr('data-type', 'page');
           }
-          if(!WebIDE.bootstrap() &amp;&amp; modal) {
-            WebIDE.openModalNoBootstrap('#hierarchyPageModal');
-            _addModalShortcut();
-          }
         });
         // User wants to edit a new page
         $('.editPage').off('click');
@@ -354,17 +346,12 @@ define(['jquery'], function($) {
             $('#editorDeletePageConfirmed').attr('data-page', file);
             $('#editorDeletePageConfirmed').attr('data-space', folder);
             $('#editorDeletePageConfirmed').attr('data-locale', locale);
-            if(WebIDE.bootstrap()) {
-              $('#editorDeletePageModal').modal('show');
-            }
-            else {
-              WebIDE.openModalNoBootstrap('#editorDeletePageModal');
-            }
+            $('#editorDeletePageModal').modal('show');
           }
         });
       };
       /**
-      * Initialize the modals (with or without Bootstrap) and their one-time events (shown, hidden, clicks)
+      * Initialize the modals and their one-time events (shown, hidden, clicks)
       */
       var initModals = WikiEditor.initModals = function() {
         $('#hierarchyPageModal').on('shown.bs.modal', _addModalShortcut);
@@ -444,12 +431,7 @@ define(['jquery'], function($) {
               WebIDE.removeTab(element, tabNumberId);
             }
             Hierarchy.reload();
-            if(WebIDE.bootstrap()) {
-              $('#editorDeletePageModal').modal('hide');
-            }
-            else {
-              WebIDE.closeModalNoBootstrap();
-            }
+            $('#editorDeletePageModal').modal('hide');
             WebIDE.setLoadingState(false, Translations.commons.deleted, 2500);
           }).error(function(xhr){
             WebIDE.setLoadingState(false, xhr.statusText, 2500);
@@ -502,12 +484,7 @@ define(['jquery'], function($) {
           }).success(function(){
             function callback() {
               $('#hierarchyNewPageName').val('');
-              if(WebIDE.bootstrap()) {
-                $('#hierarchyPageModal').modal('hide');
-              }
-              else {
-                WebIDE.closeModalNoBootstrap();
-              }
+              $('#hierarchyPageModal').modal('hide');
               WebIDE.setHierarchyState(Translations.hierarchy.page.added, 2500);
               Hierarchy.reload();
             }
@@ -517,23 +494,13 @@ define(['jquery'], function($) {
             else {
               $.ajax(ajaxProperties).success(callback).error(function(xhr) {
                 $('#hierarchyNewPageName').val('');
-                if(WebIDE.bootstrap()) {
-                  $('#hierarchyPageModal').modal('hide');
-                }
-                else {
-                  WebIDE.closeModalNoBootstrap();
-                }
+                $('#hierarchyPageModal').modal('hide');
                 WebIDE.setHierarchyState(xhr.statusText, 4000, 'red');
               });
             }
           }).error(function(xhr){
             $('#hierarchyNewPageName').val('');
-            if(WebIDE.bootstrap()) {
-              $('#hierarchyPageModal').modal('hide');
-            }
-            else {
-              WebIDE.closeModalNoBootstrap();
-            }
+            $('#hierarchyPageModal').modal('hide');
             WebIDE.setHierarchyState(xhr.statusText, 4000, 'red');
           });
         });
