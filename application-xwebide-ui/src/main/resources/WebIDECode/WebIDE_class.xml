@@ -142,7 +142,7 @@ define(['jquery', 'bootstrap'], function($) {
           WebIDE.initOtherFieldsBlock($(jQueryTabId), jQueryTabId, 3, Translations.panel.shortcuts);
           var classEditorStorage = window.localStorage['XWiki.extension.XWebIDE.'+WebIDE.masterPage+'.classEditor'] || 'basic';
           classEditorStorage = (classEditorStorage === 'advanced') ? 'advanced' : 'basic';
-          var urlIframe = (classEditorStorage === 'basic') ? "/xwiki/bin/edit/"+WebIDE.getCurrentSpace(false)+"/"+WebIDE.getCurrentPage(false)+"?editor=inline&amp;sheet=AppWithinMinutes.ClassEditSheet" : "/xwiki/bin/edit/"+WebIDE.getCurrentSpace(false)+"/"+WebIDE.getCurrentPage(false)+"?editor=class";
+          var urlIframe = (classEditorStorage === 'basic') ? "/xwiki/bin/edit/"+WebIDE.getCurrentSpace(false, true)+"/"+WebIDE.getCurrentPage(false)+"?editor=inline&amp;sheet=AppWithinMinutes.ClassEditSheet" : "/xwiki/bin/edit/"+WebIDE.getCurrentSpace(false, true)+"/"+WebIDE.getCurrentPage(false)+"?editor=class";
           AWMClassEditor.iFrameLoading = true;
           var ifrm = $('&lt;iframe allowtransparency="true" id="tab'+tabNumberId+'_awm" data-type="'+classEditorStorage+'" name="tab'+tabNumberId+'_awm" class="editorIframe"/&gt;').attr('src', urlIframe).appendTo($('&lt;div class="editorClassTabContent"&gt;&lt;/div&gt;').appendTo(jQueryTabId));
           AWMClassEditor._initIframe(ifrm, tabNumberId);
