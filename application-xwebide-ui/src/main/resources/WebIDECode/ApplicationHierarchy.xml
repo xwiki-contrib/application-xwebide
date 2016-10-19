@@ -1875,7 +1875,7 @@ require(required , function ($, Translations, SH, HierarchyJS, WikiEditorJS, Obj
 
           {{info}}
             **$services.localization.render('webide.modals.add.page.type.content')**: $services.localization.render('webide.modals.add.page.info.content')&lt;br&gt;
-            **$services.localization.render('webide.modals.add.page.type.item')**: $services.localization.render('webide.modals.add.page.info.content')
+            **$services.localization.render('webide.modals.add.page.type.item')**: $services.localization.render('webide.modals.add.page.info.item')
           {{/info}}
 
           &lt;dt&gt;&lt;label&gt;$services.localization.render('webide.modals.add.page.type')&lt;/label&gt;&lt;/dt&gt;
