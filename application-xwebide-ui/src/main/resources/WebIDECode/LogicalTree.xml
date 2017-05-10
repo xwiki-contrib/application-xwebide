@@ -20,24 +20,21 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<xwikidoc reference="WebIDECode.LogicalTree" locale="">
+<xwikidoc version="1.2" reference="WebIDECode.LogicalTree" locale="">
   <web>WebIDECode</web>
   <name>LogicalTree</name>
   <language/>
   <defaultLanguage/>
   <translation>0</translation>
-  <parent>WebIDECode.ApplicationHierarchy</parent>
   <creator>xwiki:XWiki.Admin</creator>
-  <author>xwiki:XWiki.Admin</author>
-  <customClass/>
-  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1445347285000</creationDate>
-  <date>1455030617000</date>
-  <contentUpdateDate>1455030617000</contentUpdateDate>
+  <parent>WebIDECode.ApplicationHierarchy</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <date>1494431871000</date>
+  <contentUpdateDate>1494431871000</contentUpdateDate>
   <version>1.1</version>
   <title>LogicalTree</title>
-  <defaultTemplate/>
-  <validationScript/>
   <comment/>
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
@@ -45,7 +42,7 @@
   <content>{{velocity}}
 #if($masterDoc.hasAccessLevel('edit'))
 {{html wiki="true"}}
-  &lt;form method="post" action="$masterDoc.getURL('view')" class="masterExportForm"&gt;&lt;input type="hidden" name="export" value="1" /&gt;#if($singlePage)&lt;input type="hidden" name="singlePage" value="$escapetool.url($currentDoc.fullName).replace('+', '%20')" /&gt;#end&lt;input class="btn btn-default hierarchy-export-button" type="submit" value="$services.localization.render('webide.menu.export')" title="$services.localization.render('webide.menu.export')"/&gt;&lt;/form&gt;
+  &lt;form method="post" action="$expURL" class="masterExportForm"&gt;&lt;input type="hidden" name="export" value="1" /&gt;#if($singlePage)&lt;input type="hidden" name="singlePage" value="$escapetool.url($currentDoc.fullName).replace('+', '%20')" /&gt;#end&lt;input class="btn btn-default hierarchy-export-button" type="submit" value="$services.localization.render('webide.menu.export')" title="$services.localization.render('webide.menu.export')"/&gt;&lt;/form&gt;
 {{/html}}
 #end
 #set($codeSpace = "${doc.space}Code")

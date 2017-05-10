@@ -20,29 +20,490 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<xwikidoc reference="WebIDECode.ApplicationHierarchy" locale="">
+<xwikidoc version="1.2" reference="WebIDECode.ApplicationHierarchy" locale="">
   <web>WebIDECode</web>
   <name>ApplicationHierarchy</name>
   <language/>
   <defaultLanguage/>
   <translation>0</translation>
-  <parent>WebIDECode.ApplicationClass</parent>
   <creator>xwiki:XWiki.Admin</creator>
-  <author>xwiki:XWiki.Admin</author>
-  <customClass/>
-  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1434704312000</creationDate>
-  <date>1469540831000</date>
-  <contentUpdateDate>1469520743000</contentUpdateDate>
+  <parent>WebIDECode.ApplicationClass</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <date>1494431959000</date>
+  <contentUpdateDate>1494431959000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
-  <defaultTemplate/>
-  <validationScript/>
   <comment/>
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
+  <content>{{velocity}}
+#set($masterDoc = 'Main.WebHome')
+#if($xwiki.exists(${request.masterPage}))
+  #set($masterDoc = $xwiki.getDocument(${request.masterPage}))
+#elseif($xwiki.exists($util.decodeURI(${request.masterPage})))
+  #set($masterDoc = $xwiki.getDocument($util.decodeURI(${request.masterPage})))
+#end
+#if($xwiki.exists(${request.remotePage}))
+  #set($currentDoc = $xwiki.getDocument(${request.remotePage}))
+#elseif($xwiki.exists($util.decodeURI(${request.remotePage})))
+  #set($currentDoc = $xwiki.getDocument($util.decodeURI(${request.remotePage})))
+#else
+  #set($currentDoc = $doc)
+#end
+#set($currentEditor = $!request.editor)
+#set($currentTree = 'logical')
+#if($!request.treeview)
+  #set($currentTree = $!request.treeview)
+#end
+#if("$!{request.visibleSpaces}" != "")
+  #set($visibleSpacesString = $!{request.visibleSpaces})
+#end
+#set($visibleSpaces = $!visibleSpacesString.split("[,]"))
+#if("$!{request.visiblePages}" != "")
+  #set($visiblePagesString = $!{request.visiblePages})
+#end
+#set($visiblePages = $!visiblePagesString.split("[,]"))
+#if("$!{request.visibleCategory}" != "")
+  #set($visibleCategoryString = $!{request.visibleCategory})
+#end
+#set($visibleCategory = $!visibleCategoryString.split("[,]"))
+(% class="hierarchy-hidden" id="hierarchyOpenBlock" title="$services.localization.render('webide.menu.button.show')"%)(((
+{{html clean="false"}}&lt;span class="fa fa-step-forward"&gt;&lt;/span&gt;{{/html}}
+)))
+(% id="hierarchyCloseBlock" %)(((
+**$services.localization.render('webide.menu.project') :** $masterDoc.display('projectName', 'view')
+(% class="hierarchyCloseBlockButtons" %)(((
+(% title="$services.localization.render('webide.menu.button.hide')" id="hierarchyClose" class="hierarchy-icon" %){{html clean="false"}}&lt;span class="fa fa-step-backward"&gt;&lt;/span&gt;{{/html}} 
+(% title="$services.localization.render('webide.menu.button.refresh')" id="hierarchyRefresh" class="hierarchy-icon" %){{html clean="false"}}&lt;span class="fa fa-refresh"&gt;&lt;/span&gt;{{/html}}
+(% title="$services.localization.render('webide.menu.button.config')" class="hierarchy-icon" data-toggle='modal' data-target='#editorConfig' %){{html clean="false"}}&lt;span class="fa fa-cog"&gt;&lt;/span&gt;{{/html}}
+)))
+)))
+#set($nestedSpaces = false)
+#if($services.model.serialize($services.model.createDocumentReference("wiki", ["A", "B"], "page"), 'default') == 'wiki:A.B.page')
+  #set($nestedSpaces = true)
+#end
+#set($masterObj = $masterDoc.getObject('WebIDECode.ApplicationClass'))
+#set($spacesListInit = $masterObj.getProperty('spaces').value)## The value of 'spaces' in the object (before checking for nested spaces)
+#set($spacesListNested = $sorttool.sort($spacesListInit))## Same as $spacesListInit if nested spaces don't exist, or add all the subspaces if they exist
+#set($expURL = "${doc.getURL('export')}?format=xar")
+#foreach($space in $spacesListInit)
+  #set($expURL = "${expURL}&amp;pages=${space}.%25")
+#end
+#if($nestedSpaces)
+  #foreach($space in $spacesListInit)
+    #set($xwql = "select space.reference from XWikiSpace as space where space.parent=:space order by space.name")
+    #set($spacePageList = $services.query.xwql($xwql).bindValue('space', $space).execute())
+    #foreach($i in [0..1000])
+      #if($i &gt;= $spacePageList.size())
+        #break
+      #end
+      #set($addToList =[])
+      #set($discard = $finalList.add($spacePageList[$i]))
+      #set($xwql = "select space.reference from XWikiSpace as space where space.parent=:space order by space.name")
+      #set($addToList = $services.query.xwql($xwql).bindValue('space', $spacePageList[$i]).execute())
+      #foreach($item in $addToList)
+        #set($discard = $spacePageList.add($item))
+      #end
+    #end
+    #foreach($spaceElement in $spacePageList)
+      #if(!$spacesListNested.contains($spaceElement))
+        #set($discard = $spacesListNested.add($spaceElement))
+      #end
+    #end
+  #end
+  #set($spacesListNested = $sorttool.sort($spacesListNested))
+#end
+#set($spacesList = $sorttool.sort($spacesListNested))## Will also contains spaces from existing pages ('pages' in the object)
+#set($spacesListAdd = [])
+#set($pagesList = $sorttool.sort($masterObj.getProperty('pages').value))
+## Manage the case where WebIDE is opened with a page without project
+#if($masterDoc.fullName == 'WebIDECode.DefaultProject')
+  #set($singlePage = true)
+  #set($spacesList = [])
+  #set($pagesList = [$currentDoc.fullName])
+  #set($currentTree = 'physical')
+#end
+#foreach($page in $pagesList)
+  #set($expURL = "${expURL}&amp;pages=${page}")
+  #set($document = $xwiki.getDocument($page))
+  #if(!$spacesList.contains($document.space))
+    #set($discard = $spacesList.add($document.space))
+  #end
+#end
+#set($spacesList = $sorttool.sort($spacesList))
+## Determine the list of parents of the current document to be able to open and **bold** them in the hierarchy
+#if($nestedSpaces)
+  #set($spaceParentList = [])
+  #set($spacePath = "")
+  #set($spaceParentListTemp = $currentDoc.space.replace('\.', '%5C%2E').split('\.'))
+  #foreach($item in $spaceParentListTemp)
+    #set($spacePath = "${spacePath}$item.replace('%5C%2E', '\.')")
+    #set($discard = $spaceParentList.add($spacePath))
+    #set($spacePath = "${spacePath}.")
+  #end
+#else
+  #set($spaceParentList = [$currentDoc.space])
+#end
+#set($beginAddButton = "{{html clean='false' wiki='true'}} &lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span class='hierarchyAddNewElementButton' class='dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'&gt;&lt;span class='fa fa-plus'&gt;&lt;/span&gt;&lt;span class='sr-only'&gt;Toggle Dropdown&lt;/span&gt;&lt;/span&gt;&lt;ul class='dropdown-menu dropdown-menu-right'&gt;")
+#set($endAddButton = '&lt;/ul&gt;&lt;/div&gt;{{/html}}')
+#set($beginRemoveButton = "{{html clean='false' wiki='true'}} &lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span class='hierarchyAddNewElementButton' class='dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'&gt;&lt;span class='fa fa-times'&gt;&lt;/span&gt;&lt;span class='sr-only'&gt;Toggle Dropdown&lt;/span&gt;&lt;/span&gt;&lt;ul class='dropdown-menu dropdown-menu-right'&gt;")
+#set($endRemoveButton = '&lt;/ul&gt;&lt;/div&gt;{{/html}}')
+{{html clean=false}}
+  &lt;ul class="nav nav-tabs hierarchy-navbar"&gt;
+    &lt;li class="hierarchyChangeTree hierarchyLogicalTree #if($currentTree == 'logical')active#end"&gt;&lt;a href="#"&gt;$services.localization.render('webide.menu.view.logical')&lt;/a&gt;&lt;/li&gt;
+    &lt;li class="hierarchyChangeTree hierarchyPhysicalTree #if($currentTree == 'physical')active#end"&gt;&lt;a href="#"&gt;$services.localization.render('webide.menu.view.physical')&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+{{/html}}
+(% id="hierarchyContent" %) (((
+#if($currentTree == 'physical')
+  {{include reference="WebIDECode.PhysicalTree" /}}
+#else
+  {{include reference="WebIDECode.LogicalTree" /}}
+#end
+{{html clean=false}}
+&lt;div id="hierarchyUpdatedFolderList" class="hierarchy-hidden"&gt;
+#foreach($space in $spacesListNested)
+  #if($xwiki.hasAccessLevel('edit', "$space.$reservedDocumentName"))
+    &lt;option value="$escapetool.url($space).replace('+', '%20')"&gt;$space&lt;/option&gt;
+  #end
+#end
+&lt;/div&gt;
+{{/html}}
+)))
+
+  (% class="modal fade text-left hierarchy-hidden" id="hierarchyFolderModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
+          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
+          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.add.space.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false"}}
+          &lt;form class="xform"&gt;
+          &lt;dl&gt;
+          &lt;dt&gt;&lt;label for="hierarchyNewFolderName"&gt;$services.localization.render('webide.modals.commons.space')&lt;/label&gt;&lt;/dt&gt;
+          &lt;dd&gt;&lt;input type="text" id="hierarchyNewFolderName" /&gt;&lt;/dd&gt;
+          &lt;button id="hierarchyAddFolder" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.space.button')&lt;/button&gt;&lt;br&gt;
+          &lt;p id="hierarchyFolderModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
+          &lt;/dl&gt;
+          &lt;/form&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+  (% class="modal fade text-left hierarchy-hidden" id="hierarchyExistingPageModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
+          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
+          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.add.page.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false" wiki="true"}}
+          &lt;form class="xform"&gt;
+          &lt;dl&gt;
+          &lt;dt&gt;&lt;label for="hierarchyExistingPageName"&gt;$services.localization.render('webide.modals.commons.pageFullName')&lt;/label&gt;&lt;/dt&gt;&lt;dd&gt;&lt;input type="text" id="hierarchyExistingPageName" /&gt;&lt;/dd&gt;
+          &lt;button id="hierarchyAddExistingPage" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.page.button')&lt;/button&gt;
+          &lt;p id="hierarchyExistingPageModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
+          &lt;/dl&gt;
+          &lt;/form&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+  (% class="modal fade text-left hierarchy-hidden" id="hierarchyPageModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
+          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
+          &lt;h4 class="modal-title" id="hierarchyAddPageTitle"&gt;$services.localization.render('webide.modals.add.page.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false" wiki="true"}}
+          &lt;form class="xform"&gt;
+          &lt;dl&gt;
+          &lt;dt&gt;&lt;label for="hierarchyPageFolder"&gt;$services.localization.render('webide.modals.commons.space')&lt;/label&gt;&lt;/dt&gt;
+          &lt;dd&gt;&lt;select id="hierarchyPageFolder"&gt;
+          #foreach($space in $spacesListNested)
+            #if($xwiki.hasAccessLevel('edit', "$space.$reservedDocumentName"))
+              &lt;option value="$escapetool.url($space).replace('+', '%20')"&gt;$space&lt;/option&gt;
+            #end
+          #end
+          &lt;/select&gt;&lt;/dd&gt;
+          &lt;dt&gt;&lt;label for="hierarchyNewPageName"&gt;&lt;span id="hierarchyAddPageLabel"&gt;$services.localization.render('webide.modals.commons.pageName')&lt;/span&gt;&lt;/label&gt;&lt;/dt&gt;
+          &lt;dd&gt;&lt;input type="text" id="hierarchyNewPageName" /&gt;&lt;/dd&gt;
+          &lt;div id="hierarchyAddPageTypeBlock"&gt;&lt;br&gt;
+
+          {{info}}
+            **$services.localization.render('webide.modals.add.page.type.content')**: $services.localization.render('webide.modals.add.page.info.content')&lt;br&gt;
+            **$services.localization.render('webide.modals.add.page.type.item')**: $services.localization.render('webide.modals.add.page.info.item')
+          {{/info}}
+
+          &lt;dt&gt;&lt;label&gt;$services.localization.render('webide.modals.add.page.type')&lt;/label&gt;&lt;/dt&gt;
+          &lt;dd&gt;&lt;label for="hierarchyAddPageTypeContent"&gt;&lt;input type="radio" name="hierarchyAddPageType" id="hierarchyAddPageTypeContent" value="content" checked="checked"/&gt; $services.localization.render('webide.modals.add.page.type.content')&lt;/label&gt;&lt;/dd&gt;&lt;dd&gt;&lt;label for="hierarchyAddPageTypeItem"&gt;&lt;input type="radio" name="hierarchyAddPageType" id="hierarchyAddPageTypeItem" value="item"/&gt; $services.localization.render('webide.modals.add.page.type.item')&lt;/label&gt;&lt;/dd&gt;
+          &lt;div id="hierarchyAddPageItemBlock" class="hierarchy-hidden"&gt;&lt;br&gt;
+          &lt;dt&gt;&lt;label for="hierarchyAddPageItem"&gt;$services.localization.render('webide.modals.commons.class')&lt;/label&gt;&lt;/dt&gt;
+          &lt;dd&gt;&lt;select id="hierarchyAddPageItem"&gt;
+          &lt;/select&gt;&lt;/dd&gt;&lt;/div&gt;
+          &lt;/div&gt;
+          &lt;div id="hierarchyAddPageLocaleBlock"&gt;&lt;br&gt;
+          &lt;dt&gt;&lt;label for="hierarchyAddPageLocale"&gt;$services.localization.render('webide.modals.add.page.language')&lt;/label&gt; ($services.localization.render('webide.modals.add.page.language.list'))&lt;/dt&gt;
+          &lt;dd&gt;&lt;select id="hierarchyAddPageLocale"&gt;
+          #foreach($locale in $xwiki.getDocument('XWiki.XWikiPreferences').getObject('XWiki.XWikiPreferences').getProperty('languages').value.split(','))
+            #set($language = $services.localization.toLocale($locale.trim()).getDisplayLanguage())
+            #set($displayLanguage = $language)
+            #if($language.length() &gt; 0)
+              #set($displayLanguage = "${language.substring(0, 1).toUpperCase()}${language.substring(1)}")
+            #end
+            &lt;option value="$locale.trim()"&gt;$displayLanguage&lt;/option&gt;
+          #end
+          &lt;/select&gt;&lt;/dd&gt;&lt;/div&gt;
+          &lt;br&gt;&lt;button id="hierarchyAddPage" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.page.button')&lt;/button&gt;
+          &lt;p id="hierarchyPageModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
+          &lt;/dl&gt;
+          &lt;/form&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+  (% class="modal fade text-left hierarchy-hidden" id="hierarchyObjectModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
+          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
+          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.add.object.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false" wiki="true"}}
+          &lt;form class="xform"&gt;
+          &lt;dl&gt;
+          &lt;dt&gt;&lt;label&gt;$services.localization.render('webide.modals.commons.space')&lt;/label&gt;&lt;/dt&gt;
+          &lt;dd&gt;&lt;span id="hierarchyObjectSpace"&gt;&lt;/span&gt;&lt;/dd&gt;
+          &lt;div id="hierarchyObjectPageBlock"&gt;&lt;dt&gt;&lt;label&gt;$services.localization.render('webide.modals.commons.page')&lt;/label&gt;&lt;/dt&gt;
+          &lt;dd&gt;&lt;span id="hierarchyObjectPage"&gt;&lt;/span&gt;&lt;/dd&gt;&lt;/div&gt;
+          &lt;div id="hierarchyObjectPageInputBlock"&gt;&lt;dt&gt;&lt;label for="hierarchyObjectPageInput"&gt;$services.localization.render('webide.modals.commons.name')&lt;/label&gt;&lt;/dt&gt;
+          &lt;dd&gt;&lt;input type="text" id="hierarchyObjectPageInput" value=""/&gt;&lt;/dd&gt;&lt;input type="hidden" id="hierarchyObjectPageInputDefault" value=""/&gt;&lt;/div&gt;
+          &lt;input type="hidden" id="hierarchyObjectClassName" /&gt;
+          &lt;br&gt;&lt;button id="hierarchyAddObject" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.page.button')&lt;/button&gt;
+          &lt;p id="hierarchyObjectModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
+          &lt;/dl&gt;
+          &lt;/form&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+  (% class="modal fade text-left hierarchy-hidden" id="hierarchyClassModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
+          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
+          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.add.class.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false" wiki="true"}}
+          &lt;form class="xform"&gt;
+          &lt;dl&gt;
+          &lt;dt&gt;&lt;label&gt;$services.localization.render('webide.modals.commons.space')&lt;/label&lt;&lt;/dt&gt;
+          &lt;dd&gt;&lt;span id="hierarchyClassSpace"&gt;&lt;/span&gt;&lt;/dd&gt;
+          &lt;dt&gt;&lt;label for="hierarchyClassInput"&gt;$services.localization.render('webide.modals.commons.name')&lt;/label&gt;&lt;/dt&gt;
+          &lt;dd&gt;&lt;input type="text" id="hierarchyClassInput" value=""/&gt;&lt;/dd&gt;
+          &lt;div id="hierarchyAddSheetBlock"&gt;
+            &lt;br&gt;&lt;dt&gt;&lt;label for="hierarchyClassSheet"&gt;$services.localization.render('webide.modals.add.class.sheet.actions')&lt;/label&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;select id="hierarchyClassSheet"&gt;
+              &lt;option value=""&gt;&lt;/option&gt;
+              &lt;option value="view"&gt;$services.localization.render('webide.modals.add.class.sheet.view')&lt;/option&gt;
+              &lt;option value="edit"&gt;$services.localization.render('webide.modals.add.class.sheet.edit')&lt;/option&gt;
+              &lt;option value="inline"&gt;$services.localization.render('webide.modals.add.class.sheet.inline')&lt;/option&gt;
+            &lt;/select&gt;&lt;/dd&gt;
+          &lt;/div&gt;
+          &lt;br&gt;&lt;button id="hierarchyAddClass" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.class.button')&lt;/button&gt;
+          &lt;p id="hierarchyClassModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
+          &lt;/dl&gt;
+          &lt;/form&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+  (% class="modal fade text-left hierarchy-hidden" id="hierarchyCloseTabModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
+          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
+          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.closeTab.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false" wiki="true"}}
+          &lt;p&gt;
+            $services.localization.render('webide.modals.closeTab.description', ['&lt;span id="hierarchyCloseTabModalInfo"&gt;&lt;/span&gt;'])&lt;br /&gt;
+            &lt;button id="hierarchySaveAndCloseModal" class="btn btn-success"&gt;$services.localization.render('webide.modals.closeTab.button.save')&lt;/button&gt; &lt;button id="hierarchyDiscardAndCloseModal" class="btn btn-danger"&gt;$services.localization.render('webide.modals.closeTab.button.nosave')&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;$services.localization.render('webide.modals.commons.cancel')&lt;/button&gt;
+          &lt;/p&gt;
+          &lt;/form&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+  (% class="modal fade text-left hierarchy-hidden" id="editorDeleteObjectModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
+          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
+          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.delete.object.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false" wiki="true"}}
+          &lt;p&gt;
+            $services.localization.render('webide.modals.delete.object.label') : &lt;span id="editorDeletedObjectModalInfo"&gt;&lt;/span&gt;&lt;br /&gt;
+            &lt;button id="editorDeleteObjectConfirmed" class="btn btn-danger"&gt;$services.localization.render('webide.modals.delete.object.button')&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;$services.localization.render('webide.modals.commons.cancel')&lt;/button&gt;
+          &lt;/p&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+  (% class="modal fade text-left hierarchy-hidden" id="editorDeleteMultipleObjectsModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
+          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
+          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.delete.page.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false" wiki="true"}}
+          &lt;p&gt;
+            $services.localization.render('webide.modals.delete.page.label') : &lt;span id="editorDeleteMultipleObjectsModalInfo"&gt;&lt;/span&gt;&lt;br /&gt;
+            &lt;button id="editorDeleteMultipleObjectConfirmed" class="btn btn-danger"&gt;$services.localization.render('webide.modals.delete.page.button')&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;$services.localization.render('webide.modals.commons.cancel')&lt;/button&gt;
+          &lt;/p&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+  (% class="modal fade text-left hierarchy-hidden" id="editorDeletePageModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
+          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
+          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.delete.page.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false" wiki="true"}}
+          &lt;p&gt;
+            $services.localization.render('webide.modals.delete.page.label') : &lt;span id="editorDeletedPageModalInfo"&gt;&lt;/span&gt;&lt;br /&gt;
+            &lt;button id="editorDeletePageConfirmed" class="btn btn-danger"&gt;$services.localization.render('webide.modals.delete.page.button')&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;$services.localization.render('webide.modals.commons.cancel')&lt;/button&gt;
+          &lt;/p&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+  (% class="modal fade text-left hierarchy-hidden" id="editorDeleteClassModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
+          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
+          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.delete.class.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false" wiki="true"}}
+          &lt;form class="xform"&gt;
+          &lt;dl&gt;
+            $services.localization.render('webide.modals.delete.class.label') : &lt;span id="editorDeletedClassModalInfo"&gt;&lt;/span&gt;&lt;br&gt;&lt;br&gt;
+            &lt;dt&gt;&lt;label&gt;$services.localization.render('webide.modals.delete.class.deleteAlso')&lt;/lebal&gt;&lt;/dt&gt;
+            &lt;dd&gt;&lt;label for="editorDeleteClassSheet"&gt;&lt;input type="checkbox" id="editorDeleteClassSheet" /&gt; $services.localization.render('webide.modals.delete.class.allSheets')&lt;/label&gt;&lt;br&gt;&lt;label for="editorDeleteClassTemplate"&gt;&lt;input type="checkbox" id="editorDeleteClassTemplate" /&gt; $services.localization.render('webide.modals.delete.class.template')&lt;/label&gt;&lt;br&gt;
+            &lt;br&gt;&lt;button id="editorDeleteClassConfirmed" class="btn btn-danger"&gt;$services.localization.render('webide.modals.delete.class.button')&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;$services.localization.render('webide.modals.commons.cancel')&lt;/button&gt;
+          &lt;/dl&gt;
+          &lt;/form&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+  (% class="modal fade text-left hierarchy-hidden" id="editorSwitchClassModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
+          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
+          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.switchClass.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false" wiki="true"}}
+          &lt;p&gt;
+          $services.localization.render('webide.modals.switchClass.label')&lt;br /&gt;
+            &lt;button id="hierarchySaveAndSwitchClassModal" class="btn btn-success"&gt;$services.localization.render('webide.modals.switchClass.button.save')&lt;/button&gt; &lt;button id="hierarchyDiscardAndAndSwitchClassModal" class="btn btn-danger"&gt;$services.localization.render('webide.modals.switchClass.button.nosave')&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;$services.localization.render('webide.modals.commons.cancel')&lt;/button&gt;
+          &lt;/p&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+  (% class="modal fade text-left hierarchy-hidden" id="editorConfig" tabindex="-1" role="dialog" aria-hidden="true"%)(((
+    (% class="modal-dialog"%)(((
+      (% class="modal-content"%)(((
+        (% class="modal-header"%)(((
+          {{html clean="false"}}
+          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
+          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.config.title')&lt;/h4&gt;
+          {{/html}}
+        )))
+        (% class="modal-body"%)(((
+          {{html clean="false" wiki="true"}}
+          &lt;form class="xform"&gt;
+          &lt;dl&gt;
+          &lt;dt&gt;&lt;label&gt;&lt;input type="checkbox" id="editorEnableCodeMirror"&gt;$services.localization.render('webide.modals.config.highlighting')&lt;/label&gt;&lt;/dt&gt;
+          &lt;/dl&gt;
+          &lt;/form&gt;
+          {{/html}}
+        )))
+      )))
+    )))
+  )))
+{{html clean="false"}}
+  &lt;div class="hierarchy-hidden"&gt;&lt;input type="hidden" id="hierarchyMasterDocName" value="$escapetool.url($masterDoc.name)" /&gt;&lt;input type="hidden" id="hierarchyMasterDocSpace" value="$escapetool.url($masterDoc.space)" /&gt;&lt;input type="hidden" id="xwikiNested" value="$nestedSpaces" /&gt;&lt;input type="hidden" id="hierarchyMainLanguage" value="$xwiki.getLanguagePreference()" /&gt;&lt;/div&gt;
+
+&lt;div id="backgroundModalNoBootstrap"&gt;&lt;/div&gt;
+
+{{/html}}
+(% id="hierarchyStateBlock" %)(((
+  (% id="hierarchyState" %)((()))(% id="hierarchySavingState" %)((()))(% id="hierarchyLoadingState" %)((()))
+)))
+{{/velocity}}</content>
   <object>
+    <name>WebIDECode.ApplicationHierarchy</name>
+    <number>0</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>95d6ad85-599f-40f3-b936-d2312fb7a8df</guid>
     <class>
       <name>XWiki.JavaScriptExtension</name>
       <customClass/>
@@ -70,7 +531,6 @@
       </cache>
       <code>
         <disabled>0</disabled>
-        <editor>PureText</editor>
         <name>code</name>
         <number>2</number>
         <prettyName>Code</prettyName>
@@ -115,10 +575,6 @@
         <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
       </use>
     </class>
-    <name>WebIDECode.ApplicationHierarchy</name>
-    <number>0</number>
-    <className>XWiki.JavaScriptExtension</className>
-    <guid>95d6ad85-599f-40f3-b936-d2312fb7a8df</guid>
     <property>
       <cache>default</cache>
     </property>
@@ -1342,6 +1798,10 @@ require(required , function ($, Translations, SH, HierarchyJS, WikiEditorJS, Obj
     </property>
   </object>
   <object>
+    <name>WebIDECode.ApplicationHierarchy</name>
+    <number>0</number>
+    <className>XWiki.StyleSheetExtension</className>
+    <guid>0c7773fa-9a7a-49a4-b0db-44800f0bf911</guid>
     <class>
       <name>XWiki.StyleSheetExtension</name>
       <customClass/>
@@ -1369,7 +1829,6 @@ require(required , function ($, Translations, SH, HierarchyJS, WikiEditorJS, Obj
       </cache>
       <code>
         <disabled>0</disabled>
-        <editor>PureText</editor>
         <name>code</name>
         <number>3</number>
         <prettyName>Code</prettyName>
@@ -1430,10 +1889,6 @@ require(required , function ($, Translations, SH, HierarchyJS, WikiEditorJS, Obj
         <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
       </use>
     </class>
-    <name>WebIDECode.ApplicationHierarchy</name>
-    <number>0</number>
-    <className>XWiki.StyleSheetExtension</className>
-    <guid>0c7773fa-9a7a-49a4-b0db-44800f0bf911</guid>
     <property>
       <cache>forbid</cache>
     </property>
@@ -1671,459 +2126,4 @@ require(required , function ($, Translations, SH, HierarchyJS, WikiEditorJS, Obj
       <use>onDemand</use>
     </property>
   </object>
-  <content>{{velocity}}
-#set($masterDoc = 'Main.WebHome')
-#if($xwiki.exists(${request.masterPage}))
-  #set($masterDoc = $xwiki.getDocument(${request.masterPage}))
-#elseif($xwiki.exists($util.decodeURI(${request.masterPage})))
-  #set($masterDoc = $xwiki.getDocument($util.decodeURI(${request.masterPage})))
-#end
-#if($xwiki.exists(${request.remotePage}))
-  #set($currentDoc = $xwiki.getDocument(${request.remotePage}))
-#elseif($xwiki.exists($util.decodeURI(${request.remotePage})))
-  #set($currentDoc = $xwiki.getDocument($util.decodeURI(${request.remotePage})))
-#else
-  #set($currentDoc = $doc)
-#end
-#set($currentEditor = $!request.editor)
-#set($currentTree = 'logical')
-#if($!request.treeview)
-  #set($currentTree = $!request.treeview)
-#end
-#if("$!{request.visibleSpaces}" != "")
-  #set($visibleSpacesString = $!{request.visibleSpaces})
-#end
-#set($visibleSpaces = $!visibleSpacesString.split("[,]"))
-#if("$!{request.visiblePages}" != "")
-  #set($visiblePagesString = $!{request.visiblePages})
-#end
-#set($visiblePages = $!visiblePagesString.split("[,]"))
-#if("$!{request.visibleCategory}" != "")
-  #set($visibleCategoryString = $!{request.visibleCategory})
-#end
-#set($visibleCategory = $!visibleCategoryString.split("[,]"))
-(% class="hierarchy-hidden" id="hierarchyOpenBlock" title="$services.localization.render('webide.menu.button.show')"%)(((
-{{html clean="false"}}&lt;span class="fa fa-step-forward"&gt;&lt;/span&gt;{{/html}}
-)))
-(% id="hierarchyCloseBlock" %)(((
-**$services.localization.render('webide.menu.project') :** $masterDoc.display('projectName', 'view')
-(% class="hierarchyCloseBlockButtons" %)(((
-(% title="$services.localization.render('webide.menu.button.hide')" id="hierarchyClose" class="hierarchy-icon" %){{html clean="false"}}&lt;span class="fa fa-step-backward"&gt;&lt;/span&gt;{{/html}} 
-(% title="$services.localization.render('webide.menu.button.refresh')" id="hierarchyRefresh" class="hierarchy-icon" %){{html clean="false"}}&lt;span class="fa fa-refresh"&gt;&lt;/span&gt;{{/html}}
-(% title="$services.localization.render('webide.menu.button.config')" class="hierarchy-icon" data-toggle='modal' data-target='#editorConfig' %){{html clean="false"}}&lt;span class="fa fa-cog"&gt;&lt;/span&gt;{{/html}}
-)))
-)))
-#set($nestedSpaces = false)
-#if($services.model.serialize($services.model.createDocumentReference("wiki", ["A", "B"], "page"), 'default') == 'wiki:A.B.page')
-  #set($nestedSpaces = true)
-#end
-#set($masterObj = $masterDoc.getObject('WebIDECode.ApplicationClass'))
-#set($spacesListInit = $masterObj.getProperty('spaces').value)## The value of 'spaces' in the object (before checking for nested spaces)
-#set($spacesListNested = $sorttool.sort($spacesListInit))## Same as $spacesListInit if nested spaces don't exist, or add all the subspaces if they exist
-#if($nestedSpaces)
-  #foreach($space in $spacesListInit)
-    #set($xwql = "select space.reference from XWikiSpace as space where space.parent=:space order by space.name")
-    #set($spacePageList = $services.query.xwql($xwql).bindValue('space', $space).execute())
-    #foreach($i in [0..1000])
-      #if($i &gt;= $spacePageList.size())
-        #break
-      #end
-      #set($addToList =[])
-      #set($discard = $finalList.add($spacePageList[$i]))
-      #set($xwql = "select space.reference from XWikiSpace as space where space.parent=:space order by space.name")
-      #set($addToList = $services.query.xwql($xwql).bindValue('space', $spacePageList[$i]).execute())
-      #foreach($item in $addToList)
-        #set($discard = $spacePageList.add($item))
-      #end
-    #end
-    #foreach($spaceElement in $spacePageList)
-      #if(!$spacesListNested.contains($spaceElement))
-        #set($discard = $spacesListNested.add($spaceElement))
-      #end
-    #end
-  #end
-  #set($spacesListNested = $sorttool.sort($spacesListNested))
-#end
-#set($spacesList = $sorttool.sort($spacesListNested))## Will also contains spaces from existing pages ('pages' in the object)
-#set($spacesListAdd = [])
-#set($pagesList = $sorttool.sort($masterObj.getProperty('pages').value))
-## Manage the case where WebIDE is opened with a page without project
-#if($masterDoc.fullName == 'WebIDECode.DefaultProject')
-  #set($singlePage = true)
-  #set($spacesList = [])
-  #set($pagesList = [$currentDoc.fullName])
-  #set($currentTree = 'physical')
-#end
-#foreach($page in $pagesList)
-  #set($document = $xwiki.getDocument($page))
-  #if(!$spacesList.contains($document.space))
-    #set($discard = $spacesList.add($document.space))
-  #end
-#end
-#set($spacesList = $sorttool.sort($spacesList))
-## Determine the list of parents of the current document to be able to open and **bold** them in the hierarchy
-#if($nestedSpaces)
-  #set($spaceParentList = [])
-  #set($spacePath = "")
-  #set($spaceParentListTemp = $currentDoc.space.replace('\.', '%5C%2E').split('\.'))
-  #foreach($item in $spaceParentListTemp)
-    #set($spacePath = "${spacePath}$item.replace('%5C%2E', '\.')")
-    #set($discard = $spaceParentList.add($spacePath))
-    #set($spacePath = "${spacePath}.")
-  #end
-#else
-  #set($spaceParentList = [$currentDoc.space])
-#end
-#set($beginAddButton = "{{html clean='false' wiki='true'}} &lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span class='hierarchyAddNewElementButton' class='dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'&gt;&lt;span class='fa fa-plus'&gt;&lt;/span&gt;&lt;span class='sr-only'&gt;Toggle Dropdown&lt;/span&gt;&lt;/span&gt;&lt;ul class='dropdown-menu dropdown-menu-right'&gt;")
-#set($endAddButton = '&lt;/ul&gt;&lt;/div&gt;{{/html}}')
-#set($beginRemoveButton = "{{html clean='false' wiki='true'}} &lt;div class='btn-group hierarchyAddNewElement'&gt;&lt;span class='hierarchyAddNewElementButton' class='dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'&gt;&lt;span class='fa fa-times'&gt;&lt;/span&gt;&lt;span class='sr-only'&gt;Toggle Dropdown&lt;/span&gt;&lt;/span&gt;&lt;ul class='dropdown-menu dropdown-menu-right'&gt;")
-#set($endRemoveButton = '&lt;/ul&gt;&lt;/div&gt;{{/html}}')
-{{html clean=false}}
-  &lt;ul class="nav nav-tabs hierarchy-navbar"&gt;
-    &lt;li class="hierarchyChangeTree hierarchyLogicalTree #if($currentTree == 'logical')active#end"&gt;&lt;a href="#"&gt;$services.localization.render('webide.menu.view.logical')&lt;/a&gt;&lt;/li&gt;
-    &lt;li class="hierarchyChangeTree hierarchyPhysicalTree #if($currentTree == 'physical')active#end"&gt;&lt;a href="#"&gt;$services.localization.render('webide.menu.view.physical')&lt;/a&gt;&lt;/li&gt;
-  &lt;/ul&gt;
-{{/html}}
-(% id="hierarchyContent" %) (((
-#if($currentTree == 'physical')
-  {{include reference="WebIDECode.PhysicalTree" /}}
-#else
-  {{include reference="WebIDECode.LogicalTree" /}}
-#end
-{{html clean=false}}
-&lt;div id="hierarchyUpdatedFolderList" class="hierarchy-hidden"&gt;
-#foreach($space in $spacesListNested)
-  #if($xwiki.hasAccessLevel('edit', "$space.$reservedDocumentName"))
-    &lt;option value="$escapetool.url($space).replace('+', '%20')"&gt;$space&lt;/option&gt;
-  #end
-#end
-&lt;/div&gt;
-{{/html}}
-)))
-
-  (% class="modal fade text-left hierarchy-hidden" id="hierarchyFolderModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
-    (% class="modal-dialog"%)(((
-      (% class="modal-content"%)(((
-        (% class="modal-header"%)(((
-          {{html clean="false"}}
-          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.add.space.title')&lt;/h4&gt;
-          {{/html}}
-        )))
-        (% class="modal-body"%)(((
-          {{html clean="false"}}
-          &lt;form class="xform"&gt;
-          &lt;dl&gt;
-          &lt;dt&gt;&lt;label for="hierarchyNewFolderName"&gt;$services.localization.render('webide.modals.commons.space')&lt;/label&gt;&lt;/dt&gt;
-          &lt;dd&gt;&lt;input type="text" id="hierarchyNewFolderName" /&gt;&lt;/dd&gt;
-          &lt;button id="hierarchyAddFolder" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.space.button')&lt;/button&gt;&lt;br&gt;
-          &lt;p id="hierarchyFolderModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
-          &lt;/dl&gt;
-          &lt;/form&gt;
-          {{/html}}
-        )))
-      )))
-    )))
-  )))
-  (% class="modal fade text-left hierarchy-hidden" id="hierarchyExistingPageModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
-    (% class="modal-dialog"%)(((
-      (% class="modal-content"%)(((
-        (% class="modal-header"%)(((
-          {{html clean="false"}}
-          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.add.page.title')&lt;/h4&gt;
-          {{/html}}
-        )))
-        (% class="modal-body"%)(((
-          {{html clean="false" wiki="true"}}
-          &lt;form class="xform"&gt;
-          &lt;dl&gt;
-          &lt;dt&gt;&lt;label for="hierarchyExistingPageName"&gt;$services.localization.render('webide.modals.commons.pageFullName')&lt;/label&gt;&lt;/dt&gt;&lt;dd&gt;&lt;input type="text" id="hierarchyExistingPageName" /&gt;&lt;/dd&gt;
-          &lt;button id="hierarchyAddExistingPage" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.page.button')&lt;/button&gt;
-          &lt;p id="hierarchyExistingPageModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
-          &lt;/dl&gt;
-          &lt;/form&gt;
-          {{/html}}
-        )))
-      )))
-    )))
-  )))
-  (% class="modal fade text-left hierarchy-hidden" id="hierarchyPageModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
-    (% class="modal-dialog"%)(((
-      (% class="modal-content"%)(((
-        (% class="modal-header"%)(((
-          {{html clean="false"}}
-          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title" id="hierarchyAddPageTitle"&gt;$services.localization.render('webide.modals.add.page.title')&lt;/h4&gt;
-          {{/html}}
-        )))
-        (% class="modal-body"%)(((
-          {{html clean="false" wiki="true"}}
-          &lt;form class="xform"&gt;
-          &lt;dl&gt;
-          &lt;dt&gt;&lt;label for="hierarchyPageFolder"&gt;$services.localization.render('webide.modals.commons.space')&lt;/label&gt;&lt;/dt&gt;
-          &lt;dd&gt;&lt;select id="hierarchyPageFolder"&gt;
-          #foreach($space in $spacesListNested)
-            #if($xwiki.hasAccessLevel('edit', "$space.$reservedDocumentName"))
-              &lt;option value="$escapetool.url($space).replace('+', '%20')"&gt;$space&lt;/option&gt;
-            #end
-          #end
-          &lt;/select&gt;&lt;/dd&gt;
-          &lt;dt&gt;&lt;label for="hierarchyNewPageName"&gt;&lt;span id="hierarchyAddPageLabel"&gt;$services.localization.render('webide.modals.commons.pageName')&lt;/span&gt;&lt;/label&gt;&lt;/dt&gt;
-          &lt;dd&gt;&lt;input type="text" id="hierarchyNewPageName" /&gt;&lt;/dd&gt;
-          &lt;div id="hierarchyAddPageTypeBlock"&gt;&lt;br&gt;
-
-          {{info}}
-            **$services.localization.render('webide.modals.add.page.type.content')**: $services.localization.render('webide.modals.add.page.info.content')&lt;br&gt;
-            **$services.localization.render('webide.modals.add.page.type.item')**: $services.localization.render('webide.modals.add.page.info.item')
-          {{/info}}
-
-          &lt;dt&gt;&lt;label&gt;$services.localization.render('webide.modals.add.page.type')&lt;/label&gt;&lt;/dt&gt;
-          &lt;dd&gt;&lt;label for="hierarchyAddPageTypeContent"&gt;&lt;input type="radio" name="hierarchyAddPageType" id="hierarchyAddPageTypeContent" value="content" checked="checked"/&gt; $services.localization.render('webide.modals.add.page.type.content')&lt;/label&gt;&lt;/dd&gt;&lt;dd&gt;&lt;label for="hierarchyAddPageTypeItem"&gt;&lt;input type="radio" name="hierarchyAddPageType" id="hierarchyAddPageTypeItem" value="item"/&gt; $services.localization.render('webide.modals.add.page.type.item')&lt;/label&gt;&lt;/dd&gt;
-          &lt;div id="hierarchyAddPageItemBlock" class="hierarchy-hidden"&gt;&lt;br&gt;
-          &lt;dt&gt;&lt;label for="hierarchyAddPageItem"&gt;$services.localization.render('webide.modals.commons.class')&lt;/label&gt;&lt;/dt&gt;
-          &lt;dd&gt;&lt;select id="hierarchyAddPageItem"&gt;
-          &lt;/select&gt;&lt;/dd&gt;&lt;/div&gt;
-          &lt;/div&gt;
-          &lt;div id="hierarchyAddPageLocaleBlock"&gt;&lt;br&gt;
-          &lt;dt&gt;&lt;label for="hierarchyAddPageLocale"&gt;$services.localization.render('webide.modals.add.page.language')&lt;/label&gt; ($services.localization.render('webide.modals.add.page.language.list'))&lt;/dt&gt;
-          &lt;dd&gt;&lt;select id="hierarchyAddPageLocale"&gt;
-          #foreach($locale in $xwiki.getDocument('XWiki.XWikiPreferences').getObject('XWiki.XWikiPreferences').getProperty('languages').value.split(','))
-            #set($language = $services.localization.toLocale($locale.trim()).getDisplayLanguage())
-            #set($displayLanguage = $language)
-            #if($language.length() &gt; 0)
-              #set($displayLanguage = "${language.substring(0, 1).toUpperCase()}${language.substring(1)}")
-            #end
-            &lt;option value="$locale.trim()"&gt;$displayLanguage&lt;/option&gt;
-          #end
-          &lt;/select&gt;&lt;/dd&gt;&lt;/div&gt;
-          &lt;br&gt;&lt;button id="hierarchyAddPage" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.page.button')&lt;/button&gt;
-          &lt;p id="hierarchyPageModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
-          &lt;/dl&gt;
-          &lt;/form&gt;
-          {{/html}}
-        )))
-      )))
-    )))
-  )))
-  (% class="modal fade text-left hierarchy-hidden" id="hierarchyObjectModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
-    (% class="modal-dialog"%)(((
-      (% class="modal-content"%)(((
-        (% class="modal-header"%)(((
-          {{html clean="false"}}
-          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.add.object.title')&lt;/h4&gt;
-          {{/html}}
-        )))
-        (% class="modal-body"%)(((
-          {{html clean="false" wiki="true"}}
-          &lt;form class="xform"&gt;
-          &lt;dl&gt;
-          &lt;dt&gt;&lt;label&gt;$services.localization.render('webide.modals.commons.space')&lt;/label&gt;&lt;/dt&gt;
-          &lt;dd&gt;&lt;span id="hierarchyObjectSpace"&gt;&lt;/span&gt;&lt;/dd&gt;
-          &lt;div id="hierarchyObjectPageBlock"&gt;&lt;dt&gt;&lt;label&gt;$services.localization.render('webide.modals.commons.page')&lt;/label&gt;&lt;/dt&gt;
-          &lt;dd&gt;&lt;span id="hierarchyObjectPage"&gt;&lt;/span&gt;&lt;/dd&gt;&lt;/div&gt;
-          &lt;div id="hierarchyObjectPageInputBlock"&gt;&lt;dt&gt;&lt;label for="hierarchyObjectPageInput"&gt;$services.localization.render('webide.modals.commons.name')&lt;/label&gt;&lt;/dt&gt;
-          &lt;dd&gt;&lt;input type="text" id="hierarchyObjectPageInput" value=""/&gt;&lt;/dd&gt;&lt;input type="hidden" id="hierarchyObjectPageInputDefault" value=""/&gt;&lt;/div&gt;
-          &lt;input type="hidden" id="hierarchyObjectClassName" /&gt;
-          &lt;br&gt;&lt;button id="hierarchyAddObject" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.page.button')&lt;/button&gt;
-          &lt;p id="hierarchyObjectModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
-          &lt;/dl&gt;
-          &lt;/form&gt;
-          {{/html}}
-        )))
-      )))
-    )))
-  )))
-  (% class="modal fade text-left hierarchy-hidden" id="hierarchyClassModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
-    (% class="modal-dialog"%)(((
-      (% class="modal-content"%)(((
-        (% class="modal-header"%)(((
-          {{html clean="false"}}
-          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.add.class.title')&lt;/h4&gt;
-          {{/html}}
-        )))
-        (% class="modal-body"%)(((
-          {{html clean="false" wiki="true"}}
-          &lt;form class="xform"&gt;
-          &lt;dl&gt;
-          &lt;dt&gt;&lt;label&gt;$services.localization.render('webide.modals.commons.space')&lt;/label&lt;&lt;/dt&gt;
-          &lt;dd&gt;&lt;span id="hierarchyClassSpace"&gt;&lt;/span&gt;&lt;/dd&gt;
-          &lt;dt&gt;&lt;label for="hierarchyClassInput"&gt;$services.localization.render('webide.modals.commons.name')&lt;/label&gt;&lt;/dt&gt;
-          &lt;dd&gt;&lt;input type="text" id="hierarchyClassInput" value=""/&gt;&lt;/dd&gt;
-          &lt;div id="hierarchyAddSheetBlock"&gt;
-            &lt;br&gt;&lt;dt&gt;&lt;label for="hierarchyClassSheet"&gt;$services.localization.render('webide.modals.add.class.sheet.actions')&lt;/label&gt;&lt;/dt&gt;
-            &lt;dd&gt;&lt;select id="hierarchyClassSheet"&gt;
-              &lt;option value=""&gt;&lt;/option&gt;
-              &lt;option value="view"&gt;$services.localization.render('webide.modals.add.class.sheet.view')&lt;/option&gt;
-              &lt;option value="edit"&gt;$services.localization.render('webide.modals.add.class.sheet.edit')&lt;/option&gt;
-              &lt;option value="inline"&gt;$services.localization.render('webide.modals.add.class.sheet.inline')&lt;/option&gt;
-            &lt;/select&gt;&lt;/dd&gt;
-          &lt;/div&gt;
-          &lt;br&gt;&lt;button id="hierarchyAddClass" class="btn btn-success"&gt;$services.localization.render('webide.modals.add.class.button')&lt;/button&gt;
-          &lt;p id="hierarchyClassModalError" class="hierarchy-hidden"&gt;&lt;/p&gt;
-          &lt;/dl&gt;
-          &lt;/form&gt;
-          {{/html}}
-        )))
-      )))
-    )))
-  )))
-  (% class="modal fade text-left hierarchy-hidden" id="hierarchyCloseTabModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
-    (% class="modal-dialog"%)(((
-      (% class="modal-content"%)(((
-        (% class="modal-header"%)(((
-          {{html clean="false"}}
-          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.closeTab.title')&lt;/h4&gt;
-          {{/html}}
-        )))
-        (% class="modal-body"%)(((
-          {{html clean="false" wiki="true"}}
-          &lt;p&gt;
-            $services.localization.render('webide.modals.closeTab.description', ['&lt;span id="hierarchyCloseTabModalInfo"&gt;&lt;/span&gt;'])&lt;br /&gt;
-            &lt;button id="hierarchySaveAndCloseModal" class="btn btn-success"&gt;$services.localization.render('webide.modals.closeTab.button.save')&lt;/button&gt; &lt;button id="hierarchyDiscardAndCloseModal" class="btn btn-danger"&gt;$services.localization.render('webide.modals.closeTab.button.nosave')&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;$services.localization.render('webide.modals.commons.cancel')&lt;/button&gt;
-          &lt;/p&gt;
-          &lt;/form&gt;
-          {{/html}}
-        )))
-      )))
-    )))
-  )))
-  (% class="modal fade text-left hierarchy-hidden" id="editorDeleteObjectModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
-    (% class="modal-dialog"%)(((
-      (% class="modal-content"%)(((
-        (% class="modal-header"%)(((
-          {{html clean="false"}}
-          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.delete.object.title')&lt;/h4&gt;
-          {{/html}}
-        )))
-        (% class="modal-body"%)(((
-          {{html clean="false" wiki="true"}}
-          &lt;p&gt;
-            $services.localization.render('webide.modals.delete.object.label') : &lt;span id="editorDeletedObjectModalInfo"&gt;&lt;/span&gt;&lt;br /&gt;
-            &lt;button id="editorDeleteObjectConfirmed" class="btn btn-danger"&gt;$services.localization.render('webide.modals.delete.object.button')&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;$services.localization.render('webide.modals.commons.cancel')&lt;/button&gt;
-          &lt;/p&gt;
-          {{/html}}
-        )))
-      )))
-    )))
-  )))
-  (% class="modal fade text-left hierarchy-hidden" id="editorDeleteMultipleObjectsModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
-    (% class="modal-dialog"%)(((
-      (% class="modal-content"%)(((
-        (% class="modal-header"%)(((
-          {{html clean="false"}}
-          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.delete.page.title')&lt;/h4&gt;
-          {{/html}}
-        )))
-        (% class="modal-body"%)(((
-          {{html clean="false" wiki="true"}}
-          &lt;p&gt;
-            $services.localization.render('webide.modals.delete.page.label') : &lt;span id="editorDeleteMultipleObjectsModalInfo"&gt;&lt;/span&gt;&lt;br /&gt;
-            &lt;button id="editorDeleteMultipleObjectConfirmed" class="btn btn-danger"&gt;$services.localization.render('webide.modals.delete.page.button')&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;$services.localization.render('webide.modals.commons.cancel')&lt;/button&gt;
-          &lt;/p&gt;
-          {{/html}}
-        )))
-      )))
-    )))
-  )))
-  (% class="modal fade text-left hierarchy-hidden" id="editorDeletePageModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
-    (% class="modal-dialog"%)(((
-      (% class="modal-content"%)(((
-        (% class="modal-header"%)(((
-          {{html clean="false"}}
-          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.delete.page.title')&lt;/h4&gt;
-          {{/html}}
-        )))
-        (% class="modal-body"%)(((
-          {{html clean="false" wiki="true"}}
-          &lt;p&gt;
-            $services.localization.render('webide.modals.delete.page.label') : &lt;span id="editorDeletedPageModalInfo"&gt;&lt;/span&gt;&lt;br /&gt;
-            &lt;button id="editorDeletePageConfirmed" class="btn btn-danger"&gt;$services.localization.render('webide.modals.delete.page.button')&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;$services.localization.render('webide.modals.commons.cancel')&lt;/button&gt;
-          &lt;/p&gt;
-          {{/html}}
-        )))
-      )))
-    )))
-  )))
-  (% class="modal fade text-left hierarchy-hidden" id="editorDeleteClassModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
-    (% class="modal-dialog"%)(((
-      (% class="modal-content"%)(((
-        (% class="modal-header"%)(((
-          {{html clean="false"}}
-          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.delete.class.title')&lt;/h4&gt;
-          {{/html}}
-        )))
-        (% class="modal-body"%)(((
-          {{html clean="false" wiki="true"}}
-          &lt;form class="xform"&gt;
-          &lt;dl&gt;
-            $services.localization.render('webide.modals.delete.class.label') : &lt;span id="editorDeletedClassModalInfo"&gt;&lt;/span&gt;&lt;br&gt;&lt;br&gt;
-            &lt;dt&gt;&lt;label&gt;$services.localization.render('webide.modals.delete.class.deleteAlso')&lt;/lebal&gt;&lt;/dt&gt;
-            &lt;dd&gt;&lt;label for="editorDeleteClassSheet"&gt;&lt;input type="checkbox" id="editorDeleteClassSheet" /&gt; $services.localization.render('webide.modals.delete.class.allSheets')&lt;/label&gt;&lt;br&gt;&lt;label for="editorDeleteClassTemplate"&gt;&lt;input type="checkbox" id="editorDeleteClassTemplate" /&gt; $services.localization.render('webide.modals.delete.class.template')&lt;/label&gt;&lt;br&gt;
-            &lt;br&gt;&lt;button id="editorDeleteClassConfirmed" class="btn btn-danger"&gt;$services.localization.render('webide.modals.delete.class.button')&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;$services.localization.render('webide.modals.commons.cancel')&lt;/button&gt;
-          &lt;/dl&gt;
-          &lt;/form&gt;
-          {{/html}}
-        )))
-      )))
-    )))
-  )))
-  (% class="modal fade text-left hierarchy-hidden" id="editorSwitchClassModal" tabindex="-1" role="dialog" aria-hidden="true"%)(((
-    (% class="modal-dialog"%)(((
-      (% class="modal-content"%)(((
-        (% class="modal-header"%)(((
-          {{html clean="false"}}
-          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.switchClass.title')&lt;/h4&gt;
-          {{/html}}
-        )))
-        (% class="modal-body"%)(((
-          {{html clean="false" wiki="true"}}
-          &lt;p&gt;
-          $services.localization.render('webide.modals.switchClass.label')&lt;br /&gt;
-            &lt;button id="hierarchySaveAndSwitchClassModal" class="btn btn-success"&gt;$services.localization.render('webide.modals.switchClass.button.save')&lt;/button&gt; &lt;button id="hierarchyDiscardAndAndSwitchClassModal" class="btn btn-danger"&gt;$services.localization.render('webide.modals.switchClass.button.nosave')&lt;/button&gt; &lt;button class="btn btn-default" data-dismiss="modal" type="button"&gt;$services.localization.render('webide.modals.commons.cancel')&lt;/button&gt;
-          &lt;/p&gt;
-          {{/html}}
-        )))
-      )))
-    )))
-  )))
-  (% class="modal fade text-left hierarchy-hidden" id="editorConfig" tabindex="-1" role="dialog" aria-hidden="true"%)(((
-    (% class="modal-dialog"%)(((
-      (% class="modal-content"%)(((
-        (% class="modal-header"%)(((
-          {{html clean="false"}}
-          &lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;×&lt;/button&gt;
-          &lt;h4 class="modal-title"&gt;$services.localization.render('webide.modals.config.title')&lt;/h4&gt;
-          {{/html}}
-        )))
-        (% class="modal-body"%)(((
-          {{html clean="false" wiki="true"}}
-          &lt;form class="xform"&gt;
-          &lt;dl&gt;
-          &lt;dt&gt;&lt;label&gt;&lt;input type="checkbox" id="editorEnableCodeMirror"&gt;$services.localization.render('webide.modals.config.highlighting')&lt;/label&gt;&lt;/dt&gt;
-          &lt;/dl&gt;
-          &lt;/form&gt;
-          {{/html}}
-        )))
-      )))
-    )))
-  )))
-{{html clean="false"}}
-  &lt;div class="hierarchy-hidden"&gt;&lt;input type="hidden" id="hierarchyMasterDocName" value="$escapetool.url($masterDoc.name)" /&gt;&lt;input type="hidden" id="hierarchyMasterDocSpace" value="$escapetool.url($masterDoc.space)" /&gt;&lt;input type="hidden" id="xwikiNested" value="$nestedSpaces" /&gt;&lt;input type="hidden" id="hierarchyMainLanguage" value="$xwiki.getLanguagePreference()" /&gt;&lt;/div&gt;
-
-&lt;div id="backgroundModalNoBootstrap"&gt;&lt;/div&gt;
-
-{{/html}}
-(% id="hierarchyStateBlock" %)(((
-  (% id="hierarchyState" %)((()))(% id="hierarchySavingState" %)((()))(% id="hierarchyLoadingState" %)((()))
-)))
-{{/velocity}}</content>
 </xwikidoc>
