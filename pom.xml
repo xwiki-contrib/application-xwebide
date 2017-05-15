@@ -25,7 +25,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.xwiki.contrib</groupId>
-    <artifactId>parent-commons</artifactId>
+    <artifactId>parent-platform</artifactId>
     <version>6.4-8</version>
   </parent>
   <groupId>org.xwiki.contrib</groupId>
@@ -52,30 +52,6 @@
       <name>Yann Flory</name>
     </developer>
   </developers>
-  <repositories>
-    <repository>
-      <id>xwiki-snapshots</id>
-      <name>XWiki Nexus Snapshot Repository Proxy</name>
-      <url>http://nexus.xwiki.org/nexus/content/groups/public-snapshots</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>xwiki-releases</id>
-      <name>XWiki Nexus Releases Repository Proxy</name>
-      <url>http://nexus.xwiki.org/nexus/content/groups/public</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
   <modules>
     <module>application-xwebide-ui</module>
   </modules>
@@ -87,24 +63,6 @@
       </modules>
     </profile>
   </profiles>
-  <build>
-    <!-- Needed to add support for the XAR packaging -->
-    <extensions>
-      <extension>
-        <groupId>org.xwiki.commons</groupId>
-        <artifactId>xwiki-commons-tool-xar-handlers</artifactId>
-        <version>${commons.version}</version>
-      </extension>
-    </extensions>
-    <plugins>
-      <!-- The XAR packaging uses the XAR plugin and thus we need to define what version to use -->
-      <plugin>
-        <groupId>org.xwiki.commons</groupId>
-        <artifactId>xwiki-commons-tool-xar-plugin</artifactId>
-        <version>${commons.version}</version>
-      </plugin>
-    </plugins>
-  </build>
   <distributionManagement>
     <repository>
       <id>xwiki-staging</id>
