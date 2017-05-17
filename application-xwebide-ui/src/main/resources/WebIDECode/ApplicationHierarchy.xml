@@ -31,7 +31,7 @@
   <parent>WebIDECode.ApplicationClass</parent>
   <author>xwiki:XWiki.Admin</author>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
-  <date>1494431959000</date>
+  <date>1495025474000</date>
   <contentUpdateDate>1494431959000</contentUpdateDate>
   <version>1.1</version>
   <title>ApplicationHierarchy</title>
@@ -1422,6 +1422,7 @@ require(required , function ($, Translations, SH, HierarchyJS, WikiEditorJS, Obj
     // Type 3 = Shortcuts info
     var menuNodeBlock = $('&lt;div class="editorOtherFieldsBlock"&gt;&lt;/div&gt;').appendTo(dataNode);
     var innerContent = $('&lt;div class="editorOtherFieldsBlockContent"&gt;&lt;/div&gt;').appendTo(menuNodeBlock);
+    if (type === 1) { innerContent.addClass('advanced'); }
     $(menuNodeBlock).css({'backgroundColor' : $('#hierarchyBlock').css('backgroundColor')});
     $('&lt;span class="editorDisplayAdvancedFields"&gt;'+$('#hierarchyOpenBlock').html()+'&lt;/span&gt; &lt;strong class="editorOtherFieldsBlockTitle"&gt;'+title+'&lt;/strong&gt;').prependTo(menuNodeBlock);
     var icon = '';
