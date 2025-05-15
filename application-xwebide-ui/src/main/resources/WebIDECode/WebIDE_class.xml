@@ -466,7 +466,7 @@ define(['jquery', 'bootstrap'], function($) {
           $(ifrm).contents().find('#menuview, #rightPanels, #leftPanels, .bottombuttons, #hierarchy, #footerglobal, .row, .leftmenu2').hide();
           $(ifrm).contents().find('#classname').parent().remove();
           $(ifrm).contents().find('#options').find('#updateClassSheet, #updateClassTranslations').attr('checked', false); // Basic mode only
-          $(ifrm).contents().find('.switch-xclass, .xclass-title, #editPanels').hide(); // Advanced mode only
+          $(ifrm).contents().find('.switch-xclass, .xclass-title, #editPanels, form#edit #rightPanels').hide(); // Advanced mode only
           $(ifrm).contents().find('div.main').css({
             "left" : "0%",
             "width" : "100%",
